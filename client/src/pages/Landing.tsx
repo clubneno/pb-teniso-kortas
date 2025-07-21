@@ -253,7 +253,7 @@ export default function Landing() {
                     <div className="mt-6 text-center">
                       <Button 
                         size="lg"
-                        onClick={() => window.location.href = '/api/login'}
+                        onClick={() => window.location.href = '/auth'}
                         className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-lg border-2 border-yellow-400 transform hover:scale-105 transition-all duration-200"
                       >
                         <LogIn size={20} className="mr-2" />
