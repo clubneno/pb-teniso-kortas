@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Edit, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface ReservationWithDetails {
   id: number;
@@ -120,15 +120,7 @@ export default function ReservationCard({ reservation, showActions = false, isPa
               {reservation.totalPrice}€
             </div>
             {showActions && !isPast && (
-              <div className="flex gap-2 mt-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
-                >
-                  <Edit size={14} className="mr-1" />
-                  Keisti
-                </Button>
+              <div className="mt-2">
                 <Button
                   size="sm"
                   variant="outline"
