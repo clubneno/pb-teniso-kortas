@@ -117,7 +117,7 @@ export default function Landing() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Rezervuokite Teniso Kortą
+              Rezervuokite PB teniso kortą
               <span className="text-tennis-yellow ml-2">Lengvai</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-3xl mx-auto">
