@@ -51,6 +51,9 @@ Preferred communication style: Simple, everyday language.
 - Fixed logout functionality to properly end session and redirect to landing page (2025-07-21)
 - Implemented custom confirmation dialog for reservation cancellation (2025-07-21)
 - Added reservation sorting by date/time for better user experience (2025-07-21)
+- Enhanced time slot grid to show "Užimta" status for reserved slots (2025-07-21)
+- Updated TimeSlotGrid to display comprehensive reservation data across all courts (2025-07-21)
+- Added visual indicators for partial availability when some courts are reserved (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking

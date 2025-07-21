@@ -5,6 +5,8 @@ interface TimeSlot {
   endTime: string;
   timeDisplay: string;
   isReserved: boolean;
+  totalReservations?: number;
+  reservedCourts?: string;
 }
 
 interface TimeSlotGridProps {
@@ -53,6 +55,11 @@ export default function TimeSlotGrid({
       return `${baseClasses} bg-red-600 border border-red-700 cursor-not-allowed`;
     }
     
+    // Show partial availability for public view when some courts are reserved
+    if (isPublicView && slot.totalReservations && slot.totalReservations > 0) {
+      return `${baseClasses} bg-orange-600 border border-orange-700 cursor-not-allowed`;
+    }
+    
     if (isPast) {
       return `${baseClasses} bg-gray-500 border border-gray-600 cursor-not-allowed opacity-60`;
     }
@@ -72,12 +79,17 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
     
+    if (isPast) {
+      return "Praėjęs";
+    }
+    
     if (slot.isReserved) {
       return "Užimta";
     }
     
-    if (isPast) {
-      return "Praėjęs";
+    // For public view, show if any courts are reserved at this time
+    if (isPublicView && slot.totalReservations && slot.totalReservations > 0) {
+      return `Užimta (${slot.totalReservations})`;
     }
     
     if (selectedSlot === timeRange && !isPublicView) {

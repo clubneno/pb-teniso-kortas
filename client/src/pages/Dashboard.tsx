@@ -74,6 +74,12 @@ export default function Dashboard() {
     enabled: !!selectedCourtId,
   });
 
+  // Get all reservations for comprehensive view
+  const { data: allReservationsForDate = [] } = useQuery({
+    queryKey: ["/api/reservations/public", selectedDateStr],
+    queryFn: () => fetch(`/api/reservations/public?date=${selectedDateStr}`).then(res => res.json()),
+  });
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -145,15 +151,26 @@ export default function Dashboard() {
       const startTime = `${hour.toString().padStart(2, '0')}:00`;
       const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
       
+      // Check if this slot is reserved for the selected court
       const isReserved = availabilityData.some((slot) => 
         slot.startTime === startTime && slot.endTime === endTime
       );
+      
+      // Check how many courts are reserved at this time slot
+      const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
+        r.startTime === startTime && r.endTime === endTime
+      );
+      
+      // Get court names that have reservations at this time
+      const reservedCourts = allReservationsAtThisTime.map((r: any) => r.court.name).join(', ');
       
       slots.push({
         startTime,
         endTime,
         timeDisplay: startTime,
         isReserved,
+        totalReservations: allReservationsAtThisTime.length,
+        reservedCourts: reservedCourts,
       });
     }
     return slots;
