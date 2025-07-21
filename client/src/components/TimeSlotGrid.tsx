@@ -55,13 +55,13 @@ export default function TimeSlotGrid({
   };
 
   const getStatusColor = (slot: TimeSlot) => {
-    // All statuses now use white text on dark backgrounds
-    return "text-white";
+    // All statuses now use white text on dark backgrounds (force with !important)
+    return "!text-white";
   };
 
   const getTimeColor = (slot: TimeSlot) => {
-    // All time displays now use white text on dark backgrounds
-    return "text-white";
+    // All time displays now use white text on dark backgrounds (force with !important)
+    return "!text-white";
   };
 
   return (
