@@ -77,6 +77,8 @@ export default function Landing() {
         r.startTime === startTime && r.endTime === endTime
       );
       
+
+      
       // Check how many courts are reserved at this time slot
       const allReservationsAtThisTime = allReservations.filter(r => 
         r.startTime === startTime && r.endTime === endTime
@@ -166,6 +168,34 @@ export default function Landing() {
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
                   />
+                  
+                  {/* Quick Date Buttons for Testing */}
+                  <div className="mt-6 space-y-2">
+                    <p className="text-sm text-gray-300 text-center">Greita navigacija:</p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedDate(new Date('2025-07-22'))}
+                        className="bg-tennis-green-600 hover:bg-tennis-green-700 text-white text-xs"
+                      >
+                        Liepos 22 (yra rezervacija 08:00)
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedDate(new Date('2025-07-26'))}
+                        className="bg-tennis-green-600 hover:bg-tennis-green-700 text-white text-xs"
+                      >
+                        Liepos 26 (yra rezervacija 11:00)
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedDate(new Date())}
+                        className="bg-gray-600 hover:bg-gray-700 text-white text-xs"
+                      >
+                        Šiandien (be rezervacijų)
+                      </Button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Court Selection & Time Slots */}
