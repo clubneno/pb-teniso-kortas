@@ -96,14 +96,28 @@ export default function Landing() {
       
 
       
-      slots.push({
+      const slotData = {
         startTime,
         endTime,
         timeDisplay: startTime,
         isReserved: isReservedForSelectedCourt,
         totalReservations: allReservationsAtThisTime.length,
         reservedCourts: reservedCourts,
-      });
+      };
+
+      // Debug all 8am slots
+      if (startTime === '08:00') {
+        console.log(`SLOT CREATION DEBUG - ${selectedDateStr} ${startTime}:`, {
+          slotData,
+          reservations,
+          allReservations,
+          allReservationsLength: allReservations.length,
+          isReservedForSelectedCourt,
+          allReservationsAtThisTime
+        });
+      }
+
+      slots.push(slotData);
     }
     return slots;
   };
