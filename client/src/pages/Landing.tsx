@@ -247,7 +247,7 @@ export default function Landing() {
               <h4 className="font-semibold mb-3">Kontaktai</h4>
               <ul className="space-y-2 text-tennis-green-100">
                 <li>📞 +370 600 12345</li>
-                <li>📍 Vilnius, Lietuva</li>
+                <li>📍 Skyplaičių g. 15, Plungė</li>
               </ul>
             </div>
             
