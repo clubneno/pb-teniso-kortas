@@ -61,6 +61,13 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        "tennis-green": {
+          50: "var(--tennis-green-50)",
+          100: "var(--tennis-green-100)", 
+          500: "var(--tennis-green-500)",
+          600: "var(--tennis-green-600)",
+          700: "var(--tennis-green-700)",
+        },
       },
       keyframes: {
         "accordion-down": {

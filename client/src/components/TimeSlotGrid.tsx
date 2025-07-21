@@ -22,7 +22,7 @@ export default function TimeSlotGrid({
 }: TimeSlotGridProps) {
   
   const getSlotClassName = (slot: TimeSlot) => {
-    const baseClasses = "text-center transition-colors !text-white";
+    const baseClasses = "text-center transition-colors text-white";
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     
     if (slot.isReserved) {
@@ -64,7 +64,7 @@ export default function TimeSlotGrid({
         return (
           <div
             key={timeRange}
-            className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center text-white`}
+            className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center`}
             onClick={() => !slot.isReserved && !isPublicView && onSlotSelect(timeRange)}
             style={{ 
               pointerEvents: slot.isReserved || isPublicView ? 'none' : 'auto'
