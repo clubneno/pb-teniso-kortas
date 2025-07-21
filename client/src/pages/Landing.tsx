@@ -127,7 +127,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 onClick={() => window.location.href = '/api/login'}
-                className="bg-tennis-yellow text-tennis-green-700 hover:bg-yellow-300 font-bold text-lg"
+                className="bg-white text-tennis-green-700 hover:bg-gray-100 font-bold text-lg shadow-lg"
               >
                 <CalendarIcon size={20} className="mr-2" />
                 Rezervuoti Dabar
@@ -135,7 +135,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-2 border-white text-white hover:bg-white hover:text-tennis-green-600 font-bold text-lg"
+                className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-tennis-green-600 font-bold text-lg shadow-lg backdrop-blur-sm"
               >
                 <Eye size={20} className="mr-2" />
                 Peržiūrėti Tvarkaraštį
