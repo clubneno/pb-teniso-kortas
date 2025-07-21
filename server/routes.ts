@@ -135,6 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(reservationWithDetails);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Reservation validation errors:", error.errors);
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       console.error("Error creating reservation:", error);

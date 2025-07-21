@@ -91,6 +91,11 @@ export default function Dashboard() {
     }
   }, [courts, selectedCourtId]);
 
+  // Refresh courts data when component mounts to get latest hourly rates
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["/api/courts"] });
+  }, []);
+
   const createReservationMutation = useMutation({
     mutationFn: async (data: {
       courtId: number;
