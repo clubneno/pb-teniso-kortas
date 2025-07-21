@@ -26,18 +26,18 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     
     if (slot.isReserved) {
-      return `${baseClasses} bg-red-50 border border-red-200 opacity-60 cursor-not-allowed`;
+      return `${baseClasses} bg-red-600 border border-red-700 text-white cursor-not-allowed`;
     }
     
     if (selectedSlot === timeRange && !isPublicView) {
-      return `${baseClasses} bg-tennis-green-500 border border-tennis-green-600 text-white`;
+      return `${baseClasses} bg-tennis-green-600 border border-tennis-green-700 text-white`;
     }
     
     if (isPublicView) {
-      return `${baseClasses} bg-green-50 border border-green-200`;
+      return `${baseClasses} bg-green-600 border border-green-700 text-white`;
     }
     
-    return `${baseClasses} bg-white border border-green-100 hover:bg-green-50`;
+    return `${baseClasses} bg-green-500 border border-green-600 text-white hover:bg-green-600`;
   };
 
   const getStatusText = (slot: TimeSlot) => {
@@ -55,31 +55,13 @@ export default function TimeSlotGrid({
   };
 
   const getStatusColor = (slot: TimeSlot) => {
-    const timeRange = `${slot.startTime}-${slot.endTime}`;
-    
-    if (slot.isReserved) {
-      return "text-red-800";
-    }
-    
-    if (selectedSlot === timeRange && !isPublicView) {
-      return "text-white";
-    }
-    
-    return "text-green-800";
+    // All statuses now use white or light grey text on dark backgrounds
+    return "text-gray-100";
   };
 
   const getTimeColor = (slot: TimeSlot) => {
-    const timeRange = `${slot.startTime}-${slot.endTime}`;
-    
-    if (slot.isReserved) {
-      return "text-red-900";
-    }
-    
-    if (selectedSlot === timeRange && !isPublicView) {
-      return "text-white";
-    }
-    
-    return "text-green-900";
+    // All time displays now use white text on dark backgrounds
+    return "text-white";
   };
 
   return (
