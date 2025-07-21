@@ -205,7 +205,7 @@ export default function Landing() {
                   {/* Time Slots */}
                   <div className="border-t pt-6">
                     <h4 className="text-lg font-semibold mb-4 text-white">
-                      {formatDate(selectedDate)} - Kortų Prieinamumas
+                      {formatDate(selectedDate)}
                     </h4>
                     
                     <TimeSlotGrid 
