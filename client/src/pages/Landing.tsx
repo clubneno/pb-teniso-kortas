@@ -49,16 +49,7 @@ export default function Landing() {
     staleTime: 0, // Always refetch to avoid cache issues
   });
 
-  // Debug for July 22
   const selectedDateStr = selectedDate.toISOString().split('T')[0];
-  if (selectedDateStr === '2025-07-22') {
-    console.log('LANDING July 22 Debug:', {
-      selectedDate: selectedDateStr,
-      selectedCourtId,
-      allReservations,
-      reservationsForSelectedCourt: allReservations?.filter(r => r.courtId === selectedCourtId)
-    });
-  }
 
   // Filter reservations for the selected court for time slot logic
   const reservations = allReservations.filter(r => r.courtId === selectedCourtId);
@@ -89,14 +80,7 @@ export default function Landing() {
         r.startTime === startTime && r.endTime === endTime
       );
 
-      // Debug specific slots on July 22
-      if (selectedDateStr === '2025-07-22' && (startTime === '08:00' || startTime === '14:00')) {
-        console.log(`LANDING July 22 slot ${startTime}-${endTime}:`, {
-          reservations,
-          isReservedForSelectedCourt,
-          matchingReservations: reservations.filter(r => r.startTime === startTime && r.endTime === endTime)
-        });
-      }
+
       
       // Check how many courts are reserved at this time slot
       const allReservationsAtThisTime = allReservations.filter(r => 
