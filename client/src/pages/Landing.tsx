@@ -42,10 +42,14 @@ export default function Landing() {
     queryKey: ["/api/courts"],
   });
 
-  const { data: reservations = [] } = useQuery<PublicReservation[]>({
-    queryKey: ["/api/reservations/public", selectedDate.toISOString().split('T')[0], selectedCourtId],
-    enabled: !!selectedCourtId,
+  // Get all reservations for the selected date (across all courts)
+  const { data: allReservations = [] } = useQuery<PublicReservation[]>({
+    queryKey: ["/api/reservations/public", selectedDate.toISOString().split('T')[0]],
+    queryFn: () => fetch(`/api/reservations/public?date=${selectedDate.toISOString().split('T')[0]}`).then(res => res.json()),
   });
+
+  // Filter reservations for the selected court for time slot logic
+  const reservations = allReservations.filter(r => r.courtId === selectedCourtId);
 
   useEffect(() => {
     if (courts.length > 0 && !selectedCourtId) {
@@ -68,15 +72,26 @@ export default function Landing() {
       const startTime = `${hour.toString().padStart(2, '0')}:00`;
       const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
       
-      const isReserved = reservations.some(r => 
-        r.startTime <= startTime && r.endTime > startTime
+      // Check if this slot is reserved for the selected court
+      const isReservedForSelectedCourt = reservations.some(r => 
+        r.startTime === startTime && r.endTime === endTime
       );
+      
+      // Check how many courts are reserved at this time slot
+      const allReservationsAtThisTime = allReservations.filter(r => 
+        r.startTime === startTime && r.endTime === endTime
+      );
+      
+      // Get court names that have reservations at this time
+      const reservedCourts = allReservationsAtThisTime.map(r => r.court.name).join(', ');
       
       slots.push({
         startTime,
         endTime,
-        timeDisplay: `${startTime}`,
-        isReserved,
+        timeDisplay: startTime,
+        isReserved: isReservedForSelectedCourt,
+        totalReservations: allReservationsAtThisTime.length,
+        reservedCourts: reservedCourts,
       });
     }
     return slots;
