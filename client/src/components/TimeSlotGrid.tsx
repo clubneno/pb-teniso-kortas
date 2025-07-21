@@ -55,9 +55,9 @@ export default function TimeSlotGrid({
       return `${baseClasses} bg-red-600 border border-red-700 cursor-not-allowed`;
     }
     
-    // Show partial availability for public view when some courts are reserved
+    // Show partial availability for public view when other courts are reserved
     if (isPublicView && slot.totalReservations && slot.totalReservations > 0 && !slot.isReserved) {
-      return `${baseClasses} bg-orange-600 border border-orange-700 cursor-not-allowed`;
+      return `${baseClasses} bg-orange-600 border border-orange-700`;
     }
     
     if (isPast) {
@@ -85,13 +85,6 @@ export default function TimeSlotGrid({
     
     if (slot.isReserved) {
       return "Užimta";
-    }
-    
-    // For public view, show status for the selected court specifically
-    if (isPublicView && slot.totalReservations && slot.totalReservations > 0) {
-      // Only show "Užimta" if the selected court itself is reserved
-      // Show partial availability info separately if needed
-      return slot.isReserved ? "Užimta" : "Laisva";
     }
     
     if (selectedSlot === timeRange && !isPublicView) {

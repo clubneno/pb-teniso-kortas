@@ -51,15 +51,7 @@ export default function Landing() {
 
   const selectedDateStr = selectedDate.toISOString().split('T')[0];
 
-  // Debug for July 23
-  if (selectedDateStr === '2025-07-23') {
-    console.log('LANDING July 23 Debug:', {
-      selectedDate: selectedDateStr,
-      selectedCourtId,
-      allReservations,
-      reservationsForSelectedCourt: allReservations?.filter(r => r.courtId === selectedCourtId)
-    });
-  }
+
 
   // Filter reservations for the selected court for time slot logic
   const reservations = allReservations.filter(r => r.courtId === selectedCourtId);
@@ -90,20 +82,7 @@ export default function Landing() {
         r.startTime === startTime && r.endTime === endTime
       );
 
-      // Debug July 23 at 8am
-      if (selectedDateStr === '2025-07-23' && startTime === '08:00') {
-        console.log(`LANDING July 23 slot ${startTime}-${endTime}:`, {
-          reservations,
-          isReservedForSelectedCourt,
-          allReservationsAtThisTime: allReservations.filter(r => r.startTime === startTime && r.endTime === endTime),
-          finalSlotData: {
-            startTime,
-            endTime,
-            isReserved: isReservedForSelectedCourt,
-            totalReservations: allReservations.filter(r => r.startTime === startTime && r.endTime === endTime).length
-          }
-        });
-      }
+
 
 
       
