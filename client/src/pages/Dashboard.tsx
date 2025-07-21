@@ -180,13 +180,21 @@ export default function Dashboard() {
     createReservationMutation.mutate(reservationData);
   };
 
-  const activeReservations = reservations.filter(r => 
-    r.status === 'confirmed' && new Date(r.date) >= new Date()
-  );
+  const activeReservations = reservations
+    .filter(r => r.status === 'confirmed' && new Date(r.date) >= new Date())
+    .sort((a, b) => {
+      const dateA = new Date(a.date + 'T' + a.startTime);
+      const dateB = new Date(b.date + 'T' + b.startTime);
+      return dateA.getTime() - dateB.getTime(); // Soonest first
+    });
   
-  const pastReservations = reservations.filter(r => 
-    r.status === 'confirmed' && new Date(r.date) < new Date()
-  );
+  const pastReservations = reservations
+    .filter(r => r.status === 'confirmed' && new Date(r.date) < new Date())
+    .sort((a, b) => {
+      const dateA = new Date(a.date + 'T' + a.startTime);
+      const dateB = new Date(b.date + 'T' + b.startTime);
+      return dateB.getTime() - dateA.getTime(); // Most recent first
+    });
 
   const timeSlots = generateTimeSlots();
 
