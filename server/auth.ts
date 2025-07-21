@@ -5,12 +5,12 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User } from "@shared/schema";
+import { User as AppUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User extends AppUser {}
   }
 }
 
@@ -23,7 +23,22 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
+  // Handle potential bcrypt format from old data
+  if (stored.startsWith('$2b$') || stored.startsWith('$2a$')) {
+    // For bcrypt format, we'll need to rehash with scrypt
+    return false; // Force password reset for old users
+  }
+  
+  const parts = stored.split(".");
+  if (parts.length !== 2) {
+    return false; // Invalid format
+  }
+  
+  const [hashed, salt] = parts;
+  if (!hashed || !salt) {
+    return false; // Missing hash or salt
+  }
+  
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
