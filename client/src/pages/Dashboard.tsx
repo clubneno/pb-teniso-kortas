@@ -78,6 +78,7 @@ export default function Dashboard() {
   const { data: allReservationsForDate = [] } = useQuery({
     queryKey: ["/api/reservations/public", selectedDateStr],
     queryFn: () => fetch(`/api/reservations/public?date=${selectedDateStr}`).then(res => res.json()),
+    staleTime: 0, // Always refetch to avoid cache issues
   });
 
   useEffect(() => {
@@ -163,6 +164,8 @@ export default function Dashboard() {
       
       // Get court names that have reservations at this time
       const reservedCourts = allReservationsAtThisTime.map((r: any) => r.court.name).join(', ');
+      
+
       
       slots.push({
         startTime,

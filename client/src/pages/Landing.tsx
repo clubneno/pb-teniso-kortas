@@ -46,6 +46,7 @@ export default function Landing() {
   const { data: allReservations = [] } = useQuery<PublicReservation[]>({
     queryKey: ["/api/reservations/public", selectedDate.toISOString().split('T')[0]],
     queryFn: () => fetch(`/api/reservations/public?date=${selectedDate.toISOString().split('T')[0]}`).then(res => res.json()),
+    staleTime: 0, // Always refetch to avoid cache issues
   });
 
   // Filter reservations for the selected court for time slot logic
@@ -84,6 +85,8 @@ export default function Landing() {
       
       // Get court names that have reservations at this time
       const reservedCourts = allReservationsAtThisTime.map(r => r.court.name).join(', ');
+      
+
       
       slots.push({
         startTime,
