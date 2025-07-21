@@ -67,7 +67,7 @@ export default function Dashboard() {
   });
 
   const { data: availabilityData = [] } = useQuery<{startTime: string; endTime: string}[]>({
-    queryKey: ["/api/courts", selectedCourtId, "availability", selectedDate.toISOString().split('T')[0]],
+    queryKey: ["/api/courts", selectedCourtId, "availability", `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`],
     enabled: !!selectedCourtId,
   });
 
@@ -97,7 +97,7 @@ export default function Dashboard() {
       date: string;
       startTime: string;
       endTime: string;
-      totalPrice: number;
+      totalPrice: string;
     }) => {
       await apiRequest("POST", "/api/reservations", data);
     },
@@ -110,6 +110,7 @@ export default function Dashboard() {
       setSelectedTimeSlot(null);
     },
     onError: (error) => {
+      console.error("Reservation error:", error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Neautorizuotas",
@@ -123,7 +124,7 @@ export default function Dashboard() {
       }
       toast({
         title: "Klaida",
-        description: "Nepavyko sukurti rezervacijos. Bandykite dar kartą.",
+        description: error.message || "Nepavyko sukurti rezervacijos. Bandykite dar kartą.",
         variant: "destructive",
       });
     },
@@ -158,13 +159,16 @@ export default function Dashboard() {
     const [startTime] = selectedTimeSlot.split('-');
     const endTime = `${(parseInt(startTime.split(':')[0]) + 1).toString().padStart(2, '0')}:00`;
 
-    createReservationMutation.mutate({
+    const reservationData = {
       courtId: selectedCourtId,
-      date: selectedDate.toISOString().split('T')[0],
+      date: `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`,
       startTime,
       endTime,
-      totalPrice: parseFloat(selectedCourt.hourlyRate),
-    });
+      totalPrice: selectedCourt.hourlyRate,
+    };
+    
+    console.log("Sending reservation data:", reservationData);
+    createReservationMutation.mutate(reservationData);
   };
 
   const activeReservations = reservations.filter(r => 
