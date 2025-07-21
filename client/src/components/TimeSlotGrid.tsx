@@ -55,8 +55,8 @@ export default function TimeSlotGrid({
   };
 
   const getStatusColor = (slot: TimeSlot) => {
-    // All statuses now use white or light grey text on dark backgrounds
-    return "text-gray-100";
+    // All statuses now use white text on dark backgrounds
+    return "text-white";
   };
 
   const getTimeColor = (slot: TimeSlot) => {
