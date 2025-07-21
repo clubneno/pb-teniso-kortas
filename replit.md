@@ -45,6 +45,9 @@ Preferred communication style: Simple, everyday language.
 - Username field removed from system (2025-07-21)
 - Fixed user greeting to display firstName properly (2025-07-21)
 - Reservation system fully operational with proper validation (2025-07-21)
+- Updated all toast messages from "Sėkmė!" to "Pakeitimas išsaugotas" (2025-07-21)
+- Fixed time slot availability display bug - reserved slots now show properly (2025-07-21)
+- Corrected app branding consistency between Landing and Dashboard pages (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking

@@ -208,7 +208,7 @@ export default function Dashboard() {
               <div className="w-10 h-10 bg-tennis-green-500 rounded-full flex items-center justify-center">
                 <Volleyball className="text-white" size={20} />
               </div>
-              <span className="text-xl font-bold text-tennis-green-600">TennisReserve</span>
+              <span className="text-xl font-bold text-tennis-green-600">PB teniso kortas</span>
             </div>
             
             <div className="flex items-center space-x-3">
