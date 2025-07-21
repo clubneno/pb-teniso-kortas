@@ -298,7 +298,7 @@ export default function Dashboard() {
                         timeSlots={timeSlots}
                         onSlotSelect={setSelectedTimeSlot}
                         selectedSlot={selectedTimeSlot}
-                        selectedDate={selectedDate.toISOString().split('T')[0]}
+                        selectedDate={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
                         isPublicView={false}
                       />
                     </div>
