@@ -132,14 +132,6 @@ export default function Landing() {
                 <CalendarIcon size={20} className="mr-2" />
                 Rezervuoti Dabar
               </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-tennis-green-600 font-bold text-lg shadow-lg backdrop-blur-sm"
-              >
-                <Eye size={20} className="mr-2" />
-                Peržiūrėti Tvarkaraštį
-              </Button>
             </div>
           </div>
         </div>
