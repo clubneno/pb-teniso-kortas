@@ -26,7 +26,7 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for local authentication
+// User storage table for local authentication  
 export const users = pgTable("users", {
   id: varchar("id").primaryKey(),
   email: varchar("email").unique().notNull(),

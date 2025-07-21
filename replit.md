@@ -43,6 +43,8 @@ Preferred communication style: Simple, everyday language.
 - Role-based access control (admin/regular user) 
 - Session persistence with PostgreSQL storage
 - Username field removed from system (2025-07-21)
+- Fixed user greeting to display firstName properly (2025-07-21)
+- Reservation system fully operational with proper validation (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking
