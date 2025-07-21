@@ -43,10 +43,11 @@ export default function Landing() {
   });
 
   // Get all reservations for the selected date (across all courts)
-  const { data: allReservations = [] } = useQuery<PublicReservation[]>({
+  const { data: allReservations = [], isLoading: reservationsLoading } = useQuery<PublicReservation[]>({
     queryKey: ["/api/reservations/public", selectedDate.toISOString().split('T')[0]],
     queryFn: () => fetch(`/api/reservations/public?date=${selectedDate.toISOString().split('T')[0]}`).then(res => res.json()),
     staleTime: 0, // Always refetch to avoid cache issues
+    gcTime: 0, // Don't keep in cache
   });
 
   const selectedDateStr = selectedDate.toISOString().split('T')[0];
@@ -105,17 +106,7 @@ export default function Landing() {
         reservedCourts: reservedCourts,
       };
 
-      // Debug all 8am slots
-      if (startTime === '08:00') {
-        console.log(`SLOT CREATION DEBUG - ${selectedDateStr} ${startTime}:`, {
-          slotData,
-          reservations,
-          allReservations,
-          allReservationsLength: allReservations.length,
-          isReservedForSelectedCourt,
-          allReservationsAtThisTime
-        });
-      }
+
 
       slots.push(slotData);
     }
