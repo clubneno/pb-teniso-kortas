@@ -118,7 +118,6 @@ export default function Landing() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Rezervuokite PB teniso kortą
-              <span className="text-tennis-yellow ml-2">Lengvai</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-3xl mx-auto">
               Moderni teniso kortų rezervacijos sistema. Rinkitės laiką, rezervuokite kortą ir mėgaukitės žaidimu.
