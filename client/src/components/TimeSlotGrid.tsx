@@ -26,7 +26,7 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     
     if (slot.isReserved) {
-      return `${baseClasses} bg-red-100 border border-red-300 opacity-60 cursor-not-allowed`;
+      return `${baseClasses} bg-red-50 border border-red-200 opacity-60 cursor-not-allowed`;
     }
     
     if (selectedSlot === timeRange && !isPublicView) {
@@ -34,10 +34,10 @@ export default function TimeSlotGrid({
     }
     
     if (isPublicView) {
-      return `${baseClasses} bg-green-100 border border-green-300`;
+      return `${baseClasses} bg-green-50 border border-green-200`;
     }
     
-    return `${baseClasses} bg-green-50 border border-green-200 hover:bg-green-100`;
+    return `${baseClasses} bg-white border border-green-100 hover:bg-green-50`;
   };
 
   const getStatusText = (slot: TimeSlot) => {
