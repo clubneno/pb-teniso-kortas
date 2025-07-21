@@ -100,7 +100,8 @@ export default function Landing() {
             <div className="flex items-center space-x-3">
               <Button 
                 onClick={() => window.location.href = '/auth'}
-                className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                className="text-white font-medium hover:opacity-90"
+                style={{ backgroundColor: '#2e6b4a' }}
               >
                 <LogIn size={16} className="mr-2" />
                 Prisijungti
