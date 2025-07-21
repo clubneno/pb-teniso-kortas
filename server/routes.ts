@@ -105,6 +105,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      console.log("Incoming reservation data:", req.body);
+      console.log("User ID:", userId);
+      
       const validatedData = insertReservationSchema.parse({
         ...req.body,
         userId,

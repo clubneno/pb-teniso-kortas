@@ -17,10 +17,10 @@ import { eq, and, gte, lte, desc, asc, ne } from "drizzle-orm";
 // Interface for storage operations
 export interface IStorage {
   // User operations - for local authentication
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  updateUser(id: number, data: Partial<User>): Promise<User | undefined>;
+  updateUser(id: string, data: Partial<User>): Promise<User | undefined>;
   
   // Court operations
   getCourts(): Promise<Court[]>;
@@ -30,7 +30,7 @@ export interface IStorage {
   
   // Reservation operations
   getReservations(filters?: {
-    userId?: number;
+    userId?: string;
     courtId?: number;
     date?: string;
     status?: string;
@@ -56,12 +56,12 @@ export interface IStorage {
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
-  getUserStats(userId: number): Promise<{ totalReservations: number; lastReservation?: string }>;
+  getUserStats(userId: string): Promise<{ totalReservations: number; lastReservation?: string }>;
 }
 
 export class DatabaseStorage implements IStorage {
   // User operations - for local authentication
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
@@ -72,14 +72,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(userData: InsertUser): Promise<User> {
+    // Generate a unique ID for the user
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({ ...userData, id: userId })
       .returning();
     return user;
   }
 
-  async updateUser(id: number, data: Partial<User>): Promise<User | undefined> {
+  async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({ ...data, updatedAt: new Date() })
@@ -114,7 +116,7 @@ export class DatabaseStorage implements IStorage {
 
   // Reservation operations
   async getReservations(filters: {
-    userId?: number;
+    userId?: string;
     courtId?: number;
     date?: string;
     status?: string;
@@ -285,7 +287,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
-  async getUserStats(userId: number): Promise<{ totalReservations: number; lastReservation?: string }> {
+  async getUserStats(userId: string): Promise<{ totalReservations: number; lastReservation?: string }> {
     const userReservations = await db
       .select({
         date: reservations.date,

@@ -28,7 +28,7 @@ export const sessions = pgTable(
 
 // User storage table for local authentication
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: varchar("id").primaryKey(),
   email: varchar("email").unique().notNull(),
   password: varchar("password").notNull(),
   firstName: varchar("first_name"),
@@ -50,7 +50,7 @@ export const courts = pgTable("courts", {
 
 export const reservations = pgTable("reservations", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
   courtId: integer("court_id").references(() => courts.id).notNull(),
   date: varchar("date").notNull(), // YYYY-MM-DD format
   startTime: varchar("start_time").notNull(), // HH:mm format
