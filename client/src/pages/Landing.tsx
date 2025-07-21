@@ -261,7 +261,7 @@ export default function Landing() {
           </div>
           
           <div className="border-t border-tennis-green-500 mt-8 pt-8 text-center text-tennis-green-100">
-            <p>© 202į PB teniso kortas. Visos teisės saugomos.</p>
+            <p>© 2025 PB teniso kortas. Visos teisės saugomos.</p>
           </div>
         </div>
       </footer>
