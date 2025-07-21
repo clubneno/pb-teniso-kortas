@@ -130,6 +130,22 @@ export function setupAuth(app: Express) {
     res.status(200).json(req.user);
   });
 
+  // Handle both GET and POST logout requests
+  app.get("/api/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      // Destroy session and redirect to landing page
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destroy error:', err);
+          return res.status(500).json({ message: 'Logout error' });
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+      });
+    });
+  });
+
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);

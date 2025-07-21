@@ -48,6 +48,9 @@ Preferred communication style: Simple, everyday language.
 - Updated all toast messages from "Sėkmė!" to "Pakeitimas išsaugotas" (2025-07-21)
 - Fixed time slot availability display bug - reserved slots now show properly (2025-07-21)
 - Corrected app branding consistency between Landing and Dashboard pages (2025-07-21)
+- Fixed logout functionality to properly end session and redirect to landing page (2025-07-21)
+- Implemented custom confirmation dialog for reservation cancellation (2025-07-21)
+- Added reservation sorting by date/time for better user experience (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking

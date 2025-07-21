@@ -222,7 +222,18 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <Button
                 variant="outline"
-                onClick={() => window.location.href = '/api/logout'}
+                onClick={async () => {
+                  try {
+                    await fetch('/api/logout', { method: 'POST' });
+                    queryClient.clear();
+                    window.location.href = '/';
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    // Fallback: clear cache and redirect anyway
+                    queryClient.clear();
+                    window.location.href = '/';
+                  }
+                }}
               >
                 <LogOut size={16} className="mr-2" />
                 Atsijungti
