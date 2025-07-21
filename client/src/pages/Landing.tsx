@@ -170,21 +170,43 @@ export default function Landing() {
                   <h3 className="text-xl font-semibold mb-4 text-white">Kortai</h3>
                   
                   {/* Court Selection */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     {courts.map((court) => (
-                      <Button
+                      <div
                         key={court.id}
-                        variant={selectedCourtId === court.id ? "default" : "outline"}
                         onClick={() => setSelectedCourtId(court.id)}
-                        className={selectedCourtId === court.id 
-                          ? "bg-tennis-green-500 hover:bg-tennis-green-600 text-white" 
-                          : "bg-gray-600 border-gray-500 text-white hover:bg-gray-500 hover:border-gray-400"}
+                        className={`
+                          relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 hover:scale-105
+                          ${selectedCourtId === court.id 
+                            ? "bg-tennis-green-500 border-tennis-green-400 shadow-lg shadow-tennis-green-500/30" 
+                            : "bg-gray-600 border-gray-500 hover:bg-gray-500 hover:border-gray-400 hover:shadow-md"}
+                        `}
                       >
-                        {court.name}
-                        <Badge variant="secondary" className="ml-2 bg-gray-200 text-gray-800">
-                          {court.hourlyRate}€/val
-                        </Badge>
-                      </Button>
+                        {/* Selection Indicator */}
+                        <div className={`absolute top-2 right-2 w-4 h-4 rounded-full border-2 transition-all
+                          ${selectedCourtId === court.id 
+                            ? "bg-white border-white" 
+                            : "border-gray-400"}
+                        `}>
+                          {selectedCourtId === court.id && (
+                            <div className="w-2 h-2 bg-tennis-green-500 rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                          )}
+                        </div>
+                        
+                        {/* Court Info */}
+                        <div className="text-white">
+                          <h4 className="font-semibold text-lg mb-1">{court.name}</h4>
+                          <p className="text-sm opacity-90 mb-2">{court.description}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-tennis-yellow font-bold text-lg">
+                              {court.hourlyRate}€/val
+                            </span>
+                            {selectedCourtId === court.id && (
+                              <span className="text-xs bg-white/20 px-2 py-1 rounded">Pasirinkta</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     ))}
                   </div>
 
