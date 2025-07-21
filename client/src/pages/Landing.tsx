@@ -208,6 +208,7 @@ export default function Landing() {
                       timeSlots={timeSlots}
                       onSlotSelect={() => {}}
                       selectedSlot={null}
+                      selectedDate={selectedDate.toISOString().split('T')[0]}
                       isPublicView={true}
                     />
                     

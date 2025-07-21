@@ -298,6 +298,7 @@ export default function Dashboard() {
                         timeSlots={timeSlots}
                         onSlotSelect={setSelectedTimeSlot}
                         selectedSlot={selectedTimeSlot}
+                        selectedDate={selectedDate.toISOString().split('T')[0]}
                         isPublicView={false}
                       />
                     </div>
