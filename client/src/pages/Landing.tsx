@@ -85,6 +85,16 @@ export default function Landing() {
         slot.startTime === startTime && slot.endTime === endTime
       );
 
+      // Debug for 08:00 slot
+      if (startTime === '08:00') {
+        console.log(`LANDING DEBUG ${selectedDateStr} 08:00:`, {
+          availabilityData,
+          isReserved,
+          startTime,
+          endTime
+        });
+      }
+
       // Check how many courts are reserved at this time slot (for cross-court info)
       const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
         r.startTime === startTime && r.endTime === endTime

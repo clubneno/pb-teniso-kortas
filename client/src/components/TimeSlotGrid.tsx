@@ -79,7 +79,15 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
     
-
+    // Debug for 08:00
+    if (slot.startTime === '08:00') {
+      console.log(`TIMESLOT GRID DEBUG 08:00:`, {
+        slot,
+        isPast,
+        isReserved: slot.isReserved,
+        willReturn: isPast ? "Praėjęs" : slot.isReserved ? "Užimta" : "Laisva"
+      });
+    }
     
     if (isPast) {
       return "Praėjęs";
