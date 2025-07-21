@@ -72,16 +72,16 @@ export default function TimeSlotGrid({
         return (
           <Button
             key={timeRange}
-            variant="outline"
             className={getSlotClassName(slot)}
             onClick={() => !slot.isReserved && !isPublicView && onSlotSelect(timeRange)}
             disabled={slot.isReserved || isPublicView}
+            style={{ color: 'white' }}
           >
-            <div className="p-1">
-              <div className={`text-sm font-medium ${getTimeColor(slot)}`}>
+            <div className="p-1" style={{ color: 'white' }}>
+              <div className={`text-sm font-medium ${getTimeColor(slot)}`} style={{ color: 'white' }}>
                 {slot.timeDisplay}
               </div>
-              <div className={`text-xs ${getStatusColor(slot)}`}>
+              <div className={`text-xs ${getStatusColor(slot)}`} style={{ color: 'white' }}>
                 {getStatusText(slot)}
               </div>
             </div>
