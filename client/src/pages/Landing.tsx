@@ -35,14 +35,19 @@ interface PublicReservation {
 }
 
 export default function Landing() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // Fix timezone issue by creating date at noon local time
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+  });
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   
   const { data: courts = [] } = useQuery<Court[]>({
     queryKey: ["/api/courts"],
   });
 
-  const selectedDateStr = selectedDate.toISOString().split('T')[0];
+  // Fix timezone issue - use local date formatting
+  const selectedDateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
   
   // Use the same availability API as Dashboard for consistency
   const { data: availabilityData = [], isLoading: availabilityLoading } = useQuery<{startTime: string; endTime: string}[]>({
@@ -85,15 +90,7 @@ export default function Landing() {
         slot.startTime === startTime && slot.endTime === endTime
       );
 
-      // Debug for 08:00 slot
-      if (startTime === '08:00') {
-        console.log(`LANDING DEBUG ${selectedDateStr} 08:00:`, {
-          availabilityData,
-          isReserved,
-          startTime,
-          endTime
-        });
-      }
+
 
       // Check how many courts are reserved at this time slot (for cross-court info)
       const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 

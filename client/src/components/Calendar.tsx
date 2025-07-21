@@ -40,7 +40,7 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
       days.push({
         day: daysInPrevMonth - i,
         isCurrentMonth: false,
-        date: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), daysInPrevMonth - i)
+        date: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), daysInPrevMonth - i, 12, 0, 0)
       });
     }
 
@@ -49,7 +49,7 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
       days.push({
         day,
         isCurrentMonth: true,
-        date: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+        date: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day, 12, 0, 0)
       });
     }
 
@@ -59,7 +59,7 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
       days.push({
         day,
         isCurrentMonth: false,
-        date: new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day)
+        date: new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, day, 12, 0, 0)
       });
     }
 
@@ -88,8 +88,8 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
 
   const isPastDate = (date: Date) => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
+    const todayAtNoon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+    return date < todayAtNoon;
   };
 
   const calendarDays = generateCalendarDays();
