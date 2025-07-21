@@ -54,6 +54,8 @@ Preferred communication style: Simple, everyday language.
 - Enhanced time slot grid to show "Užimta" status for reserved slots (2025-07-21)
 - Updated TimeSlotGrid to display comprehensive reservation data across all courts (2025-07-21)
 - Added visual indicators for partial availability when some courts are reserved (2025-07-21)
+- Fixed timezone issues with Europe/Vilnius implementation (2025-07-21)
+- Reset test account passwords - Admin: admin@example.com/admin123, User: user@example.com/user123 (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking
