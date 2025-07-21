@@ -28,7 +28,6 @@ export default function AuthPage() {
   const registerForm = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
       firstName: "",
@@ -186,19 +185,7 @@ export default function AuthPage() {
                             )}
                           />
                         </div>
-                        <FormField
-                          control={registerForm.control}
-                          name="username"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Vartotojo vardas</FormLabel>
-                              <FormControl>
-                                <Input placeholder="vartotojas" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+
                         <FormField
                           control={registerForm.control}
                           name="email"

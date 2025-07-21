@@ -29,7 +29,6 @@ export const sessions = pgTable(
 // User storage table for local authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: varchar("username").unique().notNull(),
   email: varchar("email").unique().notNull(),
   password: varchar("password").notNull(),
   firstName: varchar("first_name"),
@@ -96,7 +95,6 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  username: z.string().min(3, "Vartotojo vardas turi būti bent 3 simbolių"),
   email: z.string().email("Netinkamas el. pašto formatas").min(1, "El. paštas privalomas"),
   password: z.string().min(6, "Slaptažodis turi būti bent 6 simbolių"),
   firstName: z.string().min(1, "Vardas privalomas"),

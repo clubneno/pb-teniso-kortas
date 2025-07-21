@@ -83,12 +83,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, email, password, firstName, lastName, phone } = req.body;
-
-      const existingUserByUsername = await storage.getUserByUsername(username);
-      if (existingUserByUsername) {
-        return res.status(400).json({ message: "Vartotojo vardas jau užimtas" });
-      }
+      const { email, password, firstName, lastName, phone } = req.body;
 
       const existingUserByEmail = await storage.getUserByEmail(email);
       if (existingUserByEmail) {
@@ -98,7 +93,6 @@ export function setupAuth(app: Express) {
       const hashedPassword = await hashPassword(password);
 
       const user = await storage.createUser({
-        username,
         email,
         password: hashedPassword,
         firstName,

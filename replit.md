@@ -30,18 +30,19 @@ Preferred communication style: Simple, everyday language.
 - **Primary Database**: PostgreSQL via Neon serverless
 - **Schema Management**: Drizzle Kit for migrations
 - **Key Tables**:
-  - `sessions` - Session storage (required for Replit Auth)
-  - `users` - User profiles and authentication data
+  - `sessions` - Session storage for local authentication
+  - `users` - User profiles with email-based authentication (username field removed)
   - `courts` - Tennis court information and pricing
   - `reservations` - Booking records with user and court relationships
 
 ## Key Components
 
 ### Authentication System
-- Integrated with Replit's OAuth/OpenID Connect
-- Automatic user creation and profile management
-- Role-based access control (admin/regular user)
+- Email/password based authentication (local auth system)
+- User registration and login with email validation
+- Role-based access control (admin/regular user) 
 - Session persistence with PostgreSQL storage
+- Username field removed from system (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking
@@ -74,7 +75,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Core Infrastructure
 - **Database**: Neon PostgreSQL serverless database
-- **Authentication**: Replit OAuth/OpenID Connect service
+- **Authentication**: Local email/password authentication system
 - **Email**: Resend API for transactional emails
 - **Hosting**: Designed for Replit deployment environment
 
