@@ -142,7 +142,7 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
                 className={`
                   text-center py-2 text-sm rounded-lg transition-colors
                   ${!calDay.isCurrentMonth ? 'text-gray-400' : ''}
-                  ${isSelected ? 'bg-tennis-green-600 text-white font-bold shadow-lg' : ''}
+                  ${isSelected ? 'bg-yellow-400 text-black font-bold shadow-lg border-2 border-yellow-500' : ''}
                   ${isTodayDate && !isSelected ? 'bg-tennis-green-100 text-tennis-green-700 font-medium' : ''}
                   ${isPast && calDay.isCurrentMonth && !isSelected ? 'text-gray-400' : ''}
                   ${!isPast && calDay.isCurrentMonth && !isSelected ? 'hover:bg-tennis-green-50 text-gray-800' : ''}
