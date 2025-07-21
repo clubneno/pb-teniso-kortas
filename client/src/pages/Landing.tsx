@@ -42,20 +42,22 @@ export default function Landing() {
     queryKey: ["/api/courts"],
   });
 
-  // Get all reservations for the selected date (across all courts)
-  const { data: allReservations = [], isLoading: reservationsLoading } = useQuery<PublicReservation[]>({
-    queryKey: ["/api/reservations/public", selectedDate.toISOString().split('T')[0]],
-    queryFn: () => fetch(`/api/reservations/public?date=${selectedDate.toISOString().split('T')[0]}`).then(res => res.json()),
-    staleTime: 0, // Always refetch to avoid cache issues
-    gcTime: 0, // Don't keep in cache
+  const selectedDateStr = selectedDate.toISOString().split('T')[0];
+  
+  // Use the same availability API as Dashboard for consistency
+  const { data: availabilityData = [], isLoading: availabilityLoading } = useQuery<{startTime: string; endTime: string}[]>({
+    queryKey: ["/api/courts", selectedCourtId, "availability", selectedDateStr],
+    queryFn: () => fetch(`/api/courts/${selectedCourtId}/availability?date=${selectedDateStr}`).then(res => res.json()),
+    enabled: !!selectedCourtId,
+    staleTime: 0,
   });
 
-  const selectedDateStr = selectedDate.toISOString().split('T')[0];
-
-
-
-  // Filter reservations for the selected court for time slot logic
-  const reservations = allReservations.filter(r => r.courtId === selectedCourtId);
+  // Get all reservations for comprehensive view (cross-court info)
+  const { data: allReservationsForDate = [], isLoading: reservationsLoading } = useQuery<PublicReservation[]>({
+    queryKey: ["/api/reservations/public", selectedDateStr],
+    queryFn: () => fetch(`/api/reservations/public?date=${selectedDateStr}`).then(res => res.json()),
+    staleTime: 0,
+  });
 
   useEffect(() => {
     if (courts.length > 0 && !selectedCourtId) {
@@ -78,37 +80,27 @@ export default function Landing() {
       const startTime = `${hour.toString().padStart(2, '0')}:00`;
       const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
       
-      // Check if this slot is reserved for the selected court
-      const isReservedForSelectedCourt = reservations.some(r => 
-        r.startTime === startTime && r.endTime === endTime
+      // Use exact same logic as Dashboard: check if slot is in availabilityData (reserved slots)
+      const isReserved = availabilityData.some((slot) => 
+        slot.startTime === startTime && slot.endTime === endTime
       );
 
-
-
-
-      
-      // Check how many courts are reserved at this time slot
-      const allReservationsAtThisTime = allReservations.filter(r => 
+      // Check how many courts are reserved at this time slot (for cross-court info)
+      const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
         r.startTime === startTime && r.endTime === endTime
       );
       
       // Get court names that have reservations at this time
-      const reservedCourts = allReservationsAtThisTime.map(r => r.court.name).join(', ');
-      
+      const reservedCourts = allReservationsAtThisTime.map((r: any) => r.court.name).join(', ');
 
-      
-      const slotData = {
+      slots.push({
         startTime,
         endTime,
         timeDisplay: startTime,
-        isReserved: isReservedForSelectedCourt,
+        isReserved,
         totalReservations: allReservationsAtThisTime.length,
         reservedCourts: reservedCourts,
-      };
-
-
-
-      slots.push(slotData);
+      });
     }
     return slots;
   };
