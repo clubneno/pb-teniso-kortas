@@ -58,20 +58,6 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     
     if (slot.isReserved) {
-      return "text-red-700";
-    }
-    
-    if (selectedSlot === timeRange && !isPublicView) {
-      return "text-white";
-    }
-    
-    return "text-green-700";
-  };
-
-  const getTimeColor = (slot: TimeSlot) => {
-    const timeRange = `${slot.startTime}-${slot.endTime}`;
-    
-    if (slot.isReserved) {
       return "text-red-800";
     }
     
@@ -80,6 +66,20 @@ export default function TimeSlotGrid({
     }
     
     return "text-green-800";
+  };
+
+  const getTimeColor = (slot: TimeSlot) => {
+    const timeRange = `${slot.startTime}-${slot.endTime}`;
+    
+    if (slot.isReserved) {
+      return "text-red-900";
+    }
+    
+    if (selectedSlot === timeRange && !isPublicView) {
+      return "text-white";
+    }
+    
+    return "text-green-900";
   };
 
   return (
