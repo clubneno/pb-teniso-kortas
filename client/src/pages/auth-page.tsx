@@ -20,7 +20,7 @@ export default function AuthPage() {
   const loginForm = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -103,12 +103,12 @@ export default function AuthPage() {
                       <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                         <FormField
                           control={loginForm.control}
-                          name="username"
+                          name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Vartotojo vardas</FormLabel>
+                              <FormLabel>El. paštas</FormLabel>
                               <FormControl>
-                                <Input placeholder="vartotojas" {...field} />
+                                <Input type="email" placeholder="jonas@example.com" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -204,7 +204,7 @@ export default function AuthPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>El. paštas (neprivalomas)</FormLabel>
+                              <FormLabel>El. paštas</FormLabel>
                               <FormControl>
                                 <Input type="email" placeholder="jonas@example.com" {...field} />
                               </FormControl>

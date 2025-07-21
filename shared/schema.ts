@@ -30,7 +30,7 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username").unique().notNull(),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
   password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
@@ -91,13 +91,13 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "Vartotojo vardas privalomas"),
+  email: z.string().email("Netinkamas el. pašto formatas").min(1, "El. paštas privalomas"),
   password: z.string().min(1, "Slaptažodis privalomas"),
 });
 
 export const registerSchema = z.object({
   username: z.string().min(3, "Vartotojo vardas turi būti bent 3 simbolių"),
-  email: z.string().email("Netinkamas el. pašto formatas").optional(),
+  email: z.string().email("Netinkamas el. pašto formatas").min(1, "El. paštas privalomas"),
   password: z.string().min(6, "Slaptažodis turi būti bent 6 simbolių"),
   firstName: z.string().min(1, "Vardas privalomas"),
   lastName: z.string().min(1, "Pavardė privaloma"),

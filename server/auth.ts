@@ -54,9 +54,12 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
+    new LocalStrategy({
+      usernameField: 'email',
+      passwordField: 'password'
+    }, async (email, password, done) => {
       try {
-        const user = await storage.getUserByUsername(username);
+        const user = await storage.getUserByEmail(email);
         if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false);
         } else {
@@ -82,9 +85,14 @@ export function setupAuth(app: Express) {
     try {
       const { username, email, password, firstName, lastName, phone } = req.body;
 
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername) {
         return res.status(400).json({ message: "Vartotojo vardas jau užimtas" });
+      }
+
+      const existingUserByEmail = await storage.getUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: "El. paštas jau užimtas" });
       }
 
       const hashedPassword = await hashPassword(password);
