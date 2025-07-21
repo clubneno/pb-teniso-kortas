@@ -85,7 +85,7 @@ export default function Landing() {
   const timeSlots = generateTimeSlots();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Navigation */}
       <nav className="bg-white shadow-lg border-b-2 border-tennis-green-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -146,19 +146,19 @@ export default function Landing() {
       </div>
 
       {/* Public Schedule View */}
-      <div className="py-16 bg-gray-50">
+      <div className="py-16 bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Kortų Prieinamumas</h2>
-            <p className="text-xl text-gray-600">Peržiūrėkite laisvus laikus (reikia prisijungti, kad rezervuotumėte)</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Kortų Prieinamumas</h2>
+            <p className="text-xl text-gray-300">Peržiūrėkite laisvus laikus (reikia prisijungti, kad rezervuotumėte)</p>
           </div>
 
-          <Card className="shadow-lg">
+          <Card className="shadow-lg bg-gray-700 border-gray-600">
             <CardContent className="p-6">
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* Calendar */}
                 <div className="lg:w-1/2">
-                  <h3 className="text-xl font-semibold mb-4">Pasirinkite datą</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-white">Pasirinkite datą</h3>
                   <Calendar
                     selectedDate={selectedDate}
                     onDateSelect={setSelectedDate}
@@ -167,7 +167,7 @@ export default function Landing() {
 
                 {/* Court Selection & Time Slots */}
                 <div className="lg:w-1/2">
-                  <h3 className="text-xl font-semibold mb-4">Kortai</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-white">Kortai</h3>
                   
                   {/* Court Selection */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
@@ -190,7 +190,7 @@ export default function Landing() {
 
                   {/* Time Slots */}
                   <div className="border-t pt-6">
-                    <h4 className="text-lg font-semibold mb-4">
+                    <h4 className="text-lg font-semibold mb-4 text-white">
                       {formatDate(selectedDate)} - Kortų Prieinamumas
                     </h4>
                     
