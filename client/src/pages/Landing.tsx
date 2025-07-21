@@ -109,7 +109,6 @@ export default function Landing() {
           </div>
         </div>
       </nav>
-
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-tennis-green-600 to-tennis-green-700 text-white">
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
@@ -119,9 +118,7 @@ export default function Landing() {
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Rezervuokite PB teniso kortą
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-3xl mx-auto">
-              Moderni teniso kortų rezervacijos sistema. Rinkitės laiką, rezervuokite kortą ir mėgaukitės žaidimu.
-            </p>
+            <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-3xl mx-auto">Rinkitės datą, laiką, rezervuokite PB kortą ir mėgaukitės žaidimu.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg"
@@ -135,7 +132,6 @@ export default function Landing() {
           </div>
         </div>
       </div>
-
       {/* Public Schedule View */}
       <div className="py-16 bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,7 +227,6 @@ export default function Landing() {
           </Card>
         </div>
       </div>
-
       {/* Footer */}
       <footer className="bg-tennis-green-600 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
