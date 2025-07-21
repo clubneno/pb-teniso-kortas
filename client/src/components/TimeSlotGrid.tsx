@@ -64,18 +64,17 @@ export default function TimeSlotGrid({
         return (
           <div
             key={timeRange}
-            className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center`}
+            className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center text-white`}
             onClick={() => !slot.isReserved && !isPublicView && onSlotSelect(timeRange)}
             style={{ 
-              color: 'white',
               pointerEvents: slot.isReserved || isPublicView ? 'none' : 'auto'
             }}
           >
-            <div className="text-center" style={{ color: 'white' }}>
-              <div className="text-sm font-medium" style={{ color: 'white' }}>
+            <div className="text-center">
+              <div className="text-sm font-medium">
                 {slot.timeDisplay}
               </div>
-              <div className="text-xs" style={{ color: 'white' }}>
+              <div className="text-xs">
                 {getStatusText(slot)}
               </div>
             </div>
