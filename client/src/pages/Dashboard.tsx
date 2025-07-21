@@ -66,8 +66,11 @@ export default function Dashboard() {
     retry: false,
   });
 
+  const selectedDateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+  
   const { data: availabilityData = [] } = useQuery<{startTime: string; endTime: string}[]>({
-    queryKey: ["/api/courts", selectedCourtId, "availability", `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`],
+    queryKey: ["/api/courts", selectedCourtId, "availability", selectedDateStr],
+    queryFn: () => fetch(`/api/courts/${selectedCourtId}/availability?date=${selectedDateStr}`).then(res => res.json()),
     enabled: !!selectedCourtId,
   });
 
@@ -108,10 +111,11 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       toast({
-        title: "Sėkmė!",
+        title: "Pakeitimas išsaugotas",
         description: "Rezervacija sėkmingai sukurta. Patvirtinimo el. laiškas išsiųstas.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courts", selectedCourtId, "availability"] });
       setSelectedTimeSlot(null);
     },
     onError: (error) => {
@@ -142,7 +146,7 @@ export default function Dashboard() {
       const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
       
       const isReserved = availabilityData.some((slot) => 
-        slot.startTime <= startTime && slot.endTime > startTime
+        slot.startTime === startTime && slot.endTime === endTime
       );
       
       slots.push({

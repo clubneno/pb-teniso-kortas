@@ -36,7 +36,7 @@ export default function ProfileEdit({ user }: ProfileEditProps) {
     },
     onSuccess: () => {
       toast({
-        title: "Sėkmė!",
+        title: "Pakeitimas išsaugotas",
         description: "Profilis sėkmingai atnaujintas.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });

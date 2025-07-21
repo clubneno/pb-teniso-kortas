@@ -47,7 +47,7 @@ export default function ReservationCard({ reservation, showActions = false, isPa
     },
     onSuccess: () => {
       toast({
-        title: "Sėkmė!",
+        title: "Pakeitimas išsaugotas",
         description: "Rezervacija sėkmingai atšaukta. Patvirtinimo el. laiškas išsiųstas.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
