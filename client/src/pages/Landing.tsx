@@ -250,7 +250,7 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-tennis-yellow rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                   <Volleyball className="text-tennis-green-600" size={16} />
                 </div>
                 <span className="text-lg font-bold">PB teniso kortas</span>
