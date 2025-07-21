@@ -261,37 +261,7 @@ export default function AuthPage() {
             </Tabs>
           </div>
 
-          {/* Right side - Hero */}
-          <div className="hidden lg:flex flex-col justify-center items-center text-center">
-            <div className="max-w-lg">
-              <Trophy className="h-24 w-24 text-tennis-green-600 mx-auto mb-6" />
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Rezervuokite teniso kortus
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">
-                Patogus ir greitas būdas rezervuoti teniso kortus. 
-                Peržiūrėkite laisvus laikus ir užsisakykite kortą iš karto.
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-tennis-green-500 rounded-full"></div>
-                  <span>Realaus laiko rezervacijos</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-tennis-yellow-500 rounded-full"></div>
-                  <span>El. pašto patvirtinimai</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-tennis-green-500 rounded-full"></div>
-                  <span>Lankstūs laikai</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-tennis-yellow-500 rounded-full"></div>
-                  <span>Paprasta valdymas</span>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
