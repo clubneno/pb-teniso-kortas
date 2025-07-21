@@ -51,8 +51,6 @@ Preferred communication style: Simple, everyday language.
 - Fixed logout functionality to properly end session and redirect to landing page (2025-07-21)
 - Implemented custom confirmation dialog for reservation cancellation (2025-07-21)
 - Added reservation sorting by date/time for better user experience (2025-07-21)
-- Fixed time slot reservation status display - slots now correctly show "Užimta" when reserved (2025-07-21)
-- Added quick date navigation buttons to easily test reservation display functionality (2025-07-21)
 
 ### Reservation Management
 - Real-time availability checking
