@@ -1,7 +1,18 @@
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -40,6 +51,7 @@ interface ReservationCardProps {
 
 export default function ReservationCard({ reservation, showActions = false, isPast = false }: ReservationCardProps) {
   const { toast } = useToast();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const cancelReservationMutation = useMutation({
     mutationFn: async (reservationId: number) => {
@@ -95,53 +107,85 @@ export default function ReservationCard({ reservation, showActions = false, isPa
   };
 
   const handleCancel = () => {
-    if (window.confirm('Ar tikrai norite atšaukti šią rezervaciją?')) {
-      cancelReservationMutation.mutate(reservation.id);
-    }
+    setShowCancelDialog(true);
+  };
+
+  const confirmCancel = () => {
+    cancelReservationMutation.mutate(reservation.id);
+    setShowCancelDialog(false);
   };
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${isPast ? 'bg-gray-50' : ''}`}>
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex-1">
-            <div className={`font-medium ${isPast ? 'text-gray-700' : 'text-gray-900'}`}>
-              {formatDate(reservation.date)}
-            </div>
-            <div className={`text-sm ${isPast ? 'text-gray-500' : 'text-gray-600'}`}>
-              {reservation.startTime}-{reservation.endTime} | {reservation.court.name}
-            </div>
-            <div className="mt-1">
-              {getStatusBadge(reservation.status)}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className={`font-medium ${isPast ? 'text-gray-700' : 'text-gray-900'}`}>
-              {reservation.totalPrice}€
-            </div>
-            {showActions && !isPast && (
-              <div className="mt-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-red-600 border-red-300 hover:bg-red-50"
-                  onClick={handleCancel}
-                  disabled={cancelReservationMutation.isPending}
-                >
-                  <Trash2 size={14} className="mr-1" />
-                  {cancelReservationMutation.isPending ? "Atšaukiama..." : "Atšaukti"}
-                </Button>
+    <>
+      <Card className={`hover:shadow-md transition-shadow ${isPast ? 'bg-gray-50' : ''}`}>
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className={`font-medium ${isPast ? 'text-gray-700' : 'text-gray-900'}`}>
+                {formatDate(reservation.date)}
               </div>
-            )}
+              <div className={`text-sm ${isPast ? 'text-gray-500' : 'text-gray-600'}`}>
+                {reservation.startTime}-{reservation.endTime} | {reservation.court.name}
+              </div>
+              <div className="mt-1">
+                {getStatusBadge(reservation.status)}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`font-medium ${isPast ? 'text-gray-700' : 'text-gray-900'}`}>
+                {reservation.totalPrice}€
+              </div>
+              {showActions && !isPast && (
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-red-600 border-red-300 hover:bg-red-50"
+                    onClick={handleCancel}
+                    disabled={cancelReservationMutation.isPending}
+                  >
+                    <Trash2 size={14} className="mr-1" />
+                    {cancelReservationMutation.isPending ? "Atšaukiama..." : "Atšaukti"}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        
-        {reservation.notes && (
-          <div className={`mt-3 text-sm ${isPast ? 'text-gray-500' : 'text-gray-600'} italic`}>
-            Pastabos: {reservation.notes}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          
+          {reservation.notes && (
+            <div className={`mt-3 text-sm ${isPast ? 'text-gray-500' : 'text-gray-600'} italic`}>
+              Pastabos: {reservation.notes}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Atšaukti rezervaciją</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ar tikrai norite atšaukti šią rezervaciją?
+              <br />
+              <br />
+              <strong>Data:</strong> {formatDate(reservation.date)}
+              <br />
+              <strong>Laikas:</strong> {reservation.startTime}-{reservation.endTime}
+              <br />
+              <strong>Kortas:</strong> {reservation.court.name}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Ne, grįžti</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCancel}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Taip, atšaukti
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
