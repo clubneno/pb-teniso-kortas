@@ -19,7 +19,7 @@ import {
   UserPen, 
   LogOut 
 } from "lucide-react";
-import { FaTennisBall } from "react-icons/fa";
+// Using Volleyball icon as tennis ball alternative
 
 interface Court {
   id: number;
@@ -217,7 +217,7 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <div className="w-20 h-20 bg-tennis-green-100 rounded-full flex items-center justify-center">
-                <FaTennisBall className="text-tennis-green-600" size={32} />
+                <Volleyball className="text-tennis-green-600" size={32} />
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
