@@ -177,11 +177,11 @@ export default function Landing() {
                         variant={selectedCourtId === court.id ? "default" : "outline"}
                         onClick={() => setSelectedCourtId(court.id)}
                         className={selectedCourtId === court.id 
-                          ? "bg-tennis-green-500 hover:bg-tennis-green-600" 
-                          : ""}
+                          ? "bg-tennis-green-500 hover:bg-tennis-green-600 text-white" 
+                          : "bg-gray-600 border-gray-500 text-white hover:bg-gray-500 hover:border-gray-400"}
                       >
                         {court.name}
-                        <Badge variant="secondary" className="ml-2">
+                        <Badge variant="secondary" className="ml-2 bg-gray-200 text-gray-800">
                           {court.hourlyRate}€/val
                         </Badge>
                       </Button>
