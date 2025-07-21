@@ -81,6 +81,16 @@ export default function Dashboard() {
     staleTime: 0, // Always refetch to avoid cache issues
   });
 
+  // Debug for July 22
+  if (selectedDateStr === '2025-07-22') {
+    console.log('DASHBOARD July 22 Debug:', {
+      selectedDate: selectedDateStr,
+      selectedCourtId,
+      availabilityData,
+      allReservationsForDate
+    });
+  }
+
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
@@ -156,6 +166,15 @@ export default function Dashboard() {
       const isReserved = availabilityData.some((slot) => 
         slot.startTime === startTime && slot.endTime === endTime
       );
+
+      // Debug specific slots on July 22
+      if (selectedDateStr === '2025-07-22' && (startTime === '08:00' || startTime === '14:00')) {
+        console.log(`DASHBOARD July 22 slot ${startTime}-${endTime}:`, {
+          availabilityData,
+          isReserved,
+          matchingSlots: availabilityData.filter(slot => slot.startTime === startTime && slot.endTime === endTime)
+        });
+      }
       
       // Check how many courts are reserved at this time slot
       const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
