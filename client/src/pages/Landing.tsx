@@ -254,7 +254,7 @@ export default function Landing() {
                       <Button 
                         size="lg"
                         onClick={() => window.location.href = '/api/login'}
-                        className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-lg border-2 border-yellow-400 transform hover:scale-105 transition-all duration-200"
                       >
                         <LogIn size={20} className="mr-2" />
                         Prisijunkite, kad rezervuotumėte
