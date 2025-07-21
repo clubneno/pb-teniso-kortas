@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+// Button component removed - using div for better text color control
 
 interface TimeSlot {
   startTime: string;
@@ -54,15 +54,7 @@ export default function TimeSlotGrid({
     return "Laisva";
   };
 
-  const getStatusColor = (slot: TimeSlot) => {
-    // White text is now handled by the button's base classes
-    return "";
-  };
-
-  const getTimeColor = (slot: TimeSlot) => {
-    // White text is now handled by the button's base classes
-    return "";
-  };
+  // Text color functions no longer needed - using inline styles for white text
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -70,22 +62,24 @@ export default function TimeSlotGrid({
         const timeRange = `${slot.startTime}-${slot.endTime}`;
         
         return (
-          <Button
+          <div
             key={timeRange}
-            className={getSlotClassName(slot)}
+            className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center`}
             onClick={() => !slot.isReserved && !isPublicView && onSlotSelect(timeRange)}
-            disabled={slot.isReserved || isPublicView}
-            style={{ color: 'white' }}
+            style={{ 
+              color: 'white',
+              pointerEvents: slot.isReserved || isPublicView ? 'none' : 'auto'
+            }}
           >
-            <div className="p-1" style={{ color: 'white' }}>
-              <div className={`text-sm font-medium ${getTimeColor(slot)}`} style={{ color: 'white' }}>
+            <div className="text-center" style={{ color: 'white' }}>
+              <div className="text-sm font-medium" style={{ color: 'white' }}>
                 {slot.timeDisplay}
               </div>
-              <div className={`text-xs ${getStatusColor(slot)}`} style={{ color: 'white' }}>
+              <div className="text-xs" style={{ color: 'white' }}>
                 {getStatusText(slot)}
               </div>
             </div>
-          </Button>
+          </div>
         );
       })}
     </div>
