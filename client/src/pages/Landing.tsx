@@ -241,15 +241,7 @@ export default function Landing() {
               <p className="text-tennis-green-100">Moderni PB teniso korto rezervacijos sistema Jūsų patogumui. </p>
             </div>
             
-            <div>
-              <h4 className="font-semibold mb-3">Paslaugos</h4>
-              <ul className="space-y-2 text-tennis-green-100">
-                <li>Kortų rezervacija</li>
-                <li>Grupės užsiėmimai</li>
-                <li>Privačios pamokos</li>
-                <li>Inventoriaus nuoma</li>
-              </ul>
-            </div>
+
             
             <div>
               <h4 className="font-semibold mb-3">Kontaktai</h4>
