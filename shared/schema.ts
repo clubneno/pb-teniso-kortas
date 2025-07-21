@@ -26,14 +26,14 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// User storage table for local authentication
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
+  id: serial("id").primaryKey(),
+  username: varchar("username").unique().notNull(),
   email: varchar("email").unique(),
+  password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
   phone: varchar("phone"),
   isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
@@ -51,7 +51,7 @@ export const courts = pgTable("courts", {
 
 export const reservations = pgTable("reservations", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   courtId: integer("court_id").references(() => courts.id).notNull(),
   date: varchar("date").notNull(), // YYYY-MM-DD format
   startTime: varchar("start_time").notNull(), // HH:mm format
@@ -84,11 +84,24 @@ export const reservationRelations = relations(reservations, ({ one }) => ({
 }));
 
 // Schemas
-export const insertUserSchema = createInsertSchema(users).pick({
-  email: true,
-  firstName: true,
-  lastName: true,
-  phone: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Vartotojo vardas privalomas"),
+  password: z.string().min(1, "Slaptažodis privalomas"),
+});
+
+export const registerSchema = z.object({
+  username: z.string().min(3, "Vartotojo vardas turi būti bent 3 simbolių"),
+  email: z.string().email("Netinkamas el. pašto formatas").optional(),
+  password: z.string().min(6, "Slaptažodis turi būti bent 6 simbolių"),
+  firstName: z.string().min(1, "Vardas privalomas"),
+  lastName: z.string().min(1, "Pavardė privaloma"),
+  phone: z.string().optional(),
 });
 
 export const insertCourtSchema = createInsertSchema(courts).omit({
@@ -111,8 +124,10 @@ export const updateReservationSchema = createInsertSchema(reservations)
   .partial();
 
 // Types
-export type UpsertUser = typeof users.$inferInsert;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type LoginData = z.infer<typeof loginSchema>;
+export type RegisterData = z.infer<typeof registerSchema>;
 export type Court = typeof courts.$inferSelect;
 export type InsertCourt = z.infer<typeof insertCourtSchema>;
 export type Reservation = typeof reservations.$inferSelect;

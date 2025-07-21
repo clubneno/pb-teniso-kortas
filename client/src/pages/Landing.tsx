@@ -99,7 +99,7 @@ export default function Landing() {
             
             <div className="flex items-center space-x-3">
               <Button 
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => window.location.href = '/auth'}
                 className="bg-tennis-green-500 hover:bg-tennis-green-600"
               >
                 <LogIn size={16} className="mr-2" />
@@ -126,7 +126,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => window.location.href = '/auth'}
                 className="bg-white text-tennis-green-700 hover:bg-gray-100 font-bold text-lg shadow-lg"
               >
                 <CalendarIcon size={20} className="mr-2" />

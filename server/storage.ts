@@ -3,7 +3,7 @@ import {
   courts,
   reservations,
   type User,
-  type UpsertUser,
+  type InsertUser,
   type Court,
   type InsertCourt,
   type Reservation,
@@ -16,10 +16,11 @@ import { eq, and, gte, lte, desc, asc, ne } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
-  // User operations - mandatory for Replit Auth
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  updateUser(id: string, data: Partial<User>): Promise<User | undefined>;
+  // User operations - for local authentication
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, data: Partial<User>): Promise<User | undefined>;
   
   // Court operations
   getCourts(): Promise<Court[]>;
@@ -29,7 +30,7 @@ export interface IStorage {
   
   // Reservation operations
   getReservations(filters?: {
-    userId?: string;
+    userId?: number;
     courtId?: number;
     date?: string;
     status?: string;
@@ -55,32 +56,30 @@ export interface IStorage {
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
-  getUserStats(userId: string): Promise<{ totalReservations: number; lastReservation?: string }>;
+  getUserStats(userId: number): Promise<{ totalReservations: number; lastReservation?: string }>;
 }
 
 export class DatabaseStorage implements IStorage {
-  // User operations - mandatory for Replit Auth
-  async getUser(id: string): Promise<User | undefined> {
+  // User operations - for local authentication
+  async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
       .returning();
     return user;
   }
 
-  async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
+  async updateUser(id: number, data: Partial<User>): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({ ...data, updatedAt: new Date() })
@@ -115,7 +114,7 @@ export class DatabaseStorage implements IStorage {
 
   // Reservation operations
   async getReservations(filters: {
-    userId?: string;
+    userId?: number;
     courtId?: number;
     date?: string;
     status?: string;
@@ -163,11 +162,12 @@ export class DatabaseStorage implements IStorage {
       conditions.push(lte(reservations.date, filters.endDate));
     }
 
+    let finalQuery = query;
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      finalQuery = query.where(and(...conditions));
     }
 
-    const results = await query.orderBy(desc(reservations.date), desc(reservations.startTime));
+    const results = await finalQuery.orderBy(desc(reservations.date), desc(reservations.startTime));
     
     return results.map(result => ({
       ...result,
@@ -285,7 +285,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
-  async getUserStats(userId: string): Promise<{ totalReservations: number; lastReservation?: string }> {
+  async getUserStats(userId: number): Promise<{ totalReservations: number; lastReservation?: string }> {
     const userReservations = await db
       .select({
         date: reservations.date,
