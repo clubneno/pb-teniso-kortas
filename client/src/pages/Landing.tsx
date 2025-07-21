@@ -236,7 +236,7 @@ export default function Landing() {
                 <div className="w-8 h-8 bg-tennis-yellow rounded-full flex items-center justify-center">
                   <Volleyball className="text-tennis-green-600" size={16} />
                 </div>
-                <span className="text-lg font-bold">TennisReserve</span>
+                <span className="text-lg font-bold">PB teniso kortas</span>
               </div>
               <p className="text-tennis-green-100">Moderni PB teniso korto rezervacijos sistema Jūsų patogumui. </p>
             </div>
