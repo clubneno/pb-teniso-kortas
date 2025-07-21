@@ -74,9 +74,7 @@ export default function AuthPage() {
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <Trophy className="h-8 w-8 text-tennis-green-600" />
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Teniso kortai
-                </h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">PB teniso kortas</h1>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
                 Prisijunkite prie savo paskyros arba sukurkite naują
