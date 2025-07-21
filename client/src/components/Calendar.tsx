@@ -9,6 +9,12 @@ interface CalendarProps {
 }
 
 export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) {
+  // Initialize with Vilnius timezone
+  const getVilniusDate = (date: Date) => {
+    const vilniusTime = new Date(date.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    return new Date(vilniusTime.getFullYear(), vilniusTime.getMonth(), vilniusTime.getDate(), 12, 0, 0);
+  };
+  
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
 
   const monthNames = [
@@ -83,12 +89,16 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
   };
 
   const isToday = (date: Date) => {
-    return date.toDateString() === new Date().toDateString();
+    const now = new Date();
+    const vilniusToday = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    const todayAtNoon = new Date(vilniusToday.getFullYear(), vilniusToday.getMonth(), vilniusToday.getDate(), 12, 0, 0);
+    return date.toDateString() === todayAtNoon.toDateString();
   };
 
   const isPastDate = (date: Date) => {
-    const today = new Date();
-    const todayAtNoon = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+    const now = new Date();
+    const vilniusToday = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    const todayAtNoon = new Date(vilniusToday.getFullYear(), vilniusToday.getMonth(), vilniusToday.getDate(), 12, 0, 0);
     return date < todayAtNoon;
   };
 

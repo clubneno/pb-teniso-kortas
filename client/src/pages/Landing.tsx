@@ -35,10 +35,12 @@ interface PublicReservation {
 }
 
 export default function Landing() {
-  // Fix timezone issue by creating date at noon local time
+  // Create date in Vilnius timezone
   const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+    const now = new Date();
+    // Convert to Vilnius timezone
+    const vilniusTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    return new Date(vilniusTime.getFullYear(), vilniusTime.getMonth(), vilniusTime.getDate(), 12, 0, 0);
   });
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   
@@ -46,8 +48,13 @@ export default function Landing() {
     queryKey: ["/api/courts"],
   });
 
-  // Fix timezone issue - use local date formatting
-  const selectedDateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+  // Format date string for Vilnius timezone
+  const getVilniusDateString = (date: Date) => {
+    const vilniusDate = new Date(date.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    return `${vilniusDate.getFullYear()}-${String(vilniusDate.getMonth() + 1).padStart(2, '0')}-${String(vilniusDate.getDate()).padStart(2, '0')}`;
+  };
+  
+  const selectedDateStr = getVilniusDateString(selectedDate);
   
   // Use the same availability API as Dashboard for consistency
   const { data: availabilityData = [], isLoading: availabilityLoading } = useQuery<{startTime: string; endTime: string}[]>({
@@ -75,7 +82,8 @@ export default function Landing() {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      weekday: 'long'
+      weekday: 'long',
+      timeZone: 'Europe/Vilnius'
     });
   };
 

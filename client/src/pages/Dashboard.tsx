@@ -53,7 +53,12 @@ interface ReservationWithDetails {
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // Create date in Vilnius timezone
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const vilniusTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    return new Date(vilniusTime.getFullYear(), vilniusTime.getMonth(), vilniusTime.getDate(), 12, 0, 0);
+  });
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
@@ -66,7 +71,13 @@ export default function Dashboard() {
     retry: false,
   });
 
-  const selectedDateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+  // Format date string for Vilnius timezone
+  const getVilniusDateString = (date: Date) => {
+    const vilniusDate = new Date(date.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    return `${vilniusDate.getFullYear()}-${String(vilniusDate.getMonth() + 1).padStart(2, '0')}-${String(vilniusDate.getDate()).padStart(2, '0')}`;
+  };
+  
+  const selectedDateStr = getVilniusDateString(selectedDate);
   
   const { data: availabilityData = [] } = useQuery<{startTime: string; endTime: string}[]>({
     queryKey: ["/api/courts", selectedCourtId, "availability", selectedDateStr],
