@@ -145,48 +145,6 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Kodėl Rinktis Mus?</h2>
-            <p className="text-xl text-gray-600">Profesionalūs kortai ir patogi rezervacijos sistema</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="w-16 h-16 bg-tennis-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Clock className="text-tennis-green-600" size={32} />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">24/7 Rezervacija</h3>
-                <p className="text-gray-600">Rezervuokite kortą bet kuriuo paros metu per mūsų patogią sistemą</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="w-16 h-16 bg-tennis-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="text-tennis-green-600" size={32} />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Profesionalūs Kortai</h3>
-                <p className="text-gray-600">Aukščiausios kokybės teniso kortai su profesionalia danga</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="w-16 h-16 bg-tennis-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Smartphone className="text-tennis-green-600" size={32} />
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Mobili Sąsaja</h3>
-                <p className="text-gray-600">Valdykite rezervacijas iš bet kurio įrenginio - kompiuterio ar telefono</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
       {/* Public Schedule View */}
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
