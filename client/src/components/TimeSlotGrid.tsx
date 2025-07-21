@@ -25,10 +25,15 @@ export default function TimeSlotGrid({
   
   const isSlotInPast = (slot: TimeSlot) => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Format today's date as YYYY-MM-DD using local time
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
     
     // Only check if slot is in the past for today's date
-    if (selectedDate !== today) {
+    if (selectedDate !== todayStr) {
       return false;
     }
     
