@@ -238,7 +238,7 @@ export default function Landing() {
                 </div>
                 <span className="text-lg font-bold">TennisReserve</span>
               </div>
-              <p className="text-tennis-green-100">Moderni teniso kortų rezervacijos sistema visoms jūsų sportinėms reikmėms.</p>
+              <p className="text-tennis-green-100">Moderni PB teniso korto rezervacijos sistema Jūsų patogumui. </p>
             </div>
             
             <div>
