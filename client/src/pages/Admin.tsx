@@ -1027,16 +1027,7 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Info Note */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start">
-                  <div className="text-blue-600 mr-2">ℹ️</div>
-                  <div className="text-sm text-blue-800">
-                    <p className="font-medium mb-1">Kortų valdymas</p>
-                    <p>Kortų skaičius ir kainos rodoma pagal duomenų bazės informaciją. Norint keisti šiuos nustatymus, naudokite kortų valdymo skiltį.</p>
-                  </div>
-                </div>
-              </div>
+
             </div>
           </TabsContent>
         </Tabs>
