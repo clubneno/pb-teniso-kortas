@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -75,6 +77,7 @@ export default function Admin() {
   const [dateTo, setDateTo] = useState("");
   const [chartDateFrom, setChartDateFrom] = useState("");
   const [chartDateTo, setChartDateTo] = useState("");
+  const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/admin/reservations", statusFilter, dateFrom, dateTo],
@@ -204,6 +207,64 @@ export default function Admin() {
   };
 
   const chartData = generateChartData();
+
+  // Mutation to update reservation status
+  const updateReservationMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const response = await apiRequest("PUT", `/api/admin/reservations/${id}`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations"] });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Rezervacijos būsena sėkmingai atnaujinta"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Klaida",
+        description: "Nepavyko atnaujinti rezervacijos būsenos",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation to delete reservation
+  const deleteReservationMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/admin/reservations/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations"] });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Rezervacija sėkmingai ištrinta"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Klaida",
+        description: "Nepavyko ištrinti rezervacijos",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleToggleStatus = (reservation: ReservationWithDetails) => {
+    const newStatus = reservation.status === 'confirmed' ? 'cancelled' : 'confirmed';
+    const statusText = newStatus === 'confirmed' ? 'patvirtinti' : 'atšaukti';
+    
+    if (confirm(`Ar tikrai norite ${statusText} šią rezervaciją?`)) {
+      updateReservationMutation.mutate({ id: reservation.id, status: newStatus });
+    }
+  };
+
+  const handleDeleteReservation = (reservation: ReservationWithDetails) => {
+    if (confirm(`Ar tikrai norite ištrinti rezervaciją ${reservation.user.firstName} ${reservation.user.lastName} (${new Date(reservation.date).toLocaleDateString('lt-LT')} ${reservation.startTime})?`)) {
+      deleteReservationMutation.mutate(reservation.id);
+    }
+  };
 
   // Helper function to check if reservation is in the past
   const isReservationPast = (date: string, endTime: string): boolean => {
@@ -591,10 +652,23 @@ export default function Admin() {
                             <TableCell>{reservation.totalPrice}€</TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleToggleStatus(reservation)}
+                                  disabled={updateReservationMutation.isPending}
+                                  title={reservation.status === 'confirmed' ? 'Atšaukti rezervaciją' : 'Patvirtinti rezervaciją'}
+                                >
                                   <Edit size={14} />
                                 </Button>
-                                <Button size="sm" variant="outline">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleDeleteReservation(reservation)}
+                                  disabled={deleteReservationMutation.isPending}
+                                  title="Ištrinti rezervaciją"
+                                  className="hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+                                >
                                   <Trash2 size={14} />
                                 </Button>
                               </div>

@@ -62,6 +62,8 @@ Preferred communication style: Simple, everyday language.
 - Added visual distinction for past vs upcoming reservations with darker background for completed reservations (2025-07-22)
 - Removed pending status from reservation system - all reservations are now automatically confirmed without admin approval required (2025-07-22)
 - Fixed HTML language attribute to "lt" for proper Lithuanian calendar display in date inputs (2025-07-22)
+- Implemented custom Lithuanian DatePicker component to replace native browser date inputs for guaranteed Lithuanian display (2025-07-22)
+- Added functional admin reservation management buttons: status toggle (confirmed/cancelled) and permanent deletion with confirmations (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking
