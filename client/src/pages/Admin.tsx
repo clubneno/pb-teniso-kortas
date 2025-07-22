@@ -1083,12 +1083,15 @@ export default function Admin() {
                         return !(endTime <= slot.startTime || startTime >= slot.endTime);
                       });
                       
+                      // Don't render reserved time slots at all
+                      if (isConflict) return null;
+                      
                       return (
-                        <SelectItem key={timeSlot} value={timeSlot} disabled={isConflict}>
-                          {timeSlot} {isConflict ? '(Užimta)' : ''}
+                        <SelectItem key={timeSlot} value={timeSlot}>
+                          {timeSlot}
                         </SelectItem>
                       );
-                    })}
+                    }).filter(Boolean)}
                   </SelectContent>
                 </Select>
               </div>
