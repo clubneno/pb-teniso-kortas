@@ -411,6 +411,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin user creation
+  app.post('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { email, password, firstName, lastName, phone, isAdmin } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+
+      // Create new user
+      const newUser = await storage.createUser({
+        email,
+        password, // Will be hashed in storage.createUser
+        firstName,
+        lastName,
+        phone: phone || null,
+        isAdmin: isAdmin || false
+      });
+
+      res.status(201).json(newUser);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

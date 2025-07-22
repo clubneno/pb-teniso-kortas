@@ -13,6 +13,20 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, ne } from "drizzle-orm";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
+
+function generateId(): string {
+  return randomBytes(16).toString("hex");
+}
 
 // Interface for storage operations
 export interface IStorage {
@@ -71,12 +85,22 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+
+
   async createUser(userData: InsertUser): Promise<User> {
     // Generate a unique ID for the user
     const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    
+    // Hash password before storing
+    const hashedPassword = await hashPassword(userData.password);
+    
     const [user] = await db
       .insert(users)
-      .values({ ...userData, id: userId })
+      .values({
+        ...userData,
+        id: userId,
+        password: hashedPassword,
+      })
       .returning();
     return user;
   }

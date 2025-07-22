@@ -101,6 +101,15 @@ export default function Admin() {
     date: "",
     timeSlot: "" // Will be in format "HH:mm-HH:mm"
   });
+  const [createUserModal, setCreateUserModal] = useState(false);
+  const [userForm, setUserForm] = useState({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    isAdmin: false
+  });
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -353,6 +362,50 @@ export default function Admin() {
       });
     }
   });
+
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const res = await apiRequest("POST", "/api/admin/users", userData);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setCreateUserModal(false);
+      setUserForm({
+        email: "",
+        password: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        isAdmin: false
+      });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Naudotojas sėkmingai sukurtas",
+      });
+    },
+    onError: (error) => {
+      console.error("Error creating user:", error);
+      toast({
+        title: "Klaida",
+        description: error.message || "Nepavyko sukurti naudotojo",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleCreateUser = () => {
+    if (!userForm.email || !userForm.password || !userForm.firstName || !userForm.lastName) {
+      toast({
+        title: "Klaida",
+        description: "Užpildykite visus privalomus laukus",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    createUserMutation.mutate(userForm);
+  };
 
   const handleCreateReservation = () => {
     if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || !reservationForm.timeSlot) {
@@ -821,7 +874,10 @@ export default function Admin() {
           <TabsContent value="users" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Naudotojų Valdymas</h2>
-              <Button className="bg-tennis-green-500 hover:bg-tennis-green-600">
+              <Button 
+                className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                onClick={() => setCreateUserModal(true)}
+              >
                 <UserPlus size={16} className="mr-2" />
                 Pridėti Naudotoją
               </Button>
@@ -1118,6 +1174,113 @@ export default function Admin() {
                   className="bg-tennis-green-500 hover:bg-tennis-green-600"
                 >
                   {createReservationMutation.isPending ? "Kuriama..." : "Sukurti Rezervaciją"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {createUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md mx-auto shadow-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Sukurti Naudotoją</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCreateUserModal(false)}
+                  className="h-6 w-6 hover:bg-gray-100"
+                >
+                  <Plus className="h-4 w-4 rotate-45" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="email">El. paštas *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={userForm.email}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="vardas@pavyzdys.lt"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password">Slaptažodis *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={userForm.password}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="Įveskite slaptažodį"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">Vardas *</Label>
+                  <Input
+                    id="firstName"
+                    value={userForm.firstName}
+                    onChange={(e) => setUserForm(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="Vardas"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="lastName">Pavardė *</Label>
+                  <Input
+                    id="lastName"
+                    value={userForm.lastName}
+                    onChange={(e) => setUserForm(prev => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Pavardė"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Telefonas</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={userForm.phone}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="+370 600 00000"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isAdmin"
+                  checked={userForm.isAdmin}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, isAdmin: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="isAdmin" className="text-sm">
+                  Administratoriaus teisės
+                </Label>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setCreateUserModal(false)}
+                  disabled={createUserMutation.isPending}
+                >
+                  Atšaukti
+                </Button>
+                <Button
+                  onClick={handleCreateUser}
+                  disabled={createUserMutation.isPending}
+                  className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                >
+                  {createUserMutation.isPending ? "Kuriamas..." : "Sukurti Naudotoją"}
                 </Button>
               </div>
             </CardContent>
