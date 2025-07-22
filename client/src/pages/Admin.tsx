@@ -99,8 +99,7 @@ export default function Admin() {
     userId: "",
     courtId: "",
     date: "",
-    startTime: "",
-    endTime: ""
+    timeSlot: "" // Will be in format "HH:mm-HH:mm"
   });
   const { toast } = useToast();
 
@@ -339,8 +338,7 @@ export default function Admin() {
         userId: "",
         courtId: "",
         date: "",
-        startTime: "",
-        endTime: ""
+        timeSlot: ""
       });
       toast({
         title: "Pakeitimas išsaugotas",
@@ -357,7 +355,7 @@ export default function Admin() {
   });
 
   const handleCreateReservation = () => {
-    if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || !reservationForm.startTime || !reservationForm.endTime) {
+    if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || !reservationForm.timeSlot) {
       toast({
         title: "Klaida",
         description: "Užpildykite visus laukus",
@@ -366,12 +364,23 @@ export default function Admin() {
       return;
     }
 
+    const [startTime, endTime] = reservationForm.timeSlot.split('-');
+    const selectedCourt = courts.find(court => court.id.toString() === reservationForm.courtId);
+    const hourlyRate = parseFloat(selectedCourt?.hourlyRate || "0");
+    
+    // Calculate duration in hours
+    const start = new Date(`2000-01-01T${startTime}:00`);
+    const end = new Date(`2000-01-01T${endTime}:00`);
+    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    const totalPrice = (hourlyRate * durationHours).toFixed(2);
+
     createReservationMutation.mutate({
       userId: reservationForm.userId,
       courtId: parseInt(reservationForm.courtId),
       date: reservationForm.date,
-      startTime: reservationForm.startTime,
-      endTime: reservationForm.endTime,
+      startTime: startTime,
+      endTime: endTime,
+      totalPrice: totalPrice,
       status: "confirmed"
     });
   };
@@ -1051,60 +1060,37 @@ export default function Admin() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="start-time">Pradžios laikas</Label>
-                  <Select
-                    value={reservationForm.startTime}
-                    onValueChange={(value) => setReservationForm(prev => ({ ...prev, startTime: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pradžia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 14 }, (_, i) => {
-                        const hour = 8 + i;
-                        const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-                        const isReserved = availability.some((slot: any) => 
-                          slot.startTime <= timeStr && slot.endTime > timeStr && slot.status === 'confirmed'
-                        );
-                        return (
-                          <SelectItem key={timeStr} value={timeStr} disabled={isReserved}>
-                            {timeStr} {isReserved ? '(Užimta)' : ''}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="end-time">Pabaigos laikas</Label>
-                  <Select
-                    value={reservationForm.endTime}
-                    onValueChange={(value) => setReservationForm(prev => ({ ...prev, endTime: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pabaiga" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 14 }, (_, i) => {
-                        const hour = 9 + i;
-                        const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-                        const wouldConflict = availability.some((slot: any) => {
-                          if (slot.status !== 'confirmed' || !reservationForm.startTime) return false;
-                          // Check if the proposed reservation (startTime to timeStr) would overlap with existing slot
-                          return !(timeStr <= slot.startTime || reservationForm.startTime >= slot.endTime);
-                        });
-                        return (
-                          <SelectItem key={timeStr} value={timeStr} disabled={wouldConflict}>
-                            {timeStr} {wouldConflict ? '(Konfliktui)' : ''}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="time-slot">Laiko intervalas</Label>
+                <Select
+                  value={reservationForm.timeSlot}
+                  onValueChange={(value) => setReservationForm(prev => ({ ...prev, timeSlot: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite laiko intervalą" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 13 }, (_, i) => {
+                      const startHour = 8 + i;
+                      const endHour = startHour + 1;
+                      const startTime = `${startHour.toString().padStart(2, '0')}:00`;
+                      const endTime = `${endHour.toString().padStart(2, '0')}:00`;
+                      const timeSlot = `${startTime}-${endTime}`;
+                      
+                      // Check if this hour slot conflicts with existing reservations
+                      const isConflict = availability.some((slot: any) => {
+                        if (slot.status !== 'confirmed') return false;
+                        return !(endTime <= slot.startTime || startTime >= slot.endTime);
+                      });
+                      
+                      return (
+                        <SelectItem key={timeSlot} value={timeSlot} disabled={isConflict}>
+                          {timeSlot} {isConflict ? '(Užimta)' : ''}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex gap-3 justify-end pt-4">
