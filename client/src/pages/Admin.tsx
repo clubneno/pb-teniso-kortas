@@ -151,7 +151,6 @@ export default function Admin() {
           </div>
         </div>
       </nav>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Admin Header */}
         <Card className="mb-8">
@@ -161,7 +160,7 @@ export default function Admin() {
                 <Volleyball className="text-tennis-green-600" size={24} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">PB teniso kortas - Administratoriaus Skydas</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Administratoriaus panelė</h1>
                 <p className="text-gray-600">Valdykite rezervacijas ir naudotojus</p>
               </div>
             </div>
