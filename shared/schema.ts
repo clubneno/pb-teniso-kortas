@@ -56,7 +56,7 @@ export const reservations = pgTable("reservations", {
   startTime: varchar("start_time").notNull(), // HH:mm format
   endTime: varchar("end_time").notNull(), // HH:mm format
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
-  status: varchar("status").notNull().default("confirmed"), // confirmed, cancelled, pending
+  status: varchar("status").notNull().default("confirmed"), // confirmed, cancelled
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

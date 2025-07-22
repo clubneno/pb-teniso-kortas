@@ -60,11 +60,12 @@ Preferred communication style: Simple, everyday language.
 - Updated admin branding to match landing page with "PB teniso kortas" name and volleyball icon (2025-07-22)
 - Removed unnecessary "Recent Activity" and "Today's Reservations" sections from admin interface (2025-07-22)
 - Added visual distinction for past vs upcoming reservations with darker background for completed reservations (2025-07-22)
+- Removed pending status from reservation system - all reservations are now automatically confirmed without admin approval required (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking
 - Time slot conflict prevention
-- Status tracking (pending, confirmed, cancelled)
+- Status tracking (confirmed, cancelled)
 - Price calculation based on court hourly rates
 - Email confirmation system
 

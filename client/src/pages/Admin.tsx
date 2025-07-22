@@ -299,7 +299,6 @@ export default function Admin() {
                       <SelectContent>
                         <SelectItem value="all">Visos</SelectItem>
                         <SelectItem value="confirmed">Patvirtinta</SelectItem>
-                        <SelectItem value="pending">Laukiama</SelectItem>
                         <SelectItem value="cancelled">Atšaukta</SelectItem>
                       </SelectContent>
                     </Select>
@@ -364,12 +363,10 @@ export default function Admin() {
                             <TableCell>
                               <Badge 
                                 variant={
-                                  reservation.status === 'confirmed' ? 'default' :
-                                  reservation.status === 'pending' ? 'secondary' : 'destructive'
+                                  reservation.status === 'confirmed' ? 'default' : 'destructive'
                                 }
                               >
-                                {reservation.status === 'confirmed' ? 'Patvirtinta' :
-                                 reservation.status === 'pending' ? 'Laukiama' : 'Atšaukta'}
+                                {reservation.status === 'confirmed' ? 'Patvirtinta' : 'Atšaukta'}
                               </Badge>
                             </TableCell>
                             <TableCell>{reservation.totalPrice}€</TableCell>

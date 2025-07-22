@@ -97,8 +97,7 @@ export default function ReservationCard({ reservation, showActions = false, isPa
     switch (status) {
       case 'confirmed':
         return <Badge className="bg-green-100 text-green-800">Patvirtinta</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">Laukiama</Badge>;
+
       case 'cancelled':
         return <Badge variant="destructive">Atšaukta</Badge>;
       default:
