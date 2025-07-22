@@ -377,6 +377,7 @@ export default function Admin() {
                         value={chartDateFrom}
                         onChange={(e) => setChartDateFrom(e.target.value)}
                         className="w-40"
+                        lang="lt"
                       />
                     </div>
                     <div>
@@ -387,6 +388,7 @@ export default function Admin() {
                         value={chartDateTo}
                         onChange={(e) => setChartDateTo(e.target.value)}
                         className="w-40"
+                        lang="lt"
                       />
                     </div>
                     <div className="flex items-end">
@@ -498,6 +500,7 @@ export default function Admin() {
                       type="date" 
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
+                      lang="lt"
                     />
                   </div>
                   <div>
@@ -506,6 +509,7 @@ export default function Admin() {
                       type="date" 
                       value={dateTo}
                       onChange={(e) => setDateTo(e.target.value)}
+                      lang="lt"
                     />
                   </div>
                   <div>
