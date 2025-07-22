@@ -118,6 +118,18 @@ export default function Admin() {
     (adminReservations.filter(r => r.status === 'confirmed').length / (adminReservations.length || 1)) * 100
   );
 
+  // Helper function to check if reservation is in the past
+  const isReservationPast = (date: string, endTime: string): boolean => {
+    const reservationDateTime = new Date(`${date}T${endTime}:00`);
+    const now = new Date();
+    
+    // Convert to Europe/Vilnius timezone for accurate comparison
+    const vilniusOffset = 2 * 60; // UTC+2 (or UTC+3 in summer, but simplified)
+    const localTime = new Date(now.getTime() + (vilniusOffset * 60 * 1000));
+    
+    return reservationDateTime < localTime;
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -323,8 +335,13 @@ export default function Admin() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        adminReservations.map((reservation) => (
-                          <TableRow key={reservation.id}>
+                        adminReservations.map((reservation) => {
+                          const isPast = isReservationPast(reservation.date, reservation.endTime);
+                          return (
+                          <TableRow 
+                            key={reservation.id}
+                            className={isPast ? "bg-gray-50 opacity-75" : ""}
+                          >
                             <TableCell>
                               <div>
                                 <div className="font-medium">
@@ -367,7 +384,8 @@ export default function Admin() {
                               </div>
                             </TableCell>
                           </TableRow>
-                        ))
+                        );
+                        })
                       )}
                     </TableBody>
                   </Table>
