@@ -22,8 +22,12 @@ import {
   UserPlus,
   Search,
   CalendarCheck,
-  Euro
+  Euro,
+  TrendingDown,
+  TrendingUp,
+  Activity
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface ReservationWithDetails {
   id: number;
@@ -114,9 +118,84 @@ export default function Admin() {
     })
     .reduce((sum, r) => sum + parseFloat(r.totalPrice), 0);
 
-  const courtUsage = Math.round(
-    (adminReservations.filter(r => r.status === 'confirmed').length / (adminReservations.length || 1)) * 100
-  );
+  // Calculate cancellation rate
+  const totalReservations = adminReservations.length;
+  const cancelledReservations = adminReservations.filter(r => r.status === 'cancelled').length;
+  const cancellationRate = totalReservations > 0 ? Math.round((cancelledReservations / totalReservations) * 100) : 0;
+
+  // Calculate actual court usage (weekly intervals)
+  const getWeekStart = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
+  };
+
+  const thisWeekStart = getWeekStart(new Date());
+  const thisWeekEnd = new Date(thisWeekStart);
+  thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+
+  const thisWeekReservations = adminReservations.filter(r => {
+    const reservationDate = new Date(r.date);
+    return reservationDate >= thisWeekStart && 
+           reservationDate <= thisWeekEnd && 
+           r.status === 'confirmed';
+  });
+
+  // Calculate total booked hours this week
+  const totalBookedHours = thisWeekReservations.reduce((sum, r) => {
+    const start = new Date(`2000-01-01T${r.startTime}:00`);
+    const end = new Date(`2000-01-01T${r.endTime}:00`);
+    const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    return sum + hours;
+  }, 0);
+
+  // Assuming courts open 8AM-10PM (14 hours) with 2 courts = 28 hours per day * 7 days = 196 hours per week
+  const availableHoursPerWeek = 14 * 2 * 7; // 196 hours
+  const courtUsage = Math.round((totalBookedHours / availableHoursPerWeek) * 100);
+
+  // Generate weekly chart data for the last 8 weeks
+  const generateWeeklyData = () => {
+    const weeks = [];
+    for (let i = 7; i >= 0; i--) {
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - (i * 7) - weekStart.getDay() + 1);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      const weekReservations = adminReservations.filter(r => {
+        const reservationDate = new Date(r.date);
+        return reservationDate >= weekStart && reservationDate <= weekEnd;
+      });
+      
+      const confirmedReservations = weekReservations.filter(r => r.status === 'confirmed');
+      const cancelledReservations = weekReservations.filter(r => r.status === 'cancelled');
+      
+      const weekBookedHours = confirmedReservations.reduce((sum, r) => {
+        const start = new Date(`2000-01-01T${r.startTime}:00`);
+        const end = new Date(`2000-01-01T${r.endTime}:00`);
+        const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        return sum + hours;
+      }, 0);
+      
+      const weekUsage = Math.round((weekBookedHours / availableHoursPerWeek) * 100);
+      const weekCancellationRate = weekReservations.length > 0 ? 
+        Math.round((cancelledReservations.length / weekReservations.length) * 100) : 0;
+      
+      const weekRevenue = confirmedReservations.reduce((sum, r) => sum + parseFloat(r.totalPrice), 0);
+      
+      weeks.push({
+        week: `${weekStart.getDate()}/${weekStart.getMonth() + 1}`,
+        usage: weekUsage,
+        cancellation: weekCancellationRate,
+        revenue: weekRevenue,
+        reservations: confirmedReservations.length
+      });
+    }
+    return weeks;
+  };
+
+  const weeklyData = generateWeeklyData();
 
   // Helper function to check if reservation is in the past
   const isReservationPast = (date: string, endTime: string): boolean => {
@@ -223,7 +302,7 @@ export default function Admin() {
             <h2 className="text-xl font-semibold">Sistemos Apžvalga</h2>
             
             {/* Stats Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-4 gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -254,13 +333,101 @@ export default function Admin() {
                     <div>
                       <p className="text-purple-600 text-sm font-medium">Kortų Užimtumas</p>
                       <p className="text-2xl font-bold text-purple-800">{courtUsage}%</p>
+                      <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
                     <Volleyball className="text-purple-600" size={32} />
                   </div>
                 </CardContent>
               </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-red-600 text-sm font-medium">Atšaukimų Dažnis</p>
+                      <p className="text-2xl font-bold text-red-800">{cancellationRate}%</p>
+                      <p className="text-xs text-gray-500">Viso laikotarpio</p>
+                    </div>
+                    <TrendingDown className="text-red-600" size={32} />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
+            {/* Charts Section */}
+            <div className="grid md:grid-cols-2 gap-6 mt-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Kortų Užimtumas ir Atšaukimai
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={weeklyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="week" />
+                      <YAxis />
+                      <Tooltip formatter={(value, name) => [
+                        `${value}%`, 
+                        name === 'usage' ? 'Kortų Užimtumas' : 'Atšaukimų Dažnis'
+                      ]} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="usage" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={2}
+                        name="usage"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="cancellation" 
+                        stroke="#ef4444" 
+                        strokeWidth={2}
+                        name="cancellation"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Savaitinės Pajamos ir Rezervacijos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={weeklyData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="week" />
+                      <YAxis yAxisId="left" />
+                      <YAxis yAxisId="right" orientation="right" />
+                      <Tooltip formatter={(value, name, props) => {
+                        if (name === 'revenue') return [`${value}€`, 'Pajamos'];
+                        if (name === 'reservations') return [`${value}`, 'Rezervacijos'];
+                        return [value, name];
+                      }} />
+                      <Bar 
+                        yAxisId="left"
+                        dataKey="revenue" 
+                        fill="#eab308" 
+                        name="revenue"
+                      />
+                      <Bar 
+                        yAxisId="right"
+                        dataKey="reservations" 
+                        fill="#22c55e" 
+                        name="reservations"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
 
           </TabsContent>
 
