@@ -193,19 +193,7 @@ export default function Admin() {
             <h2 className="text-xl font-semibold">Sistemos Apžvalga</h2>
             
             {/* Stats Cards */}
-            <div className="grid md:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-blue-600 text-sm font-medium">Šiandien Rezervacijų</p>
-                      <p className="text-2xl font-bold text-blue-800">{todayReservations}</p>
-                    </div>
-                    <CalendarCheck className="text-blue-600" size={32} />
-                  </div>
-                </CardContent>
-              </Card>
-              
+            <div className="grid md:grid-cols-3 gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
