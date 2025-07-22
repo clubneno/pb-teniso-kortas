@@ -243,32 +243,7 @@ export default function Admin() {
               </Card>
             </div>
 
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Naujausia Veikla</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {adminReservations.slice(0, 5).map((reservation) => (
-                    <div key={reservation.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <strong>{reservation.user.firstName} {reservation.user.lastName}</strong> sukūrė naują rezervaciją
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {reservation.date} {reservation.startTime}-{reservation.endTime}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-400">
-                        {new Date(reservation.createdAt).toLocaleTimeString('lt-LT')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
           </TabsContent>
 
           {/* Reservations Tab */}
