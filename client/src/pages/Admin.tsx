@@ -27,10 +27,13 @@ import {
   Euro,
   TrendingDown,
   TrendingUp,
-  Activity
+  Activity,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import DatePicker from "@/components/DatePicker";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 interface ReservationWithDetails {
   id: number;
@@ -77,6 +80,19 @@ export default function Admin() {
   const [dateTo, setDateTo] = useState("");
   const [chartDateFrom, setChartDateFrom] = useState("");
   const [chartDateTo, setChartDateTo] = useState("");
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    isDestructive: boolean;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    isDestructive: false
+  });
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -254,16 +270,35 @@ export default function Admin() {
   const handleToggleStatus = (reservation: ReservationWithDetails) => {
     const newStatus = reservation.status === 'confirmed' ? 'cancelled' : 'confirmed';
     const statusText = newStatus === 'confirmed' ? 'patvirtinti' : 'atšaukti';
+    const userName = `${reservation.user.firstName} ${reservation.user.lastName}`;
+    const dateTime = `${new Date(reservation.date).toLocaleDateString('lt-LT')} ${reservation.startTime}-${reservation.endTime}`;
     
-    if (confirm(`Ar tikrai norite ${statusText} šią rezervaciją?`)) {
-      updateReservationMutation.mutate({ id: reservation.id, status: newStatus });
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: `${statusText.charAt(0).toUpperCase() + statusText.slice(1)} rezervaciją`,
+      message: `Ar tikrai norite ${statusText} rezervaciją vartotojo ${userName} (${dateTime})?`,
+      onConfirm: () => {
+        updateReservationMutation.mutate({ id: reservation.id, status: newStatus });
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      },
+      isDestructive: newStatus === 'cancelled'
+    });
   };
 
   const handleDeleteReservation = (reservation: ReservationWithDetails) => {
-    if (confirm(`Ar tikrai norite ištrinti rezervaciją ${reservation.user.firstName} ${reservation.user.lastName} (${new Date(reservation.date).toLocaleDateString('lt-LT')} ${reservation.startTime})?`)) {
-      deleteReservationMutation.mutate(reservation.id);
-    }
+    const userName = `${reservation.user.firstName} ${reservation.user.lastName}`;
+    const dateTime = `${new Date(reservation.date).toLocaleDateString('lt-LT')} ${reservation.startTime}-${reservation.endTime}`;
+    
+    setConfirmModal({
+      isOpen: true,
+      title: "Ištrinti rezervaciją",
+      message: `Ar tikrai norite visiškai ištrinti rezervaciją vartotojo ${userName} (${dateTime})? Šis veiksmas negrįžtamas.`,
+      onConfirm: () => {
+        deleteReservationMutation.mutate(reservation.id);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      },
+      isDestructive: true
+    });
   };
 
   // Helper function to check if reservation is in the past
@@ -654,12 +689,19 @@ export default function Admin() {
                               <div className="flex gap-2">
                                 <Button 
                                   size="sm" 
-                                  variant="outline"
+                                  variant={reservation.status === 'confirmed' ? "default" : "outline"}
                                   onClick={() => handleToggleStatus(reservation)}
                                   disabled={updateReservationMutation.isPending}
                                   title={reservation.status === 'confirmed' ? 'Atšaukti rezervaciją' : 'Patvirtinti rezervaciją'}
+                                  className={`${reservation.status === 'confirmed' 
+                                    ? 'bg-tennis-green-500 hover:bg-tennis-green-600 text-white' 
+                                    : 'hover:bg-gray-50'}`}
                                 >
-                                  <Edit size={14} />
+                                  {reservation.status === 'confirmed' ? (
+                                    <ToggleRight size={14} />
+                                  ) : (
+                                    <ToggleLeft size={14} />
+                                  )}
                                 </Button>
                                 <Button 
                                   size="sm" 
@@ -841,6 +883,17 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        isDestructive={confirmModal.isDestructive}
+        isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending}
+      />
     </div>
   );
 }
