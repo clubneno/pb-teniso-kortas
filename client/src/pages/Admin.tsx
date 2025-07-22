@@ -366,8 +366,8 @@ export default function Admin() {
             {/* Chart Filters */}
             <Card className="mt-8">
               <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <h3 className="font-medium">Grafikų Filtrai:</h3>
+                <div className="flex items-end gap-4">
+                  <h3 className="font-medium pb-2">Grafikų Filtrai:</h3>
                   <div className="flex gap-4">
                     <div>
                       <Label htmlFor="chart-date-from">Data nuo</Label>
