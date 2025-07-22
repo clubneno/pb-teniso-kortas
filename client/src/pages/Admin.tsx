@@ -72,6 +72,8 @@ export default function Admin() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [chartDateFrom, setChartDateFrom] = useState("");
+  const [chartDateTo, setChartDateTo] = useState("");
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/admin/reservations", statusFilter, dateFrom, dateTo],
@@ -101,29 +103,7 @@ export default function Admin() {
     retry: false,
   });
 
-  // Calculate stats
-  const todayReservations = adminReservations.filter(r => 
-    r.date === new Date().toISOString().split('T')[0] && r.status === 'confirmed'
-  ).length;
-
-  const totalUsers = adminUsers.length;
-
-  const monthlyRevenue = adminReservations
-    .filter(r => {
-      const reservationDate = new Date(r.date);
-      const now = new Date();
-      return reservationDate.getMonth() === now.getMonth() && 
-             reservationDate.getFullYear() === now.getFullYear() &&
-             r.status === 'confirmed';
-    })
-    .reduce((sum, r) => sum + parseFloat(r.totalPrice), 0);
-
-  // Calculate cancellation rate
-  const totalReservations = adminReservations.length;
-  const cancelledReservations = adminReservations.filter(r => r.status === 'cancelled').length;
-  const cancellationRate = totalReservations > 0 ? Math.round((cancelledReservations / totalReservations) * 100) : 0;
-
-  // Calculate actual court usage (weekly intervals)
+  // Helper functions for weekly calculations
   const getWeekStart = (date: Date) => {
     const d = new Date(date);
     const day = d.getDay();
@@ -135,15 +115,28 @@ export default function Admin() {
   const thisWeekEnd = new Date(thisWeekStart);
   thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
 
+  // All weekly stats
   const thisWeekReservations = adminReservations.filter(r => {
     const reservationDate = new Date(r.date);
-    return reservationDate >= thisWeekStart && 
-           reservationDate <= thisWeekEnd && 
-           r.status === 'confirmed';
+    return reservationDate >= thisWeekStart && reservationDate <= thisWeekEnd;
   });
 
-  // Calculate total booked hours this week
-  const totalBookedHours = thisWeekReservations.reduce((sum, r) => {
+  const thisWeekUsers = adminUsers.filter(u => {
+    const createdDate = new Date(u.createdAt);
+    return createdDate >= thisWeekStart && createdDate <= thisWeekEnd;
+  });
+
+  const thisWeekRevenue = thisWeekReservations
+    .filter(r => r.status === 'confirmed')
+    .reduce((sum, r) => sum + parseFloat(r.totalPrice), 0);
+
+  const thisWeekCancellations = thisWeekReservations.filter(r => r.status === 'cancelled').length;
+  const thisWeekCancellationRate = thisWeekReservations.length > 0 ? 
+    Math.round((thisWeekCancellations / thisWeekReservations.length) * 100) : 0;
+
+  // Calculate court usage for this week
+  const thisWeekConfirmedReservations = thisWeekReservations.filter(r => r.status === 'confirmed');
+  const totalBookedHours = thisWeekConfirmedReservations.reduce((sum, r) => {
     const start = new Date(`2000-01-01T${r.startTime}:00`);
     const end = new Date(`2000-01-01T${r.endTime}:00`);
     const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
@@ -152,20 +145,28 @@ export default function Admin() {
 
   // Assuming courts open 8AM-10PM (14 hours) with 2 courts = 28 hours per day * 7 days = 196 hours per week
   const availableHoursPerWeek = 14 * 2 * 7; // 196 hours
-  const courtUsage = Math.round((totalBookedHours / availableHoursPerWeek) * 100);
+  const thisWeekCourtUsage = Math.round((totalBookedHours / availableHoursPerWeek) * 100);
 
-  // Generate weekly chart data for the last 8 weeks
-  const generateWeeklyData = () => {
+  // Generate chart data based on date filters or default range
+  const generateChartData = () => {
+    const startDate = chartDateFrom ? new Date(chartDateFrom) : (() => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - 2); // Default to 2 months ago
+      return date;
+    })();
+    
+    const endDate = chartDateTo ? new Date(chartDateTo) : new Date();
+    
     const weeks = [];
-    for (let i = 7; i >= 0; i--) {
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - (i * 7) - weekStart.getDay() + 1);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6);
+    let currentWeek = getWeekStart(startDate);
+    
+    while (currentWeek <= endDate) {
+      const weekEnd = new Date(currentWeek);
+      weekEnd.setDate(currentWeek.getDate() + 6);
       
       const weekReservations = adminReservations.filter(r => {
         const reservationDate = new Date(r.date);
-        return reservationDate >= weekStart && reservationDate <= weekEnd;
+        return reservationDate >= currentWeek && reservationDate <= weekEnd;
       });
       
       const confirmedReservations = weekReservations.filter(r => r.status === 'confirmed');
@@ -185,17 +186,23 @@ export default function Admin() {
       const weekRevenue = confirmedReservations.reduce((sum, r) => sum + parseFloat(r.totalPrice), 0);
       
       weeks.push({
-        week: `${weekStart.getDate()}/${weekStart.getMonth() + 1}`,
+        week: `${currentWeek.getDate()}/${currentWeek.getMonth() + 1}`,
         usage: weekUsage,
         cancellation: weekCancellationRate,
         revenue: weekRevenue,
-        reservations: confirmedReservations.length
+        reservations: confirmedReservations.length,
+        newUsers: adminUsers.filter(u => {
+          const createdDate = new Date(u.createdAt);
+          return createdDate >= currentWeek && createdDate <= weekEnd;
+        }).length
       });
+      
+      currentWeek.setDate(currentWeek.getDate() + 7);
     }
     return weeks;
   };
 
-  const weeklyData = generateWeeklyData();
+  const chartData = generateChartData();
 
   // Helper function to check if reservation is in the past
   const isReservationPast = (date: string, endTime: string): boolean => {
@@ -307,8 +314,9 @@ export default function Admin() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-green-600 text-sm font-medium">Registruoti Naudotojai</p>
-                      <p className="text-2xl font-bold text-green-800">{totalUsers}</p>
+                      <p className="text-green-600 text-sm font-medium">Nauji Naudotojai</p>
+                      <p className="text-2xl font-bold text-green-800">{thisWeekUsers.length}</p>
+                      <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
                     <Users className="text-green-600" size={32} />
                   </div>
@@ -319,8 +327,9 @@ export default function Admin() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-yellow-600 text-sm font-medium">Šio Mėnesio Pajamos</p>
-                      <p className="text-2xl font-bold text-yellow-800">{monthlyRevenue.toFixed(0)}€</p>
+                      <p className="text-yellow-600 text-sm font-medium">Savaitės Pajamos</p>
+                      <p className="text-2xl font-bold text-yellow-800">{thisWeekRevenue.toFixed(0)}€</p>
+                      <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
                     <Euro className="text-yellow-600" size={32} />
                   </div>
@@ -332,7 +341,7 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-purple-600 text-sm font-medium">Kortų Užimtumas</p>
-                      <p className="text-2xl font-bold text-purple-800">{courtUsage}%</p>
+                      <p className="text-2xl font-bold text-purple-800">{thisWeekCourtUsage}%</p>
                       <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
                     <Volleyball className="text-purple-600" size={32} />
@@ -345,8 +354,8 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-red-600 text-sm font-medium">Atšaukimų Dažnis</p>
-                      <p className="text-2xl font-bold text-red-800">{cancellationRate}%</p>
-                      <p className="text-xs text-gray-500">Viso laikotarpio</p>
+                      <p className="text-2xl font-bold text-red-800">{thisWeekCancellationRate}%</p>
+                      <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
                     <TrendingDown className="text-red-600" size={32} />
                   </div>
@@ -354,8 +363,50 @@ export default function Admin() {
               </Card>
             </div>
 
+            {/* Chart Filters */}
+            <Card className="mt-8">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <h3 className="font-medium">Grafikų Filtrai:</h3>
+                  <div className="flex gap-4">
+                    <div>
+                      <Label htmlFor="chart-date-from">Data nuo</Label>
+                      <Input 
+                        id="chart-date-from"
+                        type="date" 
+                        value={chartDateFrom}
+                        onChange={(e) => setChartDateFrom(e.target.value)}
+                        className="w-40"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="chart-date-to">Data iki</Label>
+                      <Input 
+                        id="chart-date-to"
+                        type="date" 
+                        value={chartDateTo}
+                        onChange={(e) => setChartDateTo(e.target.value)}
+                        className="w-40"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setChartDateFrom("");
+                          setChartDateTo("");
+                        }}
+                      >
+                        Išvalyti
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Charts Section */}
-            <div className="grid md:grid-cols-2 gap-6 mt-8">
+            <div className="grid md:grid-cols-2 gap-6 mt-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -365,7 +416,7 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={weeklyData}>
+                    <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="week" />
                       <YAxis />
@@ -401,7 +452,7 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={weeklyData}>
+                    <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="week" />
                       <YAxis yAxisId="left" />
