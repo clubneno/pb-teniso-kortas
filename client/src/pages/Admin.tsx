@@ -1072,6 +1072,8 @@ export default function Admin() {
                   <SelectContent>
                     {(() => {
                       const availableSlots = [];
+
+                      
                       for (let i = 0; i < 13; i++) {
                         const startHour = 8 + i;
                         const endHour = startHour + 1;
@@ -1081,9 +1083,11 @@ export default function Admin() {
                         
                         // Check if this hour slot conflicts with existing reservations
                         const isConflict = availability.some((slot: any) => {
-                          if (slot.status !== 'confirmed') return false;
+                          // Check if time slots overlap
                           return !(endTime <= slot.startTime || startTime >= slot.endTime);
                         });
+                        
+
                         
                         // Only add available slots to the array
                         if (!isConflict) {
