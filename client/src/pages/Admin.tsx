@@ -996,11 +996,22 @@ export default function Admin() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label>Kortų skaičius</Label>
-                      <Input type="number" defaultValue="2" />
+                      <Input 
+                        type="number" 
+                        value={courts.length} 
+                        readOnly
+                        className="bg-gray-50" 
+                      />
                     </div>
                     <div>
                       <Label>Valandos kaina (€)</Label>
-                      <Input type="number" defaultValue="25" />
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        value={courts.length > 0 ? courts[0].hourlyRate : 0} 
+                        readOnly
+                        className="bg-gray-50"
+                      />
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -1016,15 +1027,15 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Save Button */}
-              <div className="flex gap-4">
-                <Button className="bg-tennis-green-500 hover:bg-tennis-green-600">
-                  <Settings size={16} className="mr-2" />
-                  Išsaugoti Nustatymus
-                </Button>
-                <Button variant="outline">
-                  Atkurti Nustatymus
-                </Button>
+              {/* Info Note */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <div className="text-blue-600 mr-2">ℹ️</div>
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Kortų valdymas</p>
+                    <p>Kortų skaičius ir kainos rodoma pagal duomenų bazės informaciją. Norint keisti šiuos nustatymus, naudokite kortų valdymo skiltį.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>
