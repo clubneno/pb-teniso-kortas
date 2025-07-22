@@ -157,10 +157,9 @@ export default function ProfileEdit({ user }: ProfileEditProps) {
           </form>
         </CardContent>
       </Card>
-
       <Card className="border-red-200">
         <CardHeader>
-          <CardTitle className="text-red-600">Pavojinga Zona</CardTitle>
+          <CardTitle className="text-red-600">Paskyros ištrynimas</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-gray-600 mb-4">
