@@ -132,6 +132,22 @@ export default function Admin() {
     retry: false,
   });
 
+  // Fetch courts
+  const { data: courts = [], isLoading: courtsLoading } = useQuery<any[]>({
+    queryKey: ["/api/courts"],
+  });
+
+  // Fetch availability for selected date and court
+  const { data: availability = [], isLoading: availabilityLoading } = useQuery<any[]>({
+    queryKey: [`/api/courts/${reservationForm.courtId}/availability`, reservationForm.date],
+    queryFn: async () => {
+      if (!reservationForm.courtId || !reservationForm.date) return [];
+      const response = await fetch(`/api/courts/${reservationForm.courtId}/availability?date=${reservationForm.date}`);
+      return response.json();
+    },
+    enabled: !!reservationForm.date && !!reservationForm.courtId,
+  });
+
   // Helper functions for weekly calculations
   const getWeekStart = (date: Date) => {
     const d = new Date(date);
@@ -1008,8 +1024,11 @@ export default function Admin() {
                     <SelectValue placeholder="Pasirinkite kortą" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Kortas 1</SelectItem>
-                    <SelectItem value="2">Kortas 2</SelectItem>
+                    {courts.map((court: any) => (
+                      <SelectItem key={court.id} value={court.id.toString()}>
+                        {court.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -1026,6 +1045,12 @@ export default function Admin() {
                 />
               </div>
 
+              {availabilityLoading && reservationForm.date && reservationForm.courtId && (
+                <div className="text-center text-sm text-gray-500 py-2">
+                  Tikrinama prieinamumas...
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="start-time">Pradžios laikas</Label>
@@ -1040,9 +1065,12 @@ export default function Admin() {
                       {Array.from({ length: 14 }, (_, i) => {
                         const hour = 8 + i;
                         const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+                        const isReserved = availability.some((slot: any) => 
+                          slot.startTime <= timeStr && slot.endTime > timeStr && slot.status === 'confirmed'
+                        );
                         return (
-                          <SelectItem key={timeStr} value={timeStr}>
-                            {timeStr}
+                          <SelectItem key={timeStr} value={timeStr} disabled={isReserved}>
+                            {timeStr} {isReserved ? '(Užimta)' : ''}
                           </SelectItem>
                         );
                       })}
@@ -1063,9 +1091,14 @@ export default function Admin() {
                       {Array.from({ length: 14 }, (_, i) => {
                         const hour = 9 + i;
                         const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+                        const wouldConflict = availability.some((slot: any) => {
+                          if (slot.status !== 'confirmed' || !reservationForm.startTime) return false;
+                          // Check if the proposed reservation (startTime to timeStr) would overlap with existing slot
+                          return !(timeStr <= slot.startTime || reservationForm.startTime >= slot.endTime);
+                        });
                         return (
-                          <SelectItem key={timeStr} value={timeStr}>
-                            {timeStr}
+                          <SelectItem key={timeStr} value={timeStr} disabled={wouldConflict}>
+                            {timeStr} {wouldConflict ? '(Konfliktui)' : ''}
                           </SelectItem>
                         );
                       })}
