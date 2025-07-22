@@ -56,6 +56,9 @@ Preferred communication style: Simple, everyday language.
 - Added visual indicators for partial availability when some courts are reserved (2025-07-21)
 - Fixed timezone issues with Europe/Vilnius implementation (2025-07-21)
 - Reset test account passwords - Admin: admin@example.com/admin123, User: user@example.com/user123 (2025-07-21)
+- Fixed admin reservations page to properly display all database reservations with working filters (2025-07-22)
+- Updated admin branding to match landing page with "PB teniso kortas" name and volleyball icon (2025-07-22)
+- Removed unnecessary "Recent Activity" and "Today's Reservations" sections from admin interface (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking

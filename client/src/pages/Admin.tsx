@@ -71,6 +71,24 @@ export default function Admin() {
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/admin/reservations", statusFilter, dateFrom, dateTo],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (dateFrom) params.append('startDate', dateFrom);
+      if (dateTo) params.append('endDate', dateTo);
+      
+      const response = await fetch(`/api/admin/reservations?${params.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch reservations');
+      }
+      
+      return response.json();
+    },
     retry: false,
   });
 
@@ -298,51 +316,59 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {adminReservations.map((reservation) => (
-                        <TableRow key={reservation.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">
-                                {reservation.user.firstName} {reservation.user.lastName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {reservation.user.email}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div>{new Date(reservation.date).toLocaleDateString('lt-LT')}</div>
-                              <div className="text-sm text-gray-500">
-                                {reservation.startTime}-{reservation.endTime}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{reservation.court.name}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                reservation.status === 'confirmed' ? 'default' :
-                                reservation.status === 'pending' ? 'secondary' : 'destructive'
-                              }
-                            >
-                              {reservation.status === 'confirmed' ? 'Patvirtinta' :
-                               reservation.status === 'pending' ? 'Laukiama' : 'Atšaukta'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{reservation.totalPrice}€</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
-                                <Edit size={14} />
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <Trash2 size={14} />
-                              </Button>
-                            </div>
+                      {adminReservations.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                            Nerasta rezervacijų pagal pasirinktus filtrus
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        adminReservations.map((reservation) => (
+                          <TableRow key={reservation.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">
+                                  {reservation.user.firstName} {reservation.user.lastName}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {reservation.user.email}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div>{new Date(reservation.date).toLocaleDateString('lt-LT')}</div>
+                                <div className="text-sm text-gray-500">
+                                  {reservation.startTime}-{reservation.endTime}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{reservation.court.name}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={
+                                  reservation.status === 'confirmed' ? 'default' :
+                                  reservation.status === 'pending' ? 'secondary' : 'destructive'
+                                }
+                              >
+                                {reservation.status === 'confirmed' ? 'Patvirtinta' :
+                                 reservation.status === 'pending' ? 'Laukiama' : 'Atšaukta'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{reservation.totalPrice}€</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Edit size={14} />
+                                </Button>
+                                <Button size="sm" variant="outline">
+                                  <Trash2 size={14} />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 )}
