@@ -344,6 +344,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/admin/reservations', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      console.log("Admin creating reservation:", req.body);
+      
+      const validatedData = insertReservationSchema.parse(req.body);
+
+      // Check for conflicts
+      const hasConflict = await storage.checkReservationConflict(
+        validatedData.courtId,
+        validatedData.date,
+        validatedData.startTime,
+        validatedData.endTime
+      );
+
+      if (hasConflict) {
+        return res.status(409).json({ message: "Time slot is already reserved" });
+      }
+
+      const reservation = await storage.createReservation(validatedData);
+      const reservationWithDetails = await storage.getReservation(reservation.id);
+      
+      // Send confirmation email
+      const targetUser = await storage.getUser(validatedData.userId);
+      if (targetUser) {
+        try {
+          await emailService.sendReservationConfirmation(targetUser, reservationWithDetails!);
+        } catch (emailError) {
+          console.error("Failed to send confirmation email:", emailError);
+        }
+      }
+      
+      res.status(201).json(reservationWithDetails);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Admin reservation validation errors:", error.errors);
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error creating admin reservation:", error);
+      res.status(500).json({ message: "Failed to create reservation" });
+    }
+  });
+
   app.post('/api/admin/courts', isAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.id);

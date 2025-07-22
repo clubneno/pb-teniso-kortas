@@ -64,6 +64,7 @@ Preferred communication style: Simple, everyday language.
 - Fixed HTML language attribute to "lt" for proper Lithuanian calendar display in date inputs (2025-07-22)
 - Implemented custom Lithuanian DatePicker component to replace native browser date inputs for guaranteed Lithuanian display (2025-07-22)
 - Added functional admin reservation management buttons: status toggle (confirmed/cancelled) and permanent deletion with confirmations (2025-07-22)
+- Implemented admin reservation creation functionality allowing administrators to make reservations on behalf of users with full validation and email notifications (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking

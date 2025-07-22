@@ -29,7 +29,8 @@ import {
   TrendingUp,
   Activity,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Plus
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import DatePicker from "@/components/DatePicker";
@@ -92,6 +93,14 @@ export default function Admin() {
     message: "",
     onConfirm: () => {},
     isDestructive: false
+  });
+  const [createReservationModal, setCreateReservationModal] = useState(false);
+  const [reservationForm, setReservationForm] = useState({
+    userId: "",
+    courtId: "",
+    date: "",
+    startTime: "",
+    endTime: ""
   });
   const { toast } = useToast();
 
@@ -298,6 +307,56 @@ export default function Admin() {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
       },
       isDestructive: true
+    });
+  };
+
+  // Mutation to create reservation for user
+  const createReservationMutation = useMutation({
+    mutationFn: async (reservationData: any) => {
+      const response = await apiRequest("POST", `/api/admin/reservations`, reservationData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations"] });
+      setCreateReservationModal(false);
+      setReservationForm({
+        userId: "",
+        courtId: "",
+        date: "",
+        startTime: "",
+        endTime: ""
+      });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Rezervacija sėkmingai sukurta"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Klaida",
+        description: "Nepavyko sukurti rezervacijos",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleCreateReservation = () => {
+    if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || !reservationForm.startTime || !reservationForm.endTime) {
+      toast({
+        title: "Klaida",
+        description: "Užpildykite visus laukus",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    createReservationMutation.mutate({
+      userId: reservationForm.userId,
+      courtId: parseInt(reservationForm.courtId),
+      date: reservationForm.date,
+      startTime: reservationForm.startTime,
+      endTime: reservationForm.endTime,
+      status: "confirmed"
     });
   };
 
@@ -583,6 +642,13 @@ export default function Admin() {
           <TabsContent value="reservations" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Rezervacijų Valdymas</h2>
+              <Button 
+                onClick={() => setCreateReservationModal(true)}
+                className="bg-tennis-green-500 hover:bg-tennis-green-600"
+              >
+                <Plus size={16} className="mr-2" />
+                Sukurti Rezervaciją
+              </Button>
             </div>
             
             {/* Filter Controls */}
@@ -894,6 +960,140 @@ export default function Admin() {
         isDestructive={confirmModal.isDestructive}
         isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending}
       />
+
+      {/* Create Reservation Modal */}
+      {createReservationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md mx-auto shadow-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Sukurti Rezervaciją</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCreateReservationModal(false)}
+                  className="h-6 w-6 hover:bg-gray-100"
+                >
+                  <Plus className="h-4 w-4 rotate-45" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="user-select">Naudotojas</Label>
+                <Select
+                  value={reservationForm.userId}
+                  onValueChange={(value) => setReservationForm(prev => ({ ...prev, userId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite naudotoją" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {adminUsers?.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="court-select">Kortas</Label>
+                <Select
+                  value={reservationForm.courtId}
+                  onValueChange={(value) => setReservationForm(prev => ({ ...prev, courtId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite kortą" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Kortas 1</SelectItem>
+                    <SelectItem value="2">Kortas 2</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="date-input">Data</Label>
+                <DatePicker
+                  value={reservationForm.date}
+                  onChange={(date: string) => setReservationForm(prev => ({ 
+                    ...prev, 
+                    date: date
+                  }))}
+                  placeholder="Pasirinkite datą"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="start-time">Pradžios laikas</Label>
+                  <Select
+                    value={reservationForm.startTime}
+                    onValueChange={(value) => setReservationForm(prev => ({ ...prev, startTime: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pradžia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 14 }, (_, i) => {
+                        const hour = 8 + i;
+                        const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+                        return (
+                          <SelectItem key={timeStr} value={timeStr}>
+                            {timeStr}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="end-time">Pabaigos laikas</Label>
+                  <Select
+                    value={reservationForm.endTime}
+                    onValueChange={(value) => setReservationForm(prev => ({ ...prev, endTime: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pabaiga" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 14 }, (_, i) => {
+                        const hour = 9 + i;
+                        const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+                        return (
+                          <SelectItem key={timeStr} value={timeStr}>
+                            {timeStr}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setCreateReservationModal(false)}
+                  disabled={createReservationMutation.isPending}
+                >
+                  Atšaukti
+                </Button>
+                <Button
+                  onClick={handleCreateReservation}
+                  disabled={createReservationMutation.isPending}
+                  className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                >
+                  {createReservationMutation.isPending ? "Kuriama..." : "Sukurti Rezervaciją"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
