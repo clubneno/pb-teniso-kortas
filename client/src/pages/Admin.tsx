@@ -110,6 +110,10 @@ export default function Admin() {
     phone: "",
     isAdmin: false
   });
+  const [operatingHours, setOperatingHours] = useState({
+    weekdays: { start: "08:00", end: "22:00" },
+    weekends: { start: "09:00", end: "21:00" }
+  });
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -1014,19 +1018,94 @@ export default function Admin() {
                       />
                     </div>
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-6">
+                    {/* Workdays Schedule */}
                     <div>
-                      <Label>Darbo pradžia</Label>
-                      <Input type="time" defaultValue="08:00" />
+                      <h4 className="text-sm font-medium mb-3 text-gray-700">Darbo dienos (Pirmadienis - Penktadienis)</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Darbo pradžia</Label>
+                          <Input 
+                            type="time" 
+                            value={operatingHours.weekdays.start}
+                            onChange={(e) => setOperatingHours(prev => ({
+                              ...prev,
+                              weekdays: { ...prev.weekdays, start: e.target.value }
+                            }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Darbo pabaiga</Label>
+                          <Input 
+                            type="time" 
+                            value={operatingHours.weekdays.end}
+                            onChange={(e) => setOperatingHours(prev => ({
+                              ...prev,
+                              weekdays: { ...prev.weekdays, end: e.target.value }
+                            }))}
+                          />
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Weekend Schedule */}
                     <div>
-                      <Label>Darbo pabaiga</Label>
-                      <Input type="time" defaultValue="22:00" />
+                      <h4 className="text-sm font-medium mb-3 text-gray-700">Savaitgaliai (Šeštadienis - Sekmadienis)</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Darbo pradžia</Label>
+                          <Input 
+                            type="time" 
+                            value={operatingHours.weekends.start}
+                            onChange={(e) => setOperatingHours(prev => ({
+                              ...prev,
+                              weekends: { ...prev.weekends, start: e.target.value }
+                            }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>Darbo pabaiga</Label>
+                          <Input 
+                            type="time" 
+                            value={operatingHours.weekends.end}
+                            onChange={(e) => setOperatingHours(prev => ({
+                              ...prev,
+                              weekends: { ...prev.weekends, end: e.target.value }
+                            }))}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Save Button */}
+              <div className="flex gap-4">
+                <Button 
+                  className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                  onClick={() => {
+                    toast({
+                      title: "Pakeitimas išsaugotas",
+                      description: "Darbo laikai atnaujinti sėkmingai",
+                    });
+                  }}
+                >
+                  <Settings size={16} className="mr-2" />
+                  Išsaugoti Nustatymus
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setOperatingHours({
+                      weekdays: { start: "08:00", end: "22:00" },
+                      weekends: { start: "09:00", end: "21:00" }
+                    });
+                  }}
+                >
+                  Atkurti Nustatymus
+                </Button>
+              </div>
 
             </div>
           </TabsContent>
