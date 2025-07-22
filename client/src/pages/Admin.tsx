@@ -28,6 +28,7 @@ import {
   Activity
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import DatePicker from "@/components/DatePicker";
 
 interface ReservationWithDetails {
   id: number;
@@ -371,24 +372,22 @@ export default function Admin() {
                   <div className="flex gap-4">
                     <div>
                       <Label htmlFor="chart-date-from">Data nuo</Label>
-                      <Input 
+                      <DatePicker
                         id="chart-date-from"
-                        type="date" 
                         value={chartDateFrom}
-                        onChange={(e) => setChartDateFrom(e.target.value)}
+                        onChange={setChartDateFrom}
                         className="w-40"
-                        lang="lt"
+                        placeholder="YYYY-MM-DD"
                       />
                     </div>
                     <div>
                       <Label htmlFor="chart-date-to">Data iki</Label>
-                      <Input 
+                      <DatePicker
                         id="chart-date-to"
-                        type="date" 
                         value={chartDateTo}
-                        onChange={(e) => setChartDateTo(e.target.value)}
+                        onChange={setChartDateTo}
                         className="w-40"
-                        lang="lt"
+                        placeholder="YYYY-MM-DD"
                       />
                     </div>
                     <div className="flex items-end">
@@ -496,20 +495,18 @@ export default function Admin() {
                 <div className="grid md:grid-cols-4 gap-4">
                   <div>
                     <Label>Data nuo</Label>
-                    <Input 
-                      type="date" 
+                    <DatePicker
                       value={dateFrom}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                      lang="lt"
+                      onChange={setDateFrom}
+                      placeholder="YYYY-MM-DD"
                     />
                   </div>
                   <div>
                     <Label>Data iki</Label>
-                    <Input 
-                      type="date" 
+                    <DatePicker
                       value={dateTo}
-                      onChange={(e) => setDateTo(e.target.value)}
-                      lang="lt"
+                      onChange={setDateTo}
+                      placeholder="YYYY-MM-DD"
                     />
                   </div>
                   <div>
