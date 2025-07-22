@@ -192,56 +192,7 @@ export default function Admin() {
           <TabsContent value="overview" className="space-y-6">
             <h2 className="text-xl font-semibold">Sistemos Apžvalga</h2>
             
-            {/* Stats Cards */}
-            <div className="grid md:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-blue-600 text-sm font-medium">Šiandien Rezervacijų</p>
-                      <p className="text-2xl font-bold text-blue-800">{todayReservations}</p>
-                    </div>
-                    <CalendarCheck className="text-blue-600" size={32} />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-green-600 text-sm font-medium">Aktyvūs Naudotojai</p>
-                      <p className="text-2xl font-bold text-green-800">{activeUsers}</p>
-                    </div>
-                    <Users className="text-green-600" size={32} />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-yellow-600 text-sm font-medium">Šio Mėnesio Pajamos</p>
-                      <p className="text-2xl font-bold text-yellow-800">{monthlyRevenue.toFixed(0)}€</p>
-                    </div>
-                    <Euro className="text-yellow-600" size={32} />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-purple-600 text-sm font-medium">Kortų Užimtumas</p>
-                      <p className="text-2xl font-bold text-purple-800">{courtUsage}%</p>
-                    </div>
-                    <Volleyball className="text-purple-600" size={32} />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+
 
 
           </TabsContent>
