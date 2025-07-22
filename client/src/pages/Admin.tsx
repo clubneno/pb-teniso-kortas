@@ -1210,21 +1210,39 @@ export default function Admin() {
                     {(() => {
                       const availableSlots = [];
 
+                      // Determine if selected date is weekend or weekday
+                      let operatingStartTime = "08:00";
+                      let operatingEndTime = "22:00";
                       
-                      for (let i = 0; i < 13; i++) {
-                        const startHour = 8 + i;
-                        const endHour = startHour + 1;
-                        const startTime = `${startHour.toString().padStart(2, '0')}:00`;
-                        const endTime = `${endHour.toString().padStart(2, '0')}:00`;
-                        const timeSlot = `${startTime}-${endTime}`;
+                      if (reservationForm.date) {
+                        const selectedDate = new Date(reservationForm.date);
+                        const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
+                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                        
+                        if (isWeekend) {
+                          operatingStartTime = operatingHours.weekends.start;
+                          operatingEndTime = operatingHours.weekends.end;
+                        } else {
+                          operatingStartTime = operatingHours.weekdays.start;
+                          operatingEndTime = operatingHours.weekdays.end;
+                        }
+                      }
+                      
+                      // Parse operating hours
+                      const startHour = parseInt(operatingStartTime.split(':')[0]);
+                      const endHour = parseInt(operatingEndTime.split(':')[0]);
+                      
+                      // Generate time slots within operating hours
+                      for (let hour = startHour; hour < endHour; hour++) {
+                        const currentStartTime = `${hour.toString().padStart(2, '0')}:00`;
+                        const currentEndTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                        const timeSlot = `${currentStartTime}-${currentEndTime}`;
                         
                         // Check if this hour slot conflicts with existing reservations
                         const isConflict = availability.some((slot: any) => {
                           // Check if time slots overlap
-                          return !(endTime <= slot.startTime || startTime >= slot.endTime);
+                          return !(currentEndTime <= slot.startTime || currentStartTime >= slot.endTime);
                         });
-                        
-
                         
                         // Only add available slots to the array
                         if (!isConflict) {

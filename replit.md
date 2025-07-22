@@ -69,6 +69,8 @@ Preferred communication style: Simple, everyday language.
 - Fixed court selection in admin modal to fetch actual courts from database ("Kortas #PB") instead of hardcoded options (2025-07-22)
 - Added totalPrice calculation in admin reservation creation to resolve validation errors and ensure proper data persistence (2025-07-22)
 - Enhanced admin reservation modal with real-time availability checking showing "(Užimta)" for reserved slots and conflict prevention (2025-07-22)
+- Added separate operating hours configuration for workdays (Monday-Friday) and weekends (Saturday-Sunday) in admin settings (2025-07-22)
+- Fixed admin reservation time slot generation to respect configured operating hours instead of hardcoded 8:00-21:00 schedule (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking
