@@ -102,7 +102,7 @@ export default function Admin() {
     r.date === new Date().toISOString().split('T')[0] && r.status === 'confirmed'
   ).length;
 
-  const activeUsers = adminUsers.filter(u => !u.isAdmin).length;
+  const totalUsers = adminUsers.length;
 
   const monthlyRevenue = adminReservations
     .filter(r => {
@@ -228,8 +228,8 @@ export default function Admin() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-green-600 text-sm font-medium">Aktyvūs Naudotojai</p>
-                      <p className="text-2xl font-bold text-green-800">{activeUsers}</p>
+                      <p className="text-green-600 text-sm font-medium">Registruoti Naudotojai</p>
+                      <p className="text-2xl font-bold text-green-800">{totalUsers}</p>
                     </div>
                     <Users className="text-green-600" size={32} />
                   </div>
