@@ -1288,9 +1288,9 @@ export default function Admin() {
                         const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
                         
                         // Check if this 30-minute slot conflicts with existing reservations
-                        const isReserved = availability.some((slot: any) => {
+                        const isReserved = availability.some((reservation: any) => {
                           // Check if time slots overlap
-                          return !(currentEndTime <= slot.startTime || currentStartTime >= slot.endTime);
+                          return !(currentEndTime <= reservation.startTime || currentStartTime >= reservation.endTime);
                         });
                         
                         slots.push({

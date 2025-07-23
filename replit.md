@@ -94,6 +94,7 @@ Preferred communication style: Simple, everyday language.
 - Changed time slots from 90-minute to 30-minute intervals while maintaining all existing functionality (2025-07-23)
 - Updated pricing calculation to charge 0.5 hours for each 30-minute slot (2025-07-23)
 - Added multi-slot selection functionality allowing users to select multiple consecutive 30-minute time slots for extended reservations (2025-07-23)
+- Fixed critical availability bug where existing reservations weren't showing as reserved due to incorrect time overlap detection (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking
