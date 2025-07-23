@@ -83,7 +83,7 @@ Preferred communication style: Simple, everyday language.
 - Updated pricing calculation to charge 1.5 hours for each 90-minute slot (2025-07-23)
 - Fixed timezone issue causing today's future reservations to appear as past reservations (2025-07-23)
 - Updated reservation filtering logic to properly work with Europe/Vilnius timezone (2025-07-23)
-- Added sorting functionality to admin reservations panel displaying from most recent to least recent (2025-07-23)
+- Added chronological sorting to admin reservations panel displaying earliest dates/times first (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking

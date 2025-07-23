@@ -137,14 +137,14 @@ export default function Admin() {
       
       const data = await response.json();
       
-      // Sort reservations from most recent to least recent (by date and time)
+      // Sort reservations chronologically: earliest dates first, earliest times first within same day
       return data.sort((a: ReservationWithDetails, b: ReservationWithDetails) => {
         // First compare by date
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
         
         if (dateA.getTime() !== dateB.getTime()) {
-          return dateB.getTime() - dateA.getTime(); // Most recent date first
+          return dateA.getTime() - dateB.getTime(); // Earliest date first
         }
         
         // If dates are equal, compare by start time
@@ -154,7 +154,7 @@ export default function Admin() {
         const minutesA = timeA[0] * 60 + timeA[1];
         const minutesB = timeB[0] * 60 + timeB[1];
         
-        return minutesB - minutesA; // Most recent time first
+        return minutesA - minutesB; // Earliest time first
       });
     },
     retry: false,
