@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import heroImage from '@assets/WhatsApp Image 2025-07-22 at 22.06.17_1753261982317.jpeg';
 
 interface Court {
   id: number;
@@ -149,8 +150,13 @@ export default function Landing() {
         </div>
       </nav>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-tennis-green-600 to-tennis-green-700 text-white">
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+      <div 
+        className="relative bg-gradient-to-br from-tennis-green-600 to-tennis-green-700 text-white bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(to bottom right, rgba(34, 197, 94, 0.8), rgba(21, 128, 61, 0.8)), url(${heroImage})`
+        }}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
