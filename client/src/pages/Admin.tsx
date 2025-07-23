@@ -1205,8 +1205,8 @@ export default function Admin() {
       {/* Create Reservation Modal */}
       {createReservationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md mx-auto shadow-xl">
-            <CardHeader>
+          <Card className="w-full max-w-2xl mx-auto shadow-xl max-h-[90vh] flex flex-col">
+            <CardHeader className="flex-shrink-0">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Sukurti Rezervaciją</CardTitle>
                 <Button
@@ -1219,7 +1219,7 @@ export default function Admin() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 overflow-y-auto flex-1">
               <div>
                 <Label htmlFor="user-select">Naudotojas</Label>
                 <Select
