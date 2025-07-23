@@ -452,7 +452,7 @@ export default function Dashboard() {
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <ProfileEdit user={user} />
+            <ProfileEdit user={user || undefined} />
           </TabsContent>
         </Tabs>
       </div>

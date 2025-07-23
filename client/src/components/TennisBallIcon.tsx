@@ -8,54 +8,22 @@ export default function TennisBallIcon({ size = 24, className = "" }: TennisBall
     <svg 
       width={size} 
       height={size} 
-      viewBox="0 0 24 24" 
+      viewBox="0 0 69.447 69.447" 
       className={className}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Tennis ball base circle - classic yellow-green color */}
-      <circle 
-        cx="12" 
-        cy="12" 
-        r="11" 
-        fill="currentColor"
-        stroke="none"
-      />
-      
-      {/* Tennis ball characteristic curved seam lines */}
-      <path 
-        d="M 3 12 Q 7 5, 12 12 Q 17 19, 21 12" 
-        fill="none" 
-        stroke="white" 
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.9"
-      />
-      <path 
-        d="M 3 12 Q 7 19, 12 12 Q 17 5, 21 12" 
-        fill="none" 
-        stroke="white" 
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.9"
-      />
-      
-      {/* Additional texture lines for more realistic look */}
-      <path 
-        d="M 6 8 Q 10 10, 12 12" 
-        fill="none" 
-        stroke="white" 
-        strokeWidth="0.8"
-        strokeLinecap="round"
-        opacity="0.4"
-      />
-      <path 
-        d="M 18 16 Q 14 14, 12 12" 
-        fill="none" 
-        stroke="white" 
-        strokeWidth="0.8"
-        strokeLinecap="round"
-        opacity="0.4"
-      />
+      <g transform="translate(-1271.769 -1574.648)">
+        {/* Main tennis ball circle - using currentColor for theming */}
+        <path 
+          d="M1341.208,1609.372a34.719,34.719,0,1,1-34.72-34.724A34.724,34.724,0,0,1,1341.208,1609.372Z" 
+          fill="currentColor"
+        />
+        {/* Tennis ball characteristic curved seam lines in white */}
+        <path 
+          d="M1311.144,1574.993a35.139,35.139,0,0,0-4.61-.344,41.069,41.069,0,0,1-34.369,29.735,34.3,34.3,0,0,0-.381,4.635l.183-.026a45.921,45.921,0,0,0,39.149-33.881Zm29.721,34.692a45.487,45.487,0,0,0-33.488,34.054l-.071.313a34.54,34.54,0,0,0,4.818-.455,41.218,41.218,0,0,1,28.686-29.194,36.059,36.059,0,0,0,.388-4.8Z" 
+          fill="white"
+        />
+      </g>
     </svg>
   );
 }
