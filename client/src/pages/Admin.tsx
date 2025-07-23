@@ -1401,7 +1401,12 @@ export default function Admin() {
                       <div className="text-sm text-tennis-green-700 space-y-1">
                         <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
                         <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
-                        <div><strong>Kaina:</strong> {(parseFloat(courts.find(c => c.id.toString() === reservationForm.courtId)?.hourlyRate || '0') * selectedTimeSlots.length * 0.5).toFixed(2)}€</div>
+                        <div><strong>Kaina:</strong> {(() => {
+                          const court = courts.find(c => c.id.toString() === reservationForm.courtId);
+                          const hourlyRate = parseFloat(court?.hourlyRate || '0');
+                          const slotRate = hourlyRate / 2; // 30-minute slot rate
+                          return (slotRate * selectedTimeSlots.length).toFixed(2);
+                        })()}€</div>
                       </div>
                       <Button 
                         variant="outline"
