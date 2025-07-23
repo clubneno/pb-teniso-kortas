@@ -17,7 +17,7 @@ import {
   Calendar, 
   Users, 
   Settings, 
-  Volleyball,
+  Zap,
   LogOut,
   Edit,
   Trash2,

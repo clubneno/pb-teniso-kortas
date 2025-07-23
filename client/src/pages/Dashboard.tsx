@@ -13,13 +13,12 @@ import TimeSlotGrid from "@/components/TimeSlotGrid";
 import ReservationCard from "@/components/ReservationCard";
 import ProfileEdit from "@/components/ProfileEdit";
 import { 
-  Volleyball, 
+  Zap, 
   CalendarPlus, 
   List, 
   UserPen, 
   LogOut 
 } from "lucide-react";
-// Using Volleyball icon as tennis ball alternative
 
 interface Court {
   id: number;
@@ -249,7 +248,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-tennis-green-500 rounded-full flex items-center justify-center">
-                <Volleyball className="text-white" size={20} />
+                <Zap className="text-white" size={20} />
               </div>
               <span className="text-xl font-bold text-tennis-green-600">PB teniso kortas</span>
             </div>
@@ -284,7 +283,7 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
               <div className="w-20 h-20 bg-tennis-green-100 rounded-full flex items-center justify-center">
-                <Volleyball className="text-tennis-green-600" size={32} />
+                <Zap className="text-tennis-green-600" size={32} />
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
