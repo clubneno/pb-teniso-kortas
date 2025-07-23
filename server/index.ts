@@ -4,6 +4,31 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// Domain restriction middleware - only allow access from custom domain
+app.use((req, res, next) => {
+  const host = req.get('host');
+  const allowedDomains = ['pbtenisokortas.lt', 'www.pbtenisokortas.lt'];
+  
+  // Allow localhost and development domains for development
+  if (process.env.NODE_ENV === 'development' || 
+      host?.includes('localhost') || 
+      host?.includes('127.0.0.1')) {
+    return next();
+  }
+  
+  // Redirect from .replit.app to custom domain
+  if (host && host.endsWith('.replit.app')) {
+    return res.redirect(301, `https://pbtenisokortas.lt${req.originalUrl}`);
+  }
+  
+  // Check if host is in allowed domains
+  if (!host || !allowedDomains.includes(host)) {
+    return res.redirect(301, `https://pbtenisokortas.lt${req.originalUrl}`);
+  }
+  
+  next();
+});
+
 // Handle www subdomain redirect
 app.use((req, res, next) => {
   const host = req.get('host');
