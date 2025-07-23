@@ -1087,7 +1087,7 @@ export default function Admin() {
                       />
                     </div>
                     <div>
-                      <Label>Valandos kaina (€)</Label>
+                      <Label>30min. kaina (€)</Label>
                       <Input 
                         type="number" 
                         step="0.01"
@@ -1190,7 +1190,6 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
-
       {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
@@ -1201,7 +1200,6 @@ export default function Admin() {
         isDestructive={confirmModal.isDestructive}
         isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending}
       />
-
       {/* Create Reservation Modal */}
       {createReservationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1392,7 +1390,6 @@ export default function Admin() {
           </Card>
         </div>
       )}
-
       {/* Create User Modal */}
       {createUserModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
