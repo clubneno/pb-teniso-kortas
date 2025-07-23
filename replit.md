@@ -71,6 +71,8 @@ Preferred communication style: Simple, everyday language.
 - Enhanced admin reservation modal with real-time availability checking showing "(Užimta)" for reserved slots and conflict prevention (2025-07-22)
 - Added separate operating hours configuration for workdays (Monday-Friday) and weekends (Saturday-Sunday) in admin settings (2025-07-22)
 - Fixed admin reservation time slot generation to respect configured operating hours instead of hardcoded 8:00-21:00 schedule (2025-07-22)
+- Added tennis court background image to Landing page hero section with proper overlay for text readability (2025-07-22)
+- Implemented custom favicon using volleyball icon in brand colors (green background with white volleyball icon) (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking
