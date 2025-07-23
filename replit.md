@@ -73,7 +73,8 @@ Preferred communication style: Simple, everyday language.
 - Fixed admin reservation time slot generation to respect configured operating hours instead of hardcoded 8:00-21:00 schedule (2025-07-22)
 - Added tennis court background image to Landing page hero section with proper overlay for text readability (2025-07-22)
 - Implemented custom favicon using tennis icon in brand colors (green background with white tennis icon) (2025-07-22)
-- Updated all page branding from volleyball to tennis icons (Zap icon) across Landing, Dashboard, and Admin pages (2025-07-22)
+- Created custom tennis ball SVG icon with realistic curved seam lines and texture details (2025-07-22)
+- Updated all page branding to use custom tennis ball icon across Landing, Dashboard, and Admin pages (2025-07-22)
 
 ### Reservation Management
 - Real-time availability checking
