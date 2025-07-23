@@ -16,6 +16,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      <Route path="/prisijungimas" component={AuthPage} />
       <Route path="/">
         {isLoading ? (
           <div className="min-h-screen flex items-center justify-center">
@@ -30,6 +31,17 @@ function Router() {
         )}
       </Route>
       <Route path="/dashboard">
+        {isLoading ? (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-tennis-green-600"></div>
+          </div>
+        ) : user && !user?.isAdmin ? (
+          <Dashboard />
+        ) : (
+          <Landing />
+        )}
+      </Route>
+      <Route path="/savitarna">
         {isLoading ? (
           <div className="min-h-screen flex items-center justify-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-tennis-green-600"></div>

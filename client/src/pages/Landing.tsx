@@ -160,7 +160,7 @@ export default function Landing() {
             
             <div className="flex items-center space-x-3">
               <Button 
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => window.location.href = '/prisijungimas'}
                 className="text-white font-medium hover:opacity-90"
                 style={{ backgroundColor: '#2e6b4a' }}
               >
@@ -189,7 +189,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg"
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => window.location.href = '/prisijungimas'}
                 className="bg-white text-tennis-green-700 hover:bg-gray-100 font-bold text-lg shadow-lg"
               >
                 <CalendarIcon size={20} className="mr-2" />
@@ -281,7 +281,7 @@ export default function Landing() {
                     <div className="mt-6 text-center">
                       <Button 
                         size="lg"
-                        onClick={() => window.location.href = '/auth'}
+                        onClick={() => window.location.href = '/prisijungimas'}
                         className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold shadow-lg border-2 border-yellow-400 transform hover:scale-105 transition-all duration-200"
                       >
                         <LogIn size={20} className="mr-2" />

@@ -23,7 +23,7 @@ export default function AuthPage() {
   useSEO({
     title: "Prisijungimas ir registracija - PB teniso kortas",
     description: "Prisijunkite prie PB teniso kortų rezervacijos sistemos arba užregistruokitės naują paskyrą. Greitai ir saugiai valdykite savo teniso kortų rezervacijas.",
-    canonical: "/auth",
+    canonical: "/prisijungimas",
     keywords: "prisijungimas, registracija, teniso kortas, paskyra, rezervacijos",
     ogTitle: "Prisijungimas - PB teniso kortas",
     ogDescription: "Prisijunkite prie teniso kortų rezervacijos sistemos ir pradėkite rezervuoti kortus šiandien.",

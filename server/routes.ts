@@ -455,10 +455,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://pbtenisokortas.lt/auth</loc>
+    <loc>https://pbtenisokortas.lt/prisijungimas</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pbtenisokortas.lt/savitarna</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>`;
     
@@ -470,9 +476,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/robots.txt", (req, res) => {
     const robots = `User-agent: *
 Allow: /
-Allow: /auth
+Allow: /prisijungimas
 
+Disallow: /auth
 Disallow: /dashboard
+Disallow: /savitarna
 Disallow: /admin
 Disallow: /api/
 

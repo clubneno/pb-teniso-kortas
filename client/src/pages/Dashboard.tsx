@@ -58,8 +58,8 @@ export default function Dashboard() {
   useSEO({
     title: "Mano rezervacijos - PB teniso kortas",
     description: "Valdykite savo teniso kortų rezervacijas, peržiūrėkite istoriją ir sukurkite naujas rezervacijas. Lengvas ir patogus rezervacijų valdymas.",
-    canonical: "/dashboard",
-    keywords: "rezervacijų valdymas, teniso rezervacijos, mano rezervacijos, teniso kortas",
+    canonical: "/savitarna",
+    keywords: "rezervacijų valdymas, teniso rezervacijos, mano rezervacijos, teniso kortas, savitarna",
     ogTitle: "Rezervacijų valdymas - PB teniso kortas",
     ogDescription: "Valdykite visas savo teniso kortų rezervacijas vienoje vietoje. Peržiūrėkite istoriją ir kurkite naujas rezervacijas lengvai.",
   });
