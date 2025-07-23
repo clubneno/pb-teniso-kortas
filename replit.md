@@ -101,6 +101,9 @@ Preferred communication style: Simple, everyday language.
 - Made admin pricing field editable for 30-minute slot rates with automatic conversion to hourly rates for database storage (2025-07-23)
 - Fixed pricing display consistency across Landing, Dashboard, and Admin pages to show actual 30-minute slot prices (2025-07-23)
 - Increased admin reservation modal size (max-w-4xl, max-h-95vh) for better date picker visibility (2025-07-23)
+- Added complete user management functionality: create, edit, and delete users with full admin controls (2025-07-23)
+- Implemented user deletion with cascade deletion of associated reservations and confirmation dialogs (2025-07-23)
+- Cleaned up test accounts as requested: removed user123, admin123, and user_1753271942891_bebhnk (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking

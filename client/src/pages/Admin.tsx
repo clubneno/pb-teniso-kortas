@@ -482,6 +482,28 @@ export default function Admin() {
     }
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Naudotojas pašalintas",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Klaida",
+        description: error.message || "Nepavyko pašalinti naudotojo",
+        variant: "destructive"
+      });
+    }
+  });
+
   const updateCourtPricingMutation = useMutation({
     mutationFn: async (pricingData: { hourlyRate: string }) => {
       if (courts.length === 0) throw new Error("No courts found");
@@ -545,12 +567,25 @@ export default function Admin() {
     }
 
     // Don't send password if it's empty (user doesn't want to change it)
-    const updateData = { ...userForm };
+    const updateData: any = { ...userForm };
     if (!updateData.password) {
       delete updateData.password;
     }
 
     updateUserMutation.mutate(updateData);
+  };
+
+  const handleDeleteUser = (userId: string, userName: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Pašalinti naudotoją",
+      message: `Ar tikrai norite pašalinti naudotoją "${userName}"? Visi jo rezervacijos taip pat bus pašalintos. Šis veiksmas negrįžtamas.`,
+      onConfirm: () => {
+        deleteUserMutation.mutate(userId);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      },
+      isDestructive: true
+    });
   };
 
   // Validation function for admin reservation creation
@@ -1166,6 +1201,14 @@ export default function Admin() {
                               >
                                 <Edit size={14} />
                               </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteUser(user.id, `${user.firstName} ${user.lastName}`)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -1315,7 +1358,7 @@ export default function Admin() {
         title={confirmModal.title}
         message={confirmModal.message}
         isDestructive={confirmModal.isDestructive}
-        isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending}
+        isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending || deleteUserMutation.isPending}
       />
       {/* Create Reservation Modal */}
       {createReservationModal && (

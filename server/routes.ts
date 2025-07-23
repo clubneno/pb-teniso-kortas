@@ -535,6 +535,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user
+  app.delete('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      
+      // Check if user exists
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Prevent admin from deleting themselves
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+
+      // Delete user
+      const deleted = await storage.deleteUser(userId);
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete user" });
+      }
+
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   // SEO - Sitemap XML
   app.get("/sitemap.xml", (req, res) => {
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
