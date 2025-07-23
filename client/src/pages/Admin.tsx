@@ -37,6 +37,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import DatePicker from "@/components/DatePicker";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import TennisBallIcon from "@/components/TennisBallIcon";
+import TimeSlotGrid from "@/components/TimeSlotGrid";
 
 interface ReservationWithDetails {
   id: number;
@@ -112,8 +113,8 @@ export default function Admin() {
     userId: "",
     courtId: "",
     date: "",
-    timeSlot: "" // Will be in format "HH:mm-HH:mm"
   });
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [createUserModal, setCreateUserModal] = useState(false);
   const [userForm, setUserForm] = useState({
     email: "",
@@ -384,8 +385,8 @@ export default function Admin() {
         userId: "",
         courtId: "",
         date: "",
-        timeSlot: ""
       });
+      setSelectedTimeSlots([]);
       toast({
         title: "Pakeitimas išsaugotas",
         description: "Rezervacija sėkmingai sukurta"
@@ -445,24 +446,32 @@ export default function Admin() {
   };
 
   const handleCreateReservation = () => {
-    if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || !reservationForm.timeSlot) {
+    if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || selectedTimeSlots.length === 0) {
       toast({
         title: "Klaida",
-        description: "Užpildykite visus laukus",
+        description: "Užpildykite visus laukus ir pasirinkite bent vieną laiko intervalą",
         variant: "destructive"
       });
       return;
     }
 
-    const [startTime, endTime] = reservationForm.timeSlot.split('-');
+    // Sort selected time slots to ensure they are in chronological order
+    const sortedSlots = [...selectedTimeSlots].sort();
+    
+    // Get the start time from the first slot and end time from the last slot
+    const firstSlot = sortedSlots[0];
+    const lastSlot = sortedSlots[sortedSlots.length - 1];
+    
+    const [startTime] = firstSlot.split('-');
+    const [, endTime] = lastSlot.split('-');
+
     const selectedCourt = courts.find(court => court.id.toString() === reservationForm.courtId);
     const hourlyRate = parseFloat(selectedCourt?.hourlyRate || "0");
     
-    // Calculate duration in hours
-    const start = new Date(`2000-01-01T${startTime}:00`);
-    const end = new Date(`2000-01-01T${endTime}:00`);
-    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-    const totalPrice = (hourlyRate * durationHours).toFixed(2);
+    // Calculate total duration and price (each slot is 30 minutes = 0.5 hours)
+    const totalSlots = selectedTimeSlots.length;
+    const totalHours = totalSlots * 0.5;
+    const totalPrice = (hourlyRate * totalHours).toFixed(2);
 
     createReservationMutation.mutate({
       userId: reservationForm.userId,
@@ -1230,35 +1239,33 @@ export default function Admin() {
                 </div>
               )}
 
-              <div>
-                <Label htmlFor="time-slot">Laiko intervalas</Label>
-                <Select
-                  value={reservationForm.timeSlot}
-                  onValueChange={(value) => setReservationForm(prev => ({ ...prev, timeSlot: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite laiko intervalą" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(() => {
-                      const availableSlots = [];
-
+              {reservationForm.date && reservationForm.courtId && (
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <Label>Laiko intervalai</Label>
+                    {selectedTimeSlots.length > 0 && (
+                      <span className="text-xs text-tennis-green-600 font-medium">
+                        {selectedTimeSlots.length} pasirinkta
+                      </span>
+                    )}
+                  </div>
+                  
+                  <TimeSlotGrid
+                    timeSlots={(() => {
                       // Determine if selected date is weekend or weekday
                       let operatingStartTime = "08:00";
                       let operatingEndTime = "22:00";
                       
-                      if (reservationForm.date) {
-                        const selectedDate = new Date(reservationForm.date);
-                        const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
-                        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                        
-                        if (isWeekend) {
-                          operatingStartTime = operatingHours.weekends.start;
-                          operatingEndTime = operatingHours.weekends.end;
-                        } else {
-                          operatingStartTime = operatingHours.weekdays.start;
-                          operatingEndTime = operatingHours.weekdays.end;
-                        }
+                      const selectedDate = new Date(reservationForm.date);
+                      const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
+                      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                      
+                      if (isWeekend) {
+                        operatingStartTime = operatingHours.weekends.start;
+                        operatingEndTime = operatingHours.weekends.end;
+                      } else {
+                        operatingStartTime = operatingHours.weekdays.start;
+                        operatingEndTime = operatingHours.weekdays.end;
                       }
                       
                       // Parse operating hours
@@ -1268,6 +1275,7 @@ export default function Admin() {
                       // Generate 30-minute slots within operating hours
                       const startMinutes = startHour * 60;
                       const endMinutes = endHour * 60;
+                      const slots = [];
                       
                       for (let currentMinutes = startMinutes; currentMinutes + 30 <= endMinutes; currentMinutes += 30) {
                         const currentStartHour = Math.floor(currentMinutes / 60);
@@ -1278,28 +1286,54 @@ export default function Admin() {
                         
                         const currentStartTime = `${currentStartHour.toString().padStart(2, '0')}:${currentStartMin.toString().padStart(2, '0')}`;
                         const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
-                        const timeSlot = `${currentStartTime}-${currentEndTime}`;
                         
                         // Check if this 30-minute slot conflicts with existing reservations
-                        const isConflict = availability.some((slot: any) => {
+                        const isReserved = availability.some((slot: any) => {
                           // Check if time slots overlap
                           return !(currentEndTime <= slot.startTime || currentStartTime >= slot.endTime);
                         });
                         
-                        // Only add available slots to the array
-                        if (!isConflict) {
-                          availableSlots.push(
-                            <SelectItem key={timeSlot} value={timeSlot}>
-                              {timeSlot}
-                            </SelectItem>
-                          );
-                        }
+                        slots.push({
+                          startTime: currentStartTime,
+                          endTime: currentEndTime,
+                          timeDisplay: currentStartTime,
+                          isReserved,
+                        });
                       }
-                      return availableSlots;
+                      return slots;
                     })()}
-                  </SelectContent>
-                </Select>
-              </div>
+                    onSlotSelect={(slot) => {
+                      setSelectedTimeSlots(prev => 
+                        prev.includes(slot) 
+                          ? prev.filter(s => s !== slot)
+                          : [...prev, slot]
+                      );
+                    }}
+                    selectedSlots={selectedTimeSlots}
+                    selectedDate={reservationForm.date}
+                    isPublicView={false}
+                  />
+                  
+                  {selectedTimeSlots.length > 0 && (
+                    <div className="mt-4 p-3 bg-tennis-green-50 border border-tennis-green-200 rounded-lg">
+                      <h4 className="font-medium text-tennis-green-800 mb-2">Rezervacijos Santrauka</h4>
+                      <div className="text-sm text-tennis-green-700 space-y-1">
+                        <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
+                        <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
+                        <div><strong>Kaina:</strong> {(parseFloat(courts.find(c => c.id.toString() === reservationForm.courtId)?.hourlyRate || '0') * selectedTimeSlots.length * 0.5).toFixed(2)}€</div>
+                      </div>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedTimeSlots([])}
+                        className="mt-2 text-xs"
+                      >
+                        Išvalyti pasirinkimus
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-3 justify-end pt-4">
                 <Button
