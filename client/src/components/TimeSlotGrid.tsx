@@ -12,7 +12,7 @@ interface TimeSlot {
 interface TimeSlotGridProps {
   timeSlots: TimeSlot[];
   onSlotSelect: (slot: string) => void;
-  selectedSlot: string | null;
+  selectedSlots: string[];
   selectedDate: string; // YYYY-MM-DD format
   isPublicView?: boolean;
 }
@@ -20,7 +20,7 @@ interface TimeSlotGridProps {
 export default function TimeSlotGrid({ 
   timeSlots, 
   onSlotSelect, 
-  selectedSlot, 
+  selectedSlots, 
   selectedDate,
   isPublicView = false 
 }: TimeSlotGridProps) {
@@ -64,7 +64,7 @@ export default function TimeSlotGrid({
       return `${baseClasses} bg-gray-500 border border-gray-600 cursor-not-allowed opacity-60`;
     }
     
-    if (selectedSlot === timeRange && !isPublicView) {
+    if (selectedSlots.includes(timeRange) && !isPublicView) {
       return `${baseClasses} bg-tennis-green-600 border border-tennis-green-700`;
     }
     
@@ -89,7 +89,7 @@ export default function TimeSlotGrid({
       return "Užimta";
     }
     
-    if (selectedSlot === timeRange && !isPublicView) {
+    if (selectedSlots.includes(timeRange) && !isPublicView) {
       return "Pasirinkta";
     }
     

@@ -273,7 +273,7 @@ export default function Landing() {
                     <TimeSlotGrid 
                       timeSlots={timeSlots}
                       onSlotSelect={() => {}}
-                      selectedSlot={null}
+                      selectedSlots={[]}
                       selectedDate={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
                       isPublicView={true}
                     />

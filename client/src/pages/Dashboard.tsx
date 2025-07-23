@@ -70,7 +70,7 @@ export default function Dashboard() {
     return new Date(vilniusTime.getFullYear(), vilniusTime.getMonth(), vilniusTime.getDate(), 12, 0, 0);
   });
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
 
   const { data: courts = [] } = useQuery<Court[]>({
     queryKey: ["/api/courts"],
@@ -146,7 +146,7 @@ export default function Dashboard() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/courts", selectedCourtId, "availability"] });
-      setSelectedTimeSlot(null);
+      setSelectedTimeSlots([]);
     },
     onError: (error) => {
       console.error("Reservation error:", error);
@@ -214,27 +214,31 @@ export default function Dashboard() {
   };
 
   const handleReservation = () => {
-    if (!selectedCourtId || !selectedTimeSlot) return;
+    if (!selectedCourtId || selectedTimeSlots.length === 0) return;
 
     const selectedCourt = courts.find(c => c.id === selectedCourtId);
     if (!selectedCourt) return;
 
-    const [startTime] = selectedTimeSlot.split('-');
-    // Calculate end time by adding 30 minutes
-    const startHour = parseInt(startTime.split(':')[0]);
-    const startMin = parseInt(startTime.split(':')[1]);
-    const totalStartMinutes = startHour * 60 + startMin;
-    const totalEndMinutes = totalStartMinutes + 30;
-    const endHour = Math.floor(totalEndMinutes / 60);
-    const endMin = totalEndMinutes % 60;
-    const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
+    // Sort selected time slots to ensure they are in chronological order
+    const sortedSlots = [...selectedTimeSlots].sort();
+    
+    // Get the start time from the first slot and end time from the last slot
+    const firstSlot = sortedSlots[0];
+    const lastSlot = sortedSlots[sortedSlots.length - 1];
+    
+    const [startTime] = firstSlot.split('-');
+    const [, endTime] = lastSlot.split('-');
+
+    // Calculate total duration and price
+    const totalSlots = selectedTimeSlots.length;
+    const totalHours = totalSlots * 0.5; // Each slot is 30 minutes = 0.5 hours
 
     const reservationData = {
       courtId: selectedCourtId,
       date: `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`,
       startTime,
       endTime,
-      totalPrice: (parseFloat(selectedCourt.hourlyRate) * 0.5).toString(), // 30 minutes = 0.5 hours
+      totalPrice: (parseFloat(selectedCourt.hourlyRate) * totalHours).toString(),
     };
     
     console.log("Sending reservation data:", reservationData);
@@ -416,29 +420,53 @@ export default function Dashboard() {
 
                     {/* Time Slots */}
                     <div className="space-y-4">
-                      <p className="text-sm text-gray-600">
-                        {selectedDate.toLocaleDateString('lt-LT')} prieinami laikai:
-                      </p>
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600">
+                          {selectedDate.toLocaleDateString('lt-LT')} prieinami laikai:
+                        </p>
+                        {selectedTimeSlots.length > 0 && (
+                          <span className="text-xs text-tennis-green-600 font-medium">
+                            {selectedTimeSlots.length} pasirinkta
+                          </span>
+                        )}
+                      </div>
                       
                       <TimeSlotGrid
                         timeSlots={timeSlots}
-                        onSlotSelect={setSelectedTimeSlot}
-                        selectedSlot={selectedTimeSlot}
+                        onSlotSelect={(slot) => {
+                          setSelectedTimeSlots(prev => 
+                            prev.includes(slot) 
+                              ? prev.filter(s => s !== slot)
+                              : [...prev, slot]
+                          );
+                        }}
+                        selectedSlots={selectedTimeSlots}
                         selectedDate={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
                         isPublicView={false}
                       />
                     </div>
 
                     {/* Booking Summary */}
-                    {selectedTimeSlot && selectedCourtId && (
+                    {selectedTimeSlots.length > 0 && selectedCourtId && (
                       <Card className="mt-6 bg-tennis-green-50 border-tennis-green-200">
                         <CardContent className="p-4">
                           <h4 className="font-medium text-tennis-green-800 mb-2">Rezervacijos Santrauka</h4>
                           <div className="text-sm text-tennis-green-700 space-y-1">
                             <div><strong>Data:</strong> {selectedDate.toLocaleDateString('lt-LT')}</div>
-                            <div><strong>Laikas:</strong> {selectedTimeSlot}</div>
+                            <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
                             <div><strong>Kortas:</strong> {courts.find(c => c.id === selectedCourtId)?.name}</div>
-                            <div><strong>Kaina:</strong> {courts.find(c => c.id === selectedCourtId)?.hourlyRate}€/val</div>
+                            <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
+                            <div><strong>Kaina:</strong> {(parseFloat(courts.find(c => c.id === selectedCourtId)?.hourlyRate || '0') * selectedTimeSlots.length * 0.5).toFixed(2)}€</div>
+                          </div>
+                          <div className="mt-3 mb-3">
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedTimeSlots([])}
+                              className="text-xs"
+                            >
+                              Išvalyti pasirinkimus
+                            </Button>
                           </div>
                           <Button 
                             className="w-full mt-4 bg-tennis-green-500 hover:bg-tennis-green-600"
