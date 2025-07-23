@@ -171,12 +171,12 @@ export default function Dashboard() {
 
   const generateTimeSlots = () => {
     const slots = [];
-    // Generate 90-minute slots starting from 8:00
+    // Generate 30-minute slots starting from 8:00
     let startMinutes = 8 * 60; // 8:00 in minutes
-    const endMinutes = 21 * 60 + 30; // 21:30 in minutes (last possible end time)
+    const endMinutes = 22 * 60; // 22:00 in minutes (last possible start time)
     
     while (startMinutes < endMinutes) {
-      const endSlotMinutes = startMinutes + 90; // Add 90 minutes
+      const endSlotMinutes = startMinutes + 30; // Add 30 minutes
       
       const startHour = Math.floor(startMinutes / 60);
       const startMin = startMinutes % 60;
@@ -208,7 +208,7 @@ export default function Dashboard() {
         reservedCourts: reservedCourts,
       });
       
-      startMinutes += 90; // Move to next 90-minute slot
+      startMinutes += 30; // Move to next 30-minute slot
     }
     return slots;
   };
@@ -220,11 +220,11 @@ export default function Dashboard() {
     if (!selectedCourt) return;
 
     const [startTime] = selectedTimeSlot.split('-');
-    // Calculate end time by adding 90 minutes
+    // Calculate end time by adding 30 minutes
     const startHour = parseInt(startTime.split(':')[0]);
     const startMin = parseInt(startTime.split(':')[1]);
     const totalStartMinutes = startHour * 60 + startMin;
-    const totalEndMinutes = totalStartMinutes + 90;
+    const totalEndMinutes = totalStartMinutes + 30;
     const endHour = Math.floor(totalEndMinutes / 60);
     const endMin = totalEndMinutes % 60;
     const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
@@ -234,7 +234,7 @@ export default function Dashboard() {
       date: `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`,
       startTime,
       endTime,
-      totalPrice: (parseFloat(selectedCourt.hourlyRate) * 1.5).toString(), // 90 minutes = 1.5 hours
+      totalPrice: (parseFloat(selectedCourt.hourlyRate) * 0.5).toString(), // 30 minutes = 0.5 hours
     };
     
     console.log("Sending reservation data:", reservationData);

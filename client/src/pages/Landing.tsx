@@ -101,12 +101,12 @@ export default function Landing() {
 
   const generateTimeSlots = () => {
     const slots = [];
-    // Generate 90-minute slots starting from 8:00
+    // Generate 30-minute slots starting from 8:00
     let startMinutes = 8 * 60; // 8:00 in minutes
-    const endMinutes = 21 * 60 + 30; // 21:30 in minutes (last possible end time)
+    const endMinutes = 22 * 60; // 22:00 in minutes (last possible start time)
     
     while (startMinutes < endMinutes) {
-      const endSlotMinutes = startMinutes + 90; // Add 90 minutes
+      const endSlotMinutes = startMinutes + 30; // Add 30 minutes
       
       const startHour = Math.floor(startMinutes / 60);
       const startMin = startMinutes % 60;
@@ -138,7 +138,7 @@ export default function Landing() {
         reservedCourts: reservedCourts,
       });
       
-      startMinutes += 90; // Move to next 90-minute slot
+      startMinutes += 30; // Move to next 30-minute slot
     }
     return slots;
   };

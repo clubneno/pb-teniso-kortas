@@ -91,6 +91,8 @@ Preferred communication style: Simple, everyday language.
 - Enhanced all pages with Lithuanian-language SEO content and proper meta tags (2025-07-23)
 - Updated URL structure to use Lithuanian paths: /auth → /prisijungimas, /dashboard → /savitarna with proper SEO maintenance (2025-07-23)
 - Cleared all test reservations from database for clean production deployment (2025-07-23)
+- Changed time slots from 90-minute to 30-minute intervals while maintaining all existing functionality (2025-07-23)
+- Updated pricing calculation to charge 0.5 hours for each 30-minute slot (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking

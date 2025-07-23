@@ -1265,14 +1265,14 @@ export default function Admin() {
                       const startHour = parseInt(operatingStartTime.split(':')[0]);
                       const endHour = parseInt(operatingEndTime.split(':')[0]);
                       
-                      // Generate 90-minute slots within operating hours
+                      // Generate 30-minute slots within operating hours
                       const startMinutes = startHour * 60;
                       const endMinutes = endHour * 60;
                       
-                      for (let currentMinutes = startMinutes; currentMinutes + 90 <= endMinutes; currentMinutes += 90) {
+                      for (let currentMinutes = startMinutes; currentMinutes + 30 <= endMinutes; currentMinutes += 30) {
                         const currentStartHour = Math.floor(currentMinutes / 60);
                         const currentStartMin = currentMinutes % 60;
-                        const currentEndMinutes = currentMinutes + 90;
+                        const currentEndMinutes = currentMinutes + 30;
                         const currentEndHour = Math.floor(currentEndMinutes / 60);
                         const currentEndMin = currentEndMinutes % 60;
                         
@@ -1280,7 +1280,7 @@ export default function Admin() {
                         const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
                         const timeSlot = `${currentStartTime}-${currentEndTime}`;
                         
-                        // Check if this 90-minute slot conflicts with existing reservations
+                        // Check if this 30-minute slot conflicts with existing reservations
                         const isConflict = availability.some((slot: any) => {
                           // Check if time slots overlap
                           return !(currentEndTime <= slot.startTime || currentStartTime >= slot.endTime);
