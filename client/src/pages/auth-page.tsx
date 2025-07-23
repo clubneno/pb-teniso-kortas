@@ -10,7 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, registerSchema, type LoginData, type RegisterData } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useLocation } from "wouter";
-import { Loader2, Trophy } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import TennisBallIcon from "@/components/TennisBallIcon";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
@@ -73,7 +74,9 @@ export default function AuthPage() {
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <Trophy className="h-8 w-8 text-tennis-green-600" />
+                <div className="w-10 h-10 bg-tennis-green-600 rounded-full flex items-center justify-center">
+                  <TennisBallIcon size={20} className="text-white" />
+                </div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">PB teniso kortas</h1>
               </div>
               <p className="text-gray-600 dark:text-gray-400">
