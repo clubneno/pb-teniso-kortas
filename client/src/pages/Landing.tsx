@@ -256,9 +256,6 @@ export default function Landing() {
                             <span className="text-tennis-yellow font-bold text-lg">
                               {court.hourlyRate}€/30min.
                             </span>
-                            {selectedCourtId === court.id && (
-                              <span className="text-xs bg-white/20 px-2 py-1 rounded">Pasirinkta</span>
-                            )}
                           </div>
                         </div>
                       </div>
