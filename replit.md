@@ -104,6 +104,7 @@ Preferred communication style: Simple, everyday language.
 - Added complete user management functionality: create, edit, and delete users with full admin controls (2025-07-23)
 - Implemented user deletion with cascade deletion of associated reservations and confirmation dialogs (2025-07-23)
 - Cleaned up test accounts as requested: removed user123, admin123, and user_1753271942891_bebhnk (2025-07-23)
+- Added active reservation protection: users with future reservations cannot be deleted until reservations end or are cancelled (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking
