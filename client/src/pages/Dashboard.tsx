@@ -450,7 +450,7 @@ export default function Dashboard() {
                         >
                           {court.name}
                           <Badge variant="secondary" className="ml-2">
-                            {court.hourlyRate}€/val
+                            {court.hourlyRate}€/30min.
                           </Badge>
                         </Button>
                       ))}
