@@ -493,6 +493,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user
+  app.patch('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      const { email, password, firstName, lastName, phone, isAdmin } = req.body;
+      
+      // Check if user exists
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // If email is being changed, check if new email is already in use
+      if (email && email !== existingUser.email) {
+        const emailInUse = await storage.getUserByEmail(email);
+        if (emailInUse) {
+          return res.status(400).json({ message: "User with this email already exists" });
+        }
+      }
+
+      // Update user
+      const updatedUser = await storage.updateUser(userId, {
+        email,
+        password: password || undefined, // Only update password if provided
+        firstName,
+        lastName,
+        phone: phone || null,
+        isAdmin: isAdmin !== undefined ? isAdmin : existingUser.isAdmin
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   // SEO - Sitemap XML
   app.get("/sitemap.xml", (req, res) => {
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

@@ -116,6 +116,8 @@ export default function Admin() {
   });
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [createUserModal, setCreateUserModal] = useState(false);
+  const [editUserModal, setEditUserModal] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [userForm, setUserForm] = useState({
     email: "",
     password: "",
@@ -447,6 +449,39 @@ export default function Admin() {
     }
   });
 
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      if (!editingUserId) throw new Error("No user selected for editing");
+      const res = await apiRequest("PATCH", `/api/admin/users/${editingUserId}`, userData);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setEditUserModal(false);
+      setEditingUserId(null);
+      setUserForm({
+        email: "",
+        password: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        isAdmin: false
+      });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Naudotojo duomenys atnaujinti",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating user:", error);
+      toast({
+        title: "Klaida",
+        description: error.message || "Nepavyko atnaujinti naudotojo",
+        variant: "destructive"
+      });
+    }
+  });
+
   const updateCourtPricingMutation = useMutation({
     mutationFn: async (pricingData: { hourlyRate: string }) => {
       if (courts.length === 0) throw new Error("No courts found");
@@ -484,6 +519,38 @@ export default function Admin() {
     }
 
     createUserMutation.mutate(userForm);
+  };
+
+  const handleEditUser = (user: UserWithStats) => {
+    setEditingUserId(user.id);
+    setUserForm({
+      email: user.email || "",
+      password: "", // Don't pre-fill password for security
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      phone: user.phone || "",
+      isAdmin: user.isAdmin
+    });
+    setEditUserModal(true);
+  };
+
+  const handleUpdateUser = () => {
+    if (!userForm.email || !userForm.firstName || !userForm.lastName || !userForm.phone) {
+      toast({
+        title: "Klaida",
+        description: "Užpildykite visus privalomus laukus",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Don't send password if it's empty (user doesn't want to change it)
+    const updateData = { ...userForm };
+    if (!updateData.password) {
+      delete updateData.password;
+    }
+
+    updateUserMutation.mutate(updateData);
   };
 
   // Validation function for admin reservation creation
@@ -1092,7 +1159,11 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditUser(user)}
+                              >
                                 <Edit size={14} />
                               </Button>
                             </div>
@@ -1541,6 +1612,136 @@ export default function Admin() {
                   className="bg-tennis-green-500 hover:bg-tennis-green-600"
                 >
                   {createUserMutation.isPending ? "Kuriamas..." : "Sukurti Naudotoją"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
+      {/* Edit User Modal */}
+      {editUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md mx-auto shadow-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Redaguoti Naudotoją</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditUserModal(false);
+                    setEditingUserId(null);
+                    setUserForm({
+                      email: "",
+                      password: "",
+                      firstName: "",
+                      lastName: "",
+                      phone: "",
+                      isAdmin: false
+                    });
+                  }}
+                  className="h-6 w-6 hover:bg-gray-100"
+                >
+                  <Plus className="h-4 w-4 rotate-45" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="edit-email">El. paštas *</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={userForm.email}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="vardas@pavyzdys.lt"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-password">Slaptažodis</Label>
+                <Input
+                  id="edit-password"
+                  type="password"
+                  value={userForm.password}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="Palikite tuščią, jei nekeičiate"
+                />
+                <p className="text-xs text-gray-500 mt-1">Palikite tuščią, jei nenorite keisti slaptažodžio</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-firstName">Vardas *</Label>
+                  <Input
+                    id="edit-firstName"
+                    value={userForm.firstName}
+                    onChange={(e) => setUserForm(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="Vardas"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-lastName">Pavardė *</Label>
+                  <Input
+                    id="edit-lastName"
+                    value={userForm.lastName}
+                    onChange={(e) => setUserForm(prev => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Pavardė"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-phone">Telefonas *</Label>
+                <Input
+                  id="edit-phone"
+                  type="tel"
+                  value={userForm.phone}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="+370 600 00000"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-isAdmin"
+                  checked={userForm.isAdmin}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, isAdmin: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="edit-isAdmin" className="text-sm">
+                  Administratoriaus teisės
+                </Label>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditUserModal(false);
+                    setEditingUserId(null);
+                    setUserForm({
+                      email: "",
+                      password: "",
+                      firstName: "",
+                      lastName: "",
+                      phone: "",
+                      isAdmin: false
+                    });
+                  }}
+                  disabled={updateUserMutation.isPending}
+                >
+                  Atšaukti
+                </Button>
+                <Button
+                  onClick={handleUpdateUser}
+                  disabled={updateUserMutation.isPending}
+                  className="bg-tennis-green-500 hover:bg-tennis-green-600"
+                >
+                  {updateUserMutation.isPending ? "Atnaujinama..." : "Atnaujinti"}
                 </Button>
               </div>
             </CardContent>

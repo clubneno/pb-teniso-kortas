@@ -106,9 +106,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User | undefined> {
+    // If password is provided, hash it
+    const updateData = { ...data };
+    if (updateData.password) {
+      updateData.password = await hashPassword(updateData.password);
+    }
+    
     const [user] = await db
       .update(users)
-      .set({ ...data, updatedAt: new Date() })
+      .set({ ...updateData, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return user;
