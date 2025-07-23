@@ -90,6 +90,7 @@ Preferred communication style: Simple, everyday language.
 - Created XML sitemap and robots.txt for search engine optimization (2025-07-23)
 - Enhanced all pages with Lithuanian-language SEO content and proper meta tags (2025-07-23)
 - Updated URL structure to use Lithuanian paths: /auth → /prisijungimas, /dashboard → /savitarna with proper SEO maintenance (2025-07-23)
+- Cleared all test reservations from database for clean production deployment (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking
