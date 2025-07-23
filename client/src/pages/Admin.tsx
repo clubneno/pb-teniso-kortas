@@ -1233,13 +1233,22 @@ export default function Admin() {
                       const startHour = parseInt(operatingStartTime.split(':')[0]);
                       const endHour = parseInt(operatingEndTime.split(':')[0]);
                       
-                      // Generate time slots within operating hours
-                      for (let hour = startHour; hour < endHour; hour++) {
-                        const currentStartTime = `${hour.toString().padStart(2, '0')}:00`;
-                        const currentEndTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                      // Generate 90-minute slots within operating hours
+                      const startMinutes = startHour * 60;
+                      const endMinutes = endHour * 60;
+                      
+                      for (let currentMinutes = startMinutes; currentMinutes + 90 <= endMinutes; currentMinutes += 90) {
+                        const currentStartHour = Math.floor(currentMinutes / 60);
+                        const currentStartMin = currentMinutes % 60;
+                        const currentEndMinutes = currentMinutes + 90;
+                        const currentEndHour = Math.floor(currentEndMinutes / 60);
+                        const currentEndMin = currentEndMinutes % 60;
+                        
+                        const currentStartTime = `${currentStartHour.toString().padStart(2, '0')}:${currentStartMin.toString().padStart(2, '0')}`;
+                        const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
                         const timeSlot = `${currentStartTime}-${currentEndTime}`;
                         
-                        // Check if this hour slot conflicts with existing reservations
+                        // Check if this 90-minute slot conflicts with existing reservations
                         const isConflict = availability.some((slot: any) => {
                           // Check if time slots overlap
                           return !(currentEndTime <= slot.startTime || currentStartTime >= slot.endTime);
