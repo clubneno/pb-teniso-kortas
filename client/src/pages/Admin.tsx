@@ -17,7 +17,7 @@ import {
   Calendar, 
   Users, 
   Settings, 
-  Circle,
+
   LogOut,
   Edit,
   Trash2,
@@ -35,6 +35,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import DatePicker from "@/components/DatePicker";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import TennisBallIcon from "@/components/TennisBallIcon";
 
 interface ReservationWithDetails {
   id: number;
@@ -488,7 +489,7 @@ export default function Admin() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-tennis-green-600 rounded-full flex items-center justify-center">
-                <Circle className="text-white fill-current" size={20} />
+                <TennisBallIcon size={20} className="text-white" />
               </div>
               <span className="text-xl font-bold text-tennis-green-600">PB teniso kortas</span>
             </div>
@@ -511,7 +512,7 @@ export default function Admin() {
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-tennis-green-100 rounded-full flex items-center justify-center">
-                <Circle className="text-tennis-green-600 fill-current" size={24} />
+                <TennisBallIcon size={24} className="text-tennis-green-600" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Administratoriaus panelė</h1>
@@ -582,7 +583,7 @@ export default function Admin() {
                       <p className="text-2xl font-bold text-purple-800">{thisWeekCourtUsage}%</p>
                       <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
-                    <Circle className="text-purple-600 fill-current" size={32} />
+                    <TennisBallIcon size={32} className="text-purple-600" />
                   </div>
                 </CardContent>
               </Card>

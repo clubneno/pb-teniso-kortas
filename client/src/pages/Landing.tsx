@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import Calendar from "@/components/Calendar";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import { 
-  Circle, 
   Clock, 
   Trophy, 
   Smartphone, 
@@ -17,6 +16,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import heroImage from '@assets/WhatsApp Image 2025-07-22 at 22.06.17_1753261982317.jpeg';
+import TennisBallIcon from "@/components/TennisBallIcon";
 
 interface Court {
   id: number;
@@ -131,7 +131,7 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2e6b4a' }}>
-                <Circle className="text-white fill-current" size={20} />
+                <TennisBallIcon size={20} className="text-white" />
               </div>
               <span className="text-xl font-bold text-tennis-green-600">PB teniso kortas</span>
             </div>
@@ -280,7 +280,7 @@ export default function Landing() {
             <div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                  <Circle className="text-tennis-green-600 fill-current" size={16} />
+                  <TennisBallIcon size={16} className="text-tennis-green-600" />
                 </div>
                 <span className="text-lg font-bold">PB teniso kortas</span>
               </div>
