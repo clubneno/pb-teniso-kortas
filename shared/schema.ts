@@ -99,7 +99,7 @@ export const registerSchema = z.object({
   password: z.string().min(6, "Slaptažodis turi būti bent 6 simbolių"),
   firstName: z.string().min(1, "Vardas privalomas"),
   lastName: z.string().min(1, "Pavardė privaloma"),
-  phone: z.string().optional(),
+  phone: z.string().min(1, "Telefonas privalomas"),
 });
 
 export const insertCourtSchema = createInsertSchema(courts).omit({

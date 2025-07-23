@@ -216,7 +216,7 @@ export default function AuthPage() {
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Telefono numeris (neprivalomas)</FormLabel>
+                              <FormLabel>Telefono numeris *</FormLabel>
                               <FormControl>
                                 <Input placeholder="+370 6XX XXXXX" {...field} />
                               </FormControl>

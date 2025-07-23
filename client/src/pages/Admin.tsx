@@ -433,7 +433,7 @@ export default function Admin() {
   });
 
   const handleCreateUser = () => {
-    if (!userForm.email || !userForm.password || !userForm.firstName || !userForm.lastName) {
+    if (!userForm.email || !userForm.password || !userForm.firstName || !userForm.lastName || !userForm.phone) {
       toast({
         title: "Klaida",
         description: "Užpildykite visus privalomus laukus",
@@ -1456,7 +1456,7 @@ export default function Admin() {
               </div>
 
               <div>
-                <Label htmlFor="phone">Telefonas</Label>
+                <Label htmlFor="phone">Telefonas *</Label>
                 <Input
                   id="phone"
                   type="tel"
