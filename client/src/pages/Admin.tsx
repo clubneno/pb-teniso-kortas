@@ -130,7 +130,7 @@ export default function Admin() {
   });
   
   const [pricing, setPricing] = useState({
-    hourlyRate: "0.00"
+    slotRate: "0.00" // 30-minute slot rate
   });
   const { toast } = useToast();
 
@@ -190,8 +190,10 @@ export default function Admin() {
   // Initialize pricing state when courts data is loaded
   useEffect(() => {
     if (courts.length > 0 && courts[0].hourlyRate) {
+      // Convert hourly rate to 30-minute slot rate (hourlyRate / 2)
+      const slotRate = (parseFloat(courts[0].hourlyRate) / 2).toFixed(2);
       setPricing({
-        hourlyRate: courts[0].hourlyRate
+        slotRate: slotRate
       });
     }
   }, [courts]);
@@ -1130,8 +1132,8 @@ export default function Admin() {
                       <Input 
                         type="number" 
                         step="0.01"
-                        value={pricing.hourlyRate}
-                        onChange={(e) => setPricing(prev => ({ ...prev, hourlyRate: e.target.value }))}
+                        value={pricing.slotRate}
+                        onChange={(e) => setPricing(prev => ({ ...prev, slotRate: e.target.value }))}
                         placeholder="0.00"
                       />
                     </div>
@@ -1203,9 +1205,10 @@ export default function Admin() {
                 <Button 
                   className="bg-tennis-green-500 hover:bg-tennis-green-600"
                   onClick={() => {
-                    // Update court pricing
+                    // Convert 30-minute slot rate to hourly rate for database storage
+                    const hourlyRate = (parseFloat(pricing.slotRate) * 2).toFixed(2);
                     updateCourtPricingMutation.mutate({
-                      hourlyRate: pricing.hourlyRate
+                      hourlyRate: hourlyRate
                     });
                   }}
                   disabled={updateCourtPricingMutation.isPending}
@@ -1221,7 +1224,7 @@ export default function Admin() {
                       weekends: { start: "09:00", end: "21:00" }
                     });
                     setPricing({
-                      hourlyRate: courts.length > 0 ? courts[0].hourlyRate : "0.00"
+                      slotRate: courts.length > 0 ? (parseFloat(courts[0].hourlyRate) / 2).toFixed(2) : "0.00"
                     });
                   }}
                 >
