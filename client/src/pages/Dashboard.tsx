@@ -450,7 +450,7 @@ export default function Dashboard() {
                         >
                           {court.name}
                           <Badge variant="secondary" className="ml-2">
-                            {court.hourlyRate}€/30min.
+                            {(parseFloat(court.hourlyRate) / 2).toFixed(2)}€/30min.
                           </Badge>
                         </Button>
                       ))}
@@ -513,7 +513,12 @@ export default function Dashboard() {
                             <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
                             <div><strong>Kortas:</strong> {courts.find(c => c.id === selectedCourtId)?.name}</div>
                             <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
-                            <div><strong>Kaina:</strong> {(parseFloat(courts.find(c => c.id === selectedCourtId)?.hourlyRate || '0') * selectedTimeSlots.length * 0.5).toFixed(2)}€</div>
+                            <div><strong>Kaina:</strong> {(() => {
+                              const court = courts.find(c => c.id === selectedCourtId);
+                              const hourlyRate = parseFloat(court?.hourlyRate || '0');
+                              const slotRate = hourlyRate / 2; // 30-minute slot rate
+                              return (slotRate * selectedTimeSlots.length).toFixed(2);
+                            })()}€</div>
                           </div>
                           <div className="mt-3 mb-3">
                             <Button 
