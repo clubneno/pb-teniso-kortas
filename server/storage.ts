@@ -72,6 +72,7 @@ export interface IStorage {
   // Admin operations
   getAllUsers(): Promise<User[]>;
   getUserStats(userId: string): Promise<{ totalReservations: number; lastReservation?: string }>;
+  checkUserHasActiveReservations(userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -123,7 +124,13 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: string): Promise<boolean> {
     try {
-      // First, delete all reservations associated with this user
+      // Check if user has active reservations
+      const hasActiveReservations = await this.checkUserHasActiveReservations(id);
+      if (hasActiveReservations) {
+        throw new Error("Cannot delete user with active reservations");
+      }
+
+      // Delete all past reservations associated with this user
       await db.delete(reservations).where(eq(reservations.userId, id));
       
       // Then delete the user
@@ -131,8 +138,40 @@ export class DatabaseStorage implements IStorage {
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Error deleting user:", error);
-      return false;
+      throw error;
     }
+  }
+
+  async checkUserHasActiveReservations(userId: string): Promise<boolean> {
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+    // Get all reservations for this user that are either:
+    // 1. On a future date, OR
+    // 2. On today's date but with a future start time
+    const activeReservations = await db
+      .select()
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.userId, userId),
+          eq(reservations.status, "confirmed")
+        )
+      );
+
+    // Filter for truly active reservations (future date or future time today)
+    const futureReservations = activeReservations.filter(reservation => {
+      if (reservation.date > today) {
+        return true; // Future date
+      }
+      if (reservation.date === today && reservation.startTime > currentTime) {
+        return true; // Today but future time
+      }
+      return false; // Past reservation
+    });
+
+    return futureReservations.length > 0;
   }
 
   // Court operations

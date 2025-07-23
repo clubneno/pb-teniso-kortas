@@ -579,7 +579,7 @@ export default function Admin() {
     setConfirmModal({
       isOpen: true,
       title: "Pašalinti naudotoją",
-      message: `Ar tikrai norite pašalinti naudotoją "${userName}"? Visi jo rezervacijos taip pat bus pašalintos. Šis veiksmas negrįžtamas.`,
+      message: `Ar tikrai norite pašalinti naudotoją "${userName}"? Galimi pašalinti tik naudotojai be aktyvių rezervacijų. Visos praeities rezervacijos bus pašalintos. Šis veiksmas negrįžtamas.`,
       onConfirm: () => {
         deleteUserMutation.mutate(userId);
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
