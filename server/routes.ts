@@ -113,6 +113,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
       });
 
+      // Validate reservation duration (max 120 minutes)
+      const startTime = validatedData.startTime;
+      const endTime = validatedData.endTime;
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      const durationMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+      
+      if (durationMinutes > 120) {
+        return res.status(400).json({ message: "Maksimalus rezervacijos laikas yra 120 minučių" });
+      }
+
+      if (durationMinutes % 30 !== 0) {
+        return res.status(400).json({ message: "Rezervacijos trukmė turi būti 30 minučių kartotiniai" });
+      }
+
       // Check for conflicts
       const hasConflict = await storage.checkReservationConflict(
         validatedData.courtId,

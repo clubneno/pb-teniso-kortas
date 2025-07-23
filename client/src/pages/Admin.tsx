@@ -445,12 +445,49 @@ export default function Admin() {
     createUserMutation.mutate(userForm);
   };
 
+  // Validation function for admin reservation creation
+  const validateTimeSlots = (timeSlots: string[]) => {
+    // Check maximum duration (120 minutes = 4 slots of 30 minutes each)
+    if (timeSlots.length > 4) {
+      return { isValid: false, error: "Maksimalus rezervacijos laikas yra 120 minučių (4 laiko intervalai)" };
+    }
+
+    if (timeSlots.length === 0) {
+      return { isValid: false, error: "Pasirinkite bent vieną laiko intervalą" };
+    }
+
+    // Check if time slots are consecutive
+    const sortedSlots = [...timeSlots].sort();
+    
+    for (let i = 1; i < sortedSlots.length; i++) {
+      const currentSlotStart = sortedSlots[i].split('-')[0];
+      const previousSlotEnd = sortedSlots[i-1].split('-')[1];
+      
+      if (currentSlotStart !== previousSlotEnd) {
+        return { isValid: false, error: "Laiko intervalai turi būti iš eilės, be pertraukų" };
+      }
+    }
+
+    return { isValid: true, error: null };
+  };
+
   const handleCreateReservation = () => {
     if (!reservationForm.userId || !reservationForm.courtId || !reservationForm.date || selectedTimeSlots.length === 0) {
       toast({
         title: "Klaida",
         description: "Užpildykite visus laukus ir pasirinkite bent vieną laiko intervalą",
         variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate time slots
+    const validation = validateTimeSlots(selectedTimeSlots);
+    if (!validation.isValid) {
+      toast({
+        title: "Netinkamas laiko pasirinkimas",
+        description: validation.error,
+        variant: "destructive",
       });
       return;
     }

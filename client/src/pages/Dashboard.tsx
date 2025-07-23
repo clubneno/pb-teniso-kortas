@@ -214,8 +214,45 @@ export default function Dashboard() {
     return slots;
   };
 
+  // Validation functions
+  const validateTimeSlots = (timeSlots: string[]) => {
+    // Check maximum duration (120 minutes = 4 slots of 30 minutes each)
+    if (timeSlots.length > 4) {
+      return { isValid: false, error: "Maksimalus rezervacijos laikas yra 120 minučių (4 laiko intervalai)" };
+    }
+
+    if (timeSlots.length === 0) {
+      return { isValid: false, error: "Pasirinkite bent vieną laiko intervalą" };
+    }
+
+    // Check if time slots are consecutive
+    const sortedSlots = [...timeSlots].sort();
+    
+    for (let i = 1; i < sortedSlots.length; i++) {
+      const currentSlotStart = sortedSlots[i].split('-')[0];
+      const previousSlotEnd = sortedSlots[i-1].split('-')[1];
+      
+      if (currentSlotStart !== previousSlotEnd) {
+        return { isValid: false, error: "Laiko intervalai turi būti iš eilės, be pertraukų" };
+      }
+    }
+
+    return { isValid: true, error: null };
+  };
+
   const handleReservation = () => {
     if (!selectedCourtId || selectedTimeSlots.length === 0) return;
+
+    // Validate time slots
+    const validation = validateTimeSlots(selectedTimeSlots);
+    if (!validation.isValid) {
+      toast({
+        title: "Netinkamas laiko pasirinkimas",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const selectedCourt = courts.find(c => c.id === selectedCourtId);
     if (!selectedCourt) return;
@@ -421,25 +458,44 @@ export default function Dashboard() {
 
                     {/* Time Slots */}
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600">
-                          {selectedDate.toLocaleDateString('lt-LT')} prieinami laikai:
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-sm text-gray-600">
+                            {selectedDate.toLocaleDateString('lt-LT')} prieinami laikai:
+                          </p>
+                          {selectedTimeSlots.length > 0 && (
+                            <span className="text-xs text-tennis-green-600 font-medium">
+                              {selectedTimeSlots.length} pasirinkta
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Maksimalus rezervacijos laikas: 120 min. (4 intervalai). Intervalai turi būti iš eilės.
                         </p>
                         {selectedTimeSlots.length > 0 && (
-                          <span className="text-xs text-tennis-green-600 font-medium">
-                            {selectedTimeSlots.length} pasirinkta
-                          </span>
+                          <p className="text-sm text-tennis-green-600 mb-2">
+                            Pasirinkta: {selectedTimeSlots.length}/4 intervalų ({selectedTimeSlots.length * 30} min.)
+                          </p>
                         )}
                       </div>
                       
                       <TimeSlotGrid
                         timeSlots={timeSlots}
                         onSlotSelect={(slot) => {
-                          setSelectedTimeSlots(prev => 
-                            prev.includes(slot) 
-                              ? prev.filter(s => s !== slot)
-                              : [...prev, slot]
-                          );
+                          if (selectedTimeSlots.includes(slot)) {
+                            setSelectedTimeSlots(prev => prev.filter(s => s !== slot));
+                          } else {
+                            // Check if adding this slot would exceed the 4-slot limit
+                            if (selectedTimeSlots.length >= 4) {
+                              toast({
+                                title: "Viršytas limitas",
+                                description: "Maksimaliai galite pasirinkti 4 laiko intervalus (120 min.)",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            setSelectedTimeSlots(prev => [...prev, slot]);
+                          }
                         }}
                         selectedSlots={selectedTimeSlots}
                         selectedDate={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
