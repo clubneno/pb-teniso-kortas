@@ -139,9 +139,22 @@ export default function Admin() {
       
       // Sort reservations from most recent to least recent (by date and time)
       return data.sort((a: ReservationWithDetails, b: ReservationWithDetails) => {
-        const dateTimeA = new Date(a.date + 'T' + a.startTime);
-        const dateTimeB = new Date(b.date + 'T' + b.startTime);
-        return dateTimeB.getTime() - dateTimeA.getTime(); // Most recent first
+        // First compare by date
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        
+        if (dateA.getTime() !== dateB.getTime()) {
+          return dateB.getTime() - dateA.getTime(); // Most recent date first
+        }
+        
+        // If dates are equal, compare by start time
+        const timeA = a.startTime.split(':').map(num => parseInt(num));
+        const timeB = b.startTime.split(':').map(num => parseInt(num));
+        
+        const minutesA = timeA[0] * 60 + timeA[1];
+        const minutesB = timeB[0] * 60 + timeB[1];
+        
+        return minutesB - minutesA; // Most recent time first
       });
     },
     retry: false,
