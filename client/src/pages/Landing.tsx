@@ -254,7 +254,7 @@ export default function Landing() {
                           <p className="text-sm opacity-90 mb-2">{court.description}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-tennis-yellow font-bold text-lg">
-                              {court.hourlyRate}€/30min.
+                              {(parseFloat(court.hourlyRate) / 2).toFixed(2)}€/30min.
                             </span>
                           </div>
                         </div>

@@ -97,6 +97,10 @@ Preferred communication style: Simple, everyday language.
 - Fixed critical availability bug where existing reservations weren't showing as reserved due to incorrect time overlap detection (2025-07-23)
 - Fixed cache invalidation issue where cancelled reservations weren't immediately reflected in time slot display (2025-07-23)
 - Added reservation time restrictions: maximum 120 minutes duration and consecutive slots only requirement (2025-07-23)
+- Updated pricing system to properly handle 30-minute slot rates throughout the application (2025-07-23)
+- Made admin pricing field editable for 30-minute slot rates with automatic conversion to hourly rates for database storage (2025-07-23)
+- Fixed pricing display consistency across Landing, Dashboard, and Admin pages to show actual 30-minute slot prices (2025-07-23)
+- Increased admin reservation modal size (max-w-4xl, max-h-95vh) for better date picker visibility (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking
