@@ -90,16 +90,25 @@ export default function Landing() {
 
   const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 8; hour <= 21; hour++) {
-      const startTime = `${hour.toString().padStart(2, '0')}:00`;
-      const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+    // Generate 90-minute slots starting from 8:00
+    let startMinutes = 8 * 60; // 8:00 in minutes
+    const endMinutes = 21 * 60 + 30; // 21:30 in minutes (last possible end time)
+    
+    while (startMinutes < endMinutes) {
+      const endSlotMinutes = startMinutes + 90; // Add 90 minutes
+      
+      const startHour = Math.floor(startMinutes / 60);
+      const startMin = startMinutes % 60;
+      const endHour = Math.floor(endSlotMinutes / 60);
+      const endMin = endSlotMinutes % 60;
+      
+      const startTime = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
+      const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
       
       // Use exact same logic as Dashboard: check if slot is in availabilityData (reserved slots)
       const isReserved = availabilityData.some((slot) => 
         slot.startTime === startTime && slot.endTime === endTime
       );
-
-
 
       // Check how many courts are reserved at this time slot (for cross-court info)
       const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
@@ -117,6 +126,8 @@ export default function Landing() {
         totalReservations: allReservationsAtThisTime.length,
         reservedCourts: reservedCourts,
       });
+      
+      startMinutes += 90; // Move to next 90-minute slot
     }
     return slots;
   };

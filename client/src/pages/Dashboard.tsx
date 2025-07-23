@@ -160,17 +160,26 @@ export default function Dashboard() {
 
   const generateTimeSlots = () => {
     const slots = [];
-    for (let hour = 8; hour <= 21; hour++) {
-      const startTime = `${hour.toString().padStart(2, '0')}:00`;
-      const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+    // Generate 90-minute slots starting from 8:00
+    let startMinutes = 8 * 60; // 8:00 in minutes
+    const endMinutes = 21 * 60 + 30; // 21:30 in minutes (last possible end time)
+    
+    while (startMinutes < endMinutes) {
+      const endSlotMinutes = startMinutes + 90; // Add 90 minutes
+      
+      const startHour = Math.floor(startMinutes / 60);
+      const startMin = startMinutes % 60;
+      const endHour = Math.floor(endSlotMinutes / 60);
+      const endMin = endSlotMinutes % 60;
+      
+      const startTime = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
+      const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
       
       // Check if this slot is reserved for the selected court
       const isReserved = availabilityData.some((slot) => 
         slot.startTime === startTime && slot.endTime === endTime
       );
 
-
-      
       // Check how many courts are reserved at this time slot
       const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
         r.startTime === startTime && r.endTime === endTime
@@ -178,8 +187,6 @@ export default function Dashboard() {
       
       // Get court names that have reservations at this time
       const reservedCourts = allReservationsAtThisTime.map((r: any) => r.court.name).join(', ');
-      
-
       
       slots.push({
         startTime,
@@ -189,6 +196,8 @@ export default function Dashboard() {
         totalReservations: allReservationsAtThisTime.length,
         reservedCourts: reservedCourts,
       });
+      
+      startMinutes += 90; // Move to next 90-minute slot
     }
     return slots;
   };
@@ -200,14 +209,21 @@ export default function Dashboard() {
     if (!selectedCourt) return;
 
     const [startTime] = selectedTimeSlot.split('-');
-    const endTime = `${(parseInt(startTime.split(':')[0]) + 1).toString().padStart(2, '0')}:00`;
+    // Calculate end time by adding 90 minutes
+    const startHour = parseInt(startTime.split(':')[0]);
+    const startMin = parseInt(startTime.split(':')[1]);
+    const totalStartMinutes = startHour * 60 + startMin;
+    const totalEndMinutes = totalStartMinutes + 90;
+    const endHour = Math.floor(totalEndMinutes / 60);
+    const endMin = totalEndMinutes % 60;
+    const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
 
     const reservationData = {
       courtId: selectedCourtId,
       date: `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`,
       startTime,
       endTime,
-      totalPrice: selectedCourt.hourlyRate,
+      totalPrice: (parseFloat(selectedCourt.hourlyRate) * 1.5).toString(), // 90 minutes = 1.5 hours
     };
     
     console.log("Sending reservation data:", reservationData);
