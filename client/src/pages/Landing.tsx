@@ -116,14 +116,15 @@ export default function Landing() {
       const startTime = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
       const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
       
-      // Use exact same logic as Dashboard: check if slot is in availabilityData (reserved slots)
-      const isReserved = availabilityData.some((slot) => 
-        slot.startTime === startTime && slot.endTime === endTime
-      );
+      // Check if this slot overlaps with any existing reservation
+      const isReserved = availabilityData.some((reservation) => {
+        // Check if time slots overlap
+        return !(endTime <= reservation.startTime || startTime >= reservation.endTime);
+      });
 
-      // Check how many courts are reserved at this time slot (for cross-court info)
+      // Check how many courts are reserved at this time slot (overlapping)
       const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
-        r.startTime === startTime && r.endTime === endTime
+        !(endTime <= r.startTime || startTime >= r.endTime)
       );
       
       // Get court names that have reservations at this time
