@@ -426,6 +426,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/admin/courts/:courtId', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const courtId = parseInt(req.params.courtId);
+      const updateData = req.body;
+
+      // Validate only the fields that are being updated
+      if (updateData.hourlyRate !== undefined) {
+        const hourlyRateSchema = z.object({
+          hourlyRate: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
+        });
+        hourlyRateSchema.parse({ hourlyRate: updateData.hourlyRate });
+      }
+
+      const updatedCourt = await storage.updateCourt(courtId, updateData);
+      
+      if (!updatedCourt) {
+        return res.status(404).json({ message: "Court not found" });
+      }
+
+      res.json(updatedCourt);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error updating court:", error);
+      res.status(500).json({ message: "Failed to update court" });
+    }
+  });
+
   // Admin user creation
   app.post('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {

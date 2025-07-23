@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -128,6 +128,10 @@ export default function Admin() {
     weekdays: { start: "08:00", end: "22:00" },
     weekends: { start: "09:00", end: "21:00" }
   });
+  
+  const [pricing, setPricing] = useState({
+    hourlyRate: "0.00"
+  });
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -182,6 +186,15 @@ export default function Admin() {
   const { data: courts = [], isLoading: courtsLoading } = useQuery<any[]>({
     queryKey: ["/api/courts"],
   });
+
+  // Initialize pricing state when courts data is loaded
+  useEffect(() => {
+    if (courts.length > 0 && courts[0].hourlyRate) {
+      setPricing({
+        hourlyRate: courts[0].hourlyRate
+      });
+    }
+  }, [courts]);
 
   // Fetch availability for selected date and court
   const { data: availability = [], isLoading: availabilityLoading } = useQuery<any[]>({
@@ -427,6 +440,32 @@ export default function Admin() {
       toast({
         title: "Klaida",
         description: error.message || "Nepavyko sukurti naudotojo",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const updateCourtPricingMutation = useMutation({
+    mutationFn: async (pricingData: { hourlyRate: string }) => {
+      if (courts.length === 0) throw new Error("No courts found");
+      
+      const res = await apiRequest("PATCH", `/api/admin/courts/${courts[0].id}`, {
+        hourlyRate: pricingData.hourlyRate
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/courts"] });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Kortų kaina atnaujinta sėkmingai",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating pricing:", error);
+      toast({
+        title: "Klaida",
+        description: "Nepavyko atnaujinti kainos",
         variant: "destructive"
       });
     }
@@ -1091,9 +1130,9 @@ export default function Admin() {
                       <Input 
                         type="number" 
                         step="0.01"
-                        value={courts.length > 0 ? courts[0].hourlyRate : 0} 
-                        readOnly
-                        className="bg-gray-50"
+                        value={pricing.hourlyRate}
+                        onChange={(e) => setPricing(prev => ({ ...prev, hourlyRate: e.target.value }))}
+                        placeholder="0.00"
                       />
                     </div>
                   </div>
@@ -1164,14 +1203,15 @@ export default function Admin() {
                 <Button 
                   className="bg-tennis-green-500 hover:bg-tennis-green-600"
                   onClick={() => {
-                    toast({
-                      title: "Pakeitimas išsaugotas",
-                      description: "Darbo laikai atnaujinti sėkmingai",
+                    // Update court pricing
+                    updateCourtPricingMutation.mutate({
+                      hourlyRate: pricing.hourlyRate
                     });
                   }}
+                  disabled={updateCourtPricingMutation.isPending}
                 >
                   <Settings size={16} className="mr-2" />
-                  Išsaugoti Nustatymus
+                  {updateCourtPricingMutation.isPending ? "Išsaugoma..." : "Išsaugoti Nustatymus"}
                 </Button>
                 <Button 
                   variant="outline"
@@ -1179,6 +1219,9 @@ export default function Admin() {
                     setOperatingHours({
                       weekdays: { start: "08:00", end: "22:00" },
                       weekends: { start: "09:00", end: "21:00" }
+                    });
+                    setPricing({
+                      hourlyRate: courts.length > 0 ? courts[0].hourlyRate : "0.00"
                     });
                   }}
                 >
