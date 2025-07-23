@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Calendar from "@/components/Calendar";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import { 
-  Zap, 
+  Circle, 
   Clock, 
   Trophy, 
   Smartphone, 
@@ -131,7 +131,7 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#2e6b4a' }}>
-                <Zap className="text-white" size={20} />
+                <Circle className="text-white fill-current" size={20} />
               </div>
               <span className="text-xl font-bold text-tennis-green-600">PB teniso kortas</span>
             </div>
@@ -280,7 +280,7 @@ export default function Landing() {
             <div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                  <Zap className="text-tennis-green-600" size={16} />
+                  <Circle className="text-tennis-green-600 fill-current" size={16} />
                 </div>
                 <span className="text-lg font-bold">PB teniso kortas</span>
               </div>
