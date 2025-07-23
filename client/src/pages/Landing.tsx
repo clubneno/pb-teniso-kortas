@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Calendar from "@/components/Calendar";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
+import { useSEO } from "@/hooks/useSEO";
 import { 
   Clock, 
   Trophy, 
@@ -36,6 +37,16 @@ interface PublicReservation {
 }
 
 export default function Landing() {
+  // SEO optimization for landing page
+  useSEO({
+    title: "PB teniso kortas - Teniso kortų rezervacijos Lietuvoje",
+    description: "Rezervuokite teniso kortus greitai ir patogiai. PB teniso kortas siūlo modernius teniso kortus su 90 minučių rezervacijos sistema. Peržiūrėkite laisvus laikus ir rezervuokite iš karto.",
+    canonical: "/",
+    keywords: "teniso kortai, rezervacijos, tenisas, sportas, Lietuva, teniso klubas, kortų nuoma, PB teniso kortas",
+    ogTitle: "PB teniso kortas - Profesionalūs teniso kortai Lietuvoje",
+    ogDescription: "Modernus teniso klubas su patogiu rezervacijų susistemai. Rezervuokite 90 minučių teniso kortų sesijas online.",
+  });
+
   // Create date in Vilnius timezone
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();

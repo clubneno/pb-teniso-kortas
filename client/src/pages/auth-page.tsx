@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,16 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
+  
+  // SEO optimization for auth page
+  useSEO({
+    title: "Prisijungimas ir registracija - PB teniso kortas",
+    description: "Prisijunkite prie PB teniso kortų rezervacijos sistemos arba užregistruokitės naują paskyrą. Greitai ir saugiai valdykite savo teniso kortų rezervacijas.",
+    canonical: "/auth",
+    keywords: "prisijungimas, registracija, teniso kortas, paskyra, rezervacijos",
+    ogTitle: "Prisijungimas - PB teniso kortas",
+    ogDescription: "Prisijunkite prie teniso kortų rezervacijos sistemos ir pradėkite rezervuoti kortus šiandien.",
+  });
 
   const loginForm = useForm<LoginData>({
     resolver: zodResolver(loginSchema),

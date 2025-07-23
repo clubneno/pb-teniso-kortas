@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -76,6 +77,17 @@ interface UserWithStats {
 
 export default function Admin() {
   const { user, isLoading: authLoading } = useAuth();
+  
+  // SEO optimization for admin page
+  useSEO({
+    title: "Administracijos panelė - PB teniso kortas",
+    description: "Administracijos valdymo panelė teniso kortų rezervacijų sistemai. Tvarkykite kortus, rezervacijas ir vartotojus.",
+    canonical: "/admin",
+    keywords: "administracija, valdymas, rezervacijos valdymas, kortų valdymas, admin panel",
+    ogTitle: "Admin valdymas - PB teniso kortas",
+    ogDescription: "Pilnas teniso kortų rezervacijų sistemos administracijos valdymas.",
+  });
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");

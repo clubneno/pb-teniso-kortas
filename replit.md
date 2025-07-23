@@ -85,6 +85,10 @@ Preferred communication style: Simple, everyday language.
 - Updated reservation filtering logic to properly work with Europe/Vilnius timezone (2025-07-23)
 - Added chronological sorting to admin reservations panel displaying earliest dates/times first (2025-07-23)
 - Added www subdomain redirect middleware to handle both www and non-www domains (2025-07-23)
+- Implemented comprehensive SEO optimization with canonical tags, meta descriptions, Open Graph tags, and structured data (2025-07-23)
+- Added dynamic SEO management system using useSEO hook for page-specific optimization (2025-07-23)
+- Created XML sitemap and robots.txt for search engine optimization (2025-07-23)
+- Enhanced all pages with Lithuanian-language SEO content and proper meta tags (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking

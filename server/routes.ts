@@ -444,6 +444,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SEO - Sitemap XML
+  app.get("/sitemap.xml", (req, res) => {
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://pbtenisokortas.lt/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://pbtenisokortas.lt/auth</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>`;
+    
+    res.set('Content-Type', 'application/xml');
+    res.send(sitemap);
+  });
+
+  // SEO - Robots.txt
+  app.get("/robots.txt", (req, res) => {
+    const robots = `User-agent: *
+Allow: /
+Allow: /auth
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
+    
+    res.set('Content-Type', 'text/plain');
+    res.send(robots);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

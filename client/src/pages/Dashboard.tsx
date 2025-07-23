@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useSEO } from "@/hooks/useSEO";
 import Calendar from "@/components/Calendar";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import ReservationCard from "@/components/ReservationCard";
@@ -52,6 +53,16 @@ interface ReservationWithDetails {
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  
+  // SEO optimization for dashboard
+  useSEO({
+    title: "Mano rezervacijos - PB teniso kortas",
+    description: "Valdykite savo teniso kortų rezervacijas, peržiūrėkite istoriją ir sukurkite naujas rezervacijas. Lengvas ir patogus rezervacijų valdymas.",
+    canonical: "/dashboard",
+    keywords: "rezervacijų valdymas, teniso rezervacijos, mano rezervacijos, teniso kortas",
+    ogTitle: "Rezervacijų valdymas - PB teniso kortas",
+    ogDescription: "Valdykite visas savo teniso kortų rezervacijas vienoje vietoje. Peržiūrėkite istoriją ir kurkite naujas rezervacijas lengvai.",
+  });
   // Create date in Vilnius timezone
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
