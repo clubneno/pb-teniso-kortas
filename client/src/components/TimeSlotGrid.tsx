@@ -64,7 +64,7 @@ export default function TimeSlotGrid({
       return `${baseClasses} bg-gray-500 border border-gray-600 cursor-not-allowed opacity-60`;
     }
     
-    if (selectedSlots.includes(timeRange) && !isPublicView) {
+    if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
       return `${baseClasses} bg-tennis-green-600 border border-tennis-green-700`;
     }
     
@@ -89,7 +89,7 @@ export default function TimeSlotGrid({
       return "Užimta";
     }
     
-    if (selectedSlots.includes(timeRange) && !isPublicView) {
+    if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
       return "Pasirinkta";
     }
     

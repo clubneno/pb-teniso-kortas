@@ -147,26 +147,6 @@ export class DatabaseStorage implements IStorage {
     startDate?: string;
     endDate?: string;
   } = {}): Promise<ReservationWithDetails[]> {
-    let query = db
-      .select({
-        id: reservations.id,
-        userId: reservations.userId,
-        courtId: reservations.courtId,
-        date: reservations.date,
-        startTime: reservations.startTime,
-        endTime: reservations.endTime,
-        totalPrice: reservations.totalPrice,
-        status: reservations.status,
-        notes: reservations.notes,
-        createdAt: reservations.createdAt,
-        updatedAt: reservations.updatedAt,
-        user: users,
-        court: courts,
-      })
-      .from(reservations)
-      .innerJoin(users, eq(reservations.userId, users.id))
-      .innerJoin(courts, eq(reservations.courtId, courts.id));
-
     const conditions: any[] = [];
 
     if (filters.userId) {
@@ -188,12 +168,29 @@ export class DatabaseStorage implements IStorage {
       conditions.push(lte(reservations.date, filters.endDate));
     }
 
-    let finalQuery = query;
-    if (conditions.length > 0) {
-      finalQuery = query.where(and(...conditions));
-    }
+    const baseQuery = db
+      .select({
+        id: reservations.id,
+        userId: reservations.userId,
+        courtId: reservations.courtId,
+        date: reservations.date,
+        startTime: reservations.startTime,
+        endTime: reservations.endTime,
+        totalPrice: reservations.totalPrice,
+        status: reservations.status,
+        notes: reservations.notes,
+        createdAt: reservations.createdAt,
+        updatedAt: reservations.updatedAt,
+        user: users,
+        court: courts,
+      })
+      .from(reservations)
+      .innerJoin(users, eq(reservations.userId, users.id))
+      .innerJoin(courts, eq(reservations.courtId, courts.id));
 
-    const results = await finalQuery.orderBy(desc(reservations.date), desc(reservations.startTime));
+    const results = conditions.length > 0 
+      ? await baseQuery.where(and(...conditions)).orderBy(desc(reservations.date), desc(reservations.startTime))
+      : await baseQuery.orderBy(desc(reservations.date), desc(reservations.startTime));
     
     return results.map(result => ({
       ...result,
