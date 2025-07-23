@@ -95,6 +95,7 @@ Preferred communication style: Simple, everyday language.
 - Updated pricing calculation to charge 0.5 hours for each 30-minute slot (2025-07-23)
 - Added multi-slot selection functionality allowing users to select multiple consecutive 30-minute time slots for extended reservations (2025-07-23)
 - Fixed critical availability bug where existing reservations weren't showing as reserved due to incorrect time overlap detection (2025-07-23)
+- Fixed cache invalidation issue where cancelled reservations weren't immediately reflected in time slot display (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking

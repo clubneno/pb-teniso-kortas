@@ -63,6 +63,8 @@ export default function ReservationCard({ reservation, showActions = false, isPa
         description: "Rezervacija sėkmingai atšaukta. Patvirtinimo el. laiškas išsiųstas.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reservations/public"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/courts"] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
