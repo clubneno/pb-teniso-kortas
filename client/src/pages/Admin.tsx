@@ -135,7 +135,14 @@ export default function Admin() {
         throw new Error('Failed to fetch reservations');
       }
       
-      return response.json();
+      const data = await response.json();
+      
+      // Sort reservations from most recent to least recent (by date and time)
+      return data.sort((a: ReservationWithDetails, b: ReservationWithDetails) => {
+        const dateTimeA = new Date(a.date + 'T' + a.startTime);
+        const dateTimeB = new Date(b.date + 'T' + b.startTime);
+        return dateTimeB.getTime() - dateTimeA.getTime(); // Most recent first
+      });
     },
     retry: false,
   });
