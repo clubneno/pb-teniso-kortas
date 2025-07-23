@@ -254,7 +254,7 @@ export default function Landing() {
                           <p className="text-sm opacity-90 mb-2">{court.description}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-tennis-yellow font-bold text-lg">
-                              {court.hourlyRate}€/val
+                              {court.hourlyRate}€/30min.
                             </span>
                             {selectedCourtId === court.id && (
                               <span className="text-xs bg-white/20 px-2 py-1 rounded">Pasirinkta</span>
