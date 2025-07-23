@@ -230,8 +230,29 @@ export default function Dashboard() {
     createReservationMutation.mutate(reservationData);
   };
 
+  // Get current date in Vilnius timezone for accurate comparisons
+  const getVilniusDate = () => {
+    const now = new Date();
+    const vilniusTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+    return new Date(vilniusTime.getFullYear(), vilniusTime.getMonth(), vilniusTime.getDate());
+  };
+
+  const currentVilniusDate = getVilniusDate();
+
   const activeReservations = reservations
-    .filter(r => r.status === 'confirmed' && new Date(r.date) >= new Date())
+    .filter(r => {
+      if (r.status !== 'confirmed') return false;
+      const reservationDate = new Date(r.date);
+      const reservationDateTime = new Date(r.date + 'T' + r.endTime + ':00');
+      
+      // Compare dates first
+      if (reservationDate > currentVilniusDate) return true; // Future date
+      if (reservationDate < currentVilniusDate) return false; // Past date
+      
+      // Same date - check if end time has passed (in Vilnius timezone)
+      const nowInVilnius = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+      return reservationDateTime > nowInVilnius;
+    })
     .sort((a, b) => {
       const dateA = new Date(a.date + 'T' + a.startTime);
       const dateB = new Date(b.date + 'T' + b.startTime);
@@ -239,7 +260,19 @@ export default function Dashboard() {
     });
   
   const pastReservations = reservations
-    .filter(r => r.status === 'confirmed' && new Date(r.date) < new Date())
+    .filter(r => {
+      if (r.status !== 'confirmed') return false;
+      const reservationDate = new Date(r.date);
+      const reservationDateTime = new Date(r.date + 'T' + r.endTime + ':00');
+      
+      // Compare dates first
+      if (reservationDate < currentVilniusDate) return true; // Past date
+      if (reservationDate > currentVilniusDate) return false; // Future date
+      
+      // Same date - check if end time has passed (in Vilnius timezone)
+      const nowInVilnius = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Vilnius"}));
+      return reservationDateTime <= nowInVilnius;
+    })
     .sort((a, b) => {
       const dateA = new Date(a.date + 'T' + a.startTime);
       const dateB = new Date(b.date + 'T' + b.startTime);

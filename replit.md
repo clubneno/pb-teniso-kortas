@@ -81,6 +81,8 @@ Preferred communication style: Simple, everyday language.
 - Fixed all remaining LSP type errors for better code quality (2025-07-23)
 - Changed time slots from 60-minute to 90-minute intervals while maintaining all existing functionality (2025-07-23)
 - Updated pricing calculation to charge 1.5 hours for each 90-minute slot (2025-07-23)
+- Fixed timezone issue causing today's future reservations to appear as past reservations (2025-07-23)
+- Updated reservation filtering logic to properly work with Europe/Vilnius timezone (2025-07-23)
 
 ### Reservation Management
 - Real-time availability checking
