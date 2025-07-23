@@ -74,8 +74,8 @@ export default function AuthPage() {
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-tennis-green-600 rounded-full flex items-center justify-center">
-                  <TennisBallIcon size={20} className="text-white" />
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                  <TennisBallIcon size={20} className="text-tennis-green-600" />
                 </div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">PB teniso kortas</h1>
               </div>
