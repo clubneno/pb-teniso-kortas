@@ -750,6 +750,71 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
     }
   });
 
+  // Test email templates (admin only)
+  app.post('/api/admin/test-email', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { type, email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email address required' });
+      }
+
+      const testUser = {
+        firstName: 'Jonas',
+        lastName: 'Jonaitis',
+        email: email
+      };
+
+      const testReservation = {
+        id: 999,
+        date: new Date().toISOString().split('T')[0],
+        startTime: '14:00',
+        endTime: '15:30',
+        totalPrice: '15',
+        court: { name: 'Kortas #PB' },
+        status: 'confirmed'
+      };
+
+      switch (type) {
+        case 'confirmation':
+          await emailService.sendReservationConfirmation(testUser as any, testReservation as any);
+          break;
+        case 'update':
+          await emailService.sendReservationUpdate(testUser as any, testReservation as any);
+          break;
+        case 'cancellation':
+          await emailService.sendReservationCancellation({
+            email: testUser.email,
+            firstName: testUser.firstName,
+            courtName: 'Kortas #PB',
+            date: new Date().toISOString().split('T')[0],
+            startTime: '14:00',
+            endTime: '15:30',
+            reason: 'Testavimo tikslais'
+          });
+          break;
+        case 'maintenance':
+          await emailService.sendMaintenanceNotification({
+            email: testUser.email,
+            firstName: testUser.firstName,
+            courtName: 'Kortas #PB',
+            date: new Date().toISOString().split('T')[0],
+            startTime: '14:00',
+            endTime: '15:30',
+            description: 'Korto dangos atnaujinimas'
+          });
+          break;
+        default:
+          return res.status(400).json({ error: 'Invalid email type' });
+      }
+
+      res.json({ message: `Test email sent successfully to ${email}` });
+    } catch (error) {
+      console.error('Test email error:', error);
+      res.status(500).json({ error: 'Failed to send test email' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

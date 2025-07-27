@@ -34,6 +34,7 @@ import {
   Plus,
   Wrench
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import DatePicker from "@/components/DatePicker";
 import ConfirmationModal from "@/components/ConfirmationModal";
@@ -144,6 +145,13 @@ export default function Admin() {
     description: ""
   });
   const [selectedMaintenanceSlots, setSelectedMaintenanceSlots] = useState<string[]>([]);
+  
+  // Email testing state
+  const [showEmailTestModal, setShowEmailTestModal] = useState(false);
+  const [emailTestForm, setEmailTestForm] = useState({
+    email: "",
+    type: "confirmation"
+  });
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -281,6 +289,41 @@ export default function Admin() {
   };
 
   const maintenanceTimeSlots = generateMaintenanceTimeSlots();
+
+  // Email test mutation
+  const emailTestMutation = useMutation({
+    mutationFn: async (data: { type: string; email: string }) => {
+      const response = await fetch('/api/admin/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send test email');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      setShowEmailTestModal(false);
+      setEmailTestForm({ email: "", type: "confirmation" });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Testas el. laiškas sėkmingai išsiųstas",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Klaida",
+        description: error.message || "Nepavyko išsiųsti testo el. laiško",
+        variant: "destructive",
+      });
+    }
+  });
 
   const handleMaintenanceSlotSelect = (timeRange: string) => {
     setSelectedMaintenanceSlots(prev => {
@@ -1459,13 +1502,22 @@ export default function Admin() {
           <TabsContent value="maintenance" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Tvarkymo Darbų Valdymas</h2>
-              <Button 
-                className="bg-yellow-600 hover:bg-yellow-700"
-                onClick={() => setShowMaintenanceModal(true)}
-              >
-                <Plus size={16} className="mr-2" />
-                Sukurti Tvarkymo Darbus
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowEmailTestModal(true)}
+                >
+                  <Calendar size={16} className="mr-2" />
+                  Testuoti El. Paštą
+                </Button>
+                <Button 
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                  onClick={() => setShowMaintenanceModal(true)}
+                >
+                  <Plus size={16} className="mr-2" />
+                  Sukurti Tvarkymo Darbus
+                </Button>
+              </div>
             </div>
 
             {/* Maintenance Periods Table */}
@@ -2221,6 +2273,61 @@ export default function Admin() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Email Test Modal */}
+      {showEmailTestModal && (
+        <Dialog open={showEmailTestModal} onOpenChange={setShowEmailTestModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Testuoti El. Paštą</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>El. pašto adresas</Label>
+                <Input
+                  value={emailTestForm.email}
+                  onChange={(e) => setEmailTestForm(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="test@example.com"
+                  type="email"
+                />
+              </div>
+              <div>
+                <Label>El. laiško tipas</Label>
+                <Select 
+                  value={emailTestForm.type} 
+                  onValueChange={(value) => setEmailTestForm(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="confirmation">Rezervacijos patvirtinimas</SelectItem>
+                    <SelectItem value="update">Rezervacijos pakeitimas</SelectItem>
+                    <SelectItem value="cancellation">Rezervacijos atšaukimas</SelectItem>
+                    <SelectItem value="maintenance">Tvarkymo darbai</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={() => emailTestMutation.mutate(emailTestForm)}
+                  disabled={!emailTestForm.email || emailTestMutation.isPending}
+                  className="flex-1"
+                >
+                  {emailTestMutation.isPending ? "Siunčiama..." : "Siųsti"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowEmailTestModal(false)}
+                  disabled={emailTestMutation.isPending}
+                >
+                  Atšaukti
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
