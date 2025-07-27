@@ -106,6 +106,10 @@ Preferred communication style: Simple, everyday language.
 - Cleaned up test accounts as requested: removed user123, admin123, and user_1753271942891_bebhnk (2025-07-23)
 - Added active reservation protection: users with future reservations cannot be deleted until reservations end or are cancelled (2025-07-23)
 - Implemented domain restriction middleware blocking access from .replit.app domain and redirecting to custom domain pbtenisokortas.lt (2025-07-23)
+- Completed comprehensive maintenance management system with full CRUD operations for admin-only court maintenance scheduling (2025-07-27)
+- Added maintenance_periods table with court_id, date, start_time, end_time, description fields and proper timezone handling (2025-07-27)
+- Enhanced TimeSlotGrid component to display "Tvarkymo darbai" with yellow background for maintenance periods across all pages (2025-07-27)
+- Fixed maintenance period visibility issue caused by timezone date conversion between frontend and backend (2025-07-27)
 
 ### Reservation Management
 - Real-time availability checking
