@@ -167,10 +167,15 @@ class EmailService {
       
       <p><strong>Svarbūs priminimai:</strong></p>
       <ul>
-        <li>Atvykite 5-10 minučių anksčiau</li>
-        <li>Turėkite teniso raketę ir kamuoliukus</li>
-        <li>Dėvėkite tinkamą sportinę aprangą</li>
+        <li>Atvykite 5-10 minučių anksčiau registracijai</li>
+        <li>Turėkite teniso raketę ir kamuoliukus (galima nuomotis vietoje)</li>
+        <li>Dėvėkite tinkamą sportinę aprangą ir batus</li>
+        <li>Parkavimas nemokamas šalia korto</li>
       </ul>
+      
+      <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; margin-top: 20px;">
+        <p style="margin: 0; color: #2e6b4a;"><strong>💡 Patarimas:</strong> Geriausi žaidimo rezultatai pasiekiami saulėtos dienos metu!</p>
+      </div>
     `;
 
     try {
