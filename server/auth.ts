@@ -191,6 +191,75 @@ export function setupAuth(app: Express) {
     }
   });
 
+  // Validate reset token endpoint
+  app.get("/api/validate-reset-token", async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ valid: false, message: "Netinkama nuoroda" });
+      }
+
+      // Check if token exists and is not expired
+      const resetTokens = (global as any).passwordResetTokens || new Map();
+      const resetData = resetTokens.get(token);
+      
+      if (!resetData) {
+        return res.status(400).json({ valid: false, message: "Netinkama nuoroda" });
+      }
+      
+      if (new Date() > resetData.expires) {
+        // Clean up expired token
+        resetTokens.delete(token);
+        return res.status(400).json({ valid: false, message: "Nuorodos galiojimas pasibaigė" });
+      }
+      
+      res.json({ valid: true });
+    } catch (error) {
+      console.error('Token validation error:', error);
+      res.status(500).json({ valid: false, message: "Serverio klaida" });
+    }
+  });
+
+  // Reset password endpoint
+  app.post("/api/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Netinkami duomenys" });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Slaptažodis turi būti bent 6 simbolių" });
+      }
+
+      // Check if token exists and is not expired
+      const resetTokens = (global as any).passwordResetTokens || new Map();
+      const resetData = resetTokens.get(token);
+      
+      if (!resetData) {
+        return res.status(400).json({ message: "Netinkama arba pasibaigusi nuoroda" });
+      }
+      
+      if (new Date() > resetData.expires) {
+        // Clean up expired token
+        resetTokens.delete(token);
+        return res.status(400).json({ message: "Nuorodos galiojimas pasibaigė" });
+      }
+
+      // Update user password using the existing updateUser method
+      await storage.updateUser(resetData.userId, { password });
+      
+      // Clean up used token
+      resetTokens.delete(token);
+      res.json({ message: "Slaptažodis sėkmingai pakeistas" });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ message: "Serverio klaida" });
+    }
+  });
+
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);

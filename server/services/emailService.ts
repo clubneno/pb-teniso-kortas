@@ -296,17 +296,19 @@ class EmailService {
   async sendPasswordReset(user: User, resetToken: string) {
     if (!user.email || !resend) return;
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    // Use production domain or localhost for development
+    const baseUrl = process.env.FRONTEND_URL || 'https://pbtenisokortas.lt';
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     const content = `
       <div class="greeting">Sveiki, ${user.firstName || 'Gerbiamas kliente'}!</div>
-      <p>Gavome užklausą atkurti jūsų slaptažodį.</p>
+      <p>Gavome užklausą pakeisti jūsų slaptažodį.</p>
       
       <div class="details-card warning">
-        <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio atkūrimas</h3>
-        <p>Jei tai buvo jūs, spauskite žemiau esantį mygtuką:</p>
+        <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio keitimas</h3>
+        <p>Jei tikrai norite pakeisti slaptažodį, spauskite žemiau esantį mygtuką:</p>
         <div style="text-align: center; margin: 20px 0;">
-          <a href="${resetUrl}" class="btn">Atkurti slaptažodį</a>
+          <a href="${resetUrl}" class="btn">Pakeisti slaptažodį</a>
         </div>
         <p style="margin-bottom: 0;"><strong>Svarbu:</strong> Ši nuoroda galioja 1 valandą.</p>
       </div>

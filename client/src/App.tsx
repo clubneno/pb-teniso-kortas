@@ -8,6 +8,7 @@ import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Admin from "@/pages/Admin";
 import AuthPage from "@/pages/auth-page";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/auth" component={AuthPage} />
       <Route path="/prisijungimas" component={AuthPage} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/">
         {isLoading ? (
           <div className="min-h-screen flex items-center justify-center">
