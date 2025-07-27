@@ -241,7 +241,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send cancellation email
         const user = await storage.getUser(userId);
         try {
-          await emailService.sendReservationCancellation(user!, existingReservation);
+          await emailService.sendReservationCancellation({
+            email: user!.email,
+            firstName: user!.firstName || '',
+            courtName: existingReservation.court.name,
+            date: existingReservation.date,
+            startTime: existingReservation.startTime,
+            endTime: existingReservation.endTime,
+            reason: 'Vartotojo sprendimu'
+          });
         } catch (emailError) {
           console.error("Failed to send cancellation email:", emailError);
         }
@@ -656,18 +664,37 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // Check for conflicts with existing reservations
-      const hasConflict = await storage.checkReservationConflict(
+      // Find and cancel conflicting reservations
+      const conflictingReservations = await storage.getReservations({
         courtId,
         date,
-        startTime,
-        endTime
-      );
+        status: 'confirmed'
+      });
 
-      if (hasConflict) {
-        return res.status(400).json({ 
-          message: "Šis laikas konfliktuoja su egzistuojančiomis rezervacijomis arba techninės priežiūros darbais" 
-        });
+      const reservationsToCancel = conflictingReservations.filter(reservation => {
+        // Check if maintenance period overlaps with reservation
+        return !(endTime <= reservation.startTime || startTime >= reservation.endTime);
+      });
+
+      // Cancel conflicting reservations
+      for (const reservation of reservationsToCancel) {
+        await storage.updateReservation(reservation.id, { status: 'cancelled' });
+        
+        // Send email notification about cancellation
+        try {
+          await emailService.sendReservationCancellation({
+            email: reservation.user.email,
+            firstName: reservation.user.firstName || '',
+            courtName: reservation.court.name,
+            date: reservation.date,
+            startTime: reservation.startTime,
+            endTime: reservation.endTime,
+            reason: 'Korto techninės priežiūros darbai'
+          });
+        } catch (emailError) {
+          console.error("Failed to send cancellation email:", emailError);
+          // Continue with maintenance creation even if email fails
+        }
       }
 
       const period = await storage.createMaintenancePeriod({
@@ -678,7 +705,12 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
         description
       });
 
-      res.status(201).json(period);
+      const response = {
+        ...period,
+        cancelledReservations: reservationsToCancel.length
+      };
+
+      res.status(201).json(response);
     } catch (error) {
       console.error("Error creating maintenance period:", error);
       res.status(500).json({ message: "Failed to create maintenance period" });

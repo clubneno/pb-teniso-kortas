@@ -76,34 +76,41 @@ class EmailService {
     }
   }
 
-  async sendReservationCancellation(user: User, reservation: ReservationWithDetails) {
-    if (!user.email || !resend) return;
+  async sendReservationCancellation(params: { 
+    email: string; 
+    firstName: string; 
+    courtName: string; 
+    date: string; 
+    startTime: string; 
+    endTime: string; 
+    reason?: string; 
+  }) {
+    if (!params.email || !resend) return;
 
-    const formattedDate = this.formatDate(reservation.date);
-    const timeRange = `${reservation.startTime}-${reservation.endTime}`;
+    const formattedDate = this.formatDate(params.date);
+    const timeRange = `${params.startTime}-${params.endTime}`;
+    const reason = params.reason || 'Administratorių sprendimu';
 
     try {
       await resend.emails.send({
         from: this.fromEmail,
-        to: [user.email],
-        subject: 'Rezervacija atšaukta - TennisReserve',
+        to: [params.email],
+        subject: 'Rezervacija atšaukta - PB teniso kortas',
         html: `
           <h2>Rezervacija atšaukta</h2>
-          <p>Sveiki, ${user.firstName || ''}!</p>
-          <p>Jūsų teniso korto rezervacija buvo atšaukta:</p>
+          <p>Sveiki, ${params.firstName || ''}!</p>
+          <p>Informuojame, kad jūsų teniso korto rezervacija buvo atšaukta dėl: <strong>${reason}</strong></p>
           
           <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <strong>Atšauktos rezervacijos duomenys:</strong><br>
             📅 Data: ${formattedDate}<br>
             ⏰ Laikas: ${timeRange}<br>
-            🎾 Kortas: ${reservation.court.name}<br>
-            💰 Suma: ${reservation.totalPrice}€
+            🎾 Kortas: ${params.courtName}
           </div>
           
-          <p>Pinigai bus grąžinti per 3-5 darbo dienas.</p>
-          <p>Ačiū, kad rinkotės TennisReserve!</p>
+          <p>Atsiprašome už nepatogumus. Galite susisiekti su mumis, jei turite klausimų.</p>
           
-          <p>Sportiškai,<br>TennisReserve komanda</p>
+          <p>Sportiškai,<br>PB teniso kortas</p>
         `,
       });
     } catch (error) {

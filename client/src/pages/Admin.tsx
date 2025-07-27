@@ -637,15 +637,21 @@ export default function Admin() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/maintenance'] });
       queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/reservations'] });
       setShowMaintenanceModal(false);
       setMaintenanceForm({ courtId: "", date: "", description: "" });
       setSelectedMaintenanceSlots([]);
+      
+      const message = data.cancelledReservations > 0 
+        ? `Tvarkymo darbai sukurti. Atšauktos ${data.cancelledReservations} konfliktuojančios rezervacijos.`
+        : "Tvarkymo darbai sėkmingai sukurti";
+        
       toast({
         title: "Pakeitimas išsaugotas",
-        description: "Tvarkymo darbai sėkmingai sukurti",
+        description: message,
       });
     },
     onError: (error: Error) => {
