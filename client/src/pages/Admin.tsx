@@ -1576,8 +1576,9 @@ export default function Admin() {
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Sistemos Nustatymai</h2>
+            <h2 className="text-xl font-semibold mb-4">Sistemos Nustatymai</h2>
+            
+            <div className="mb-6">
               <Button 
                 variant="outline"
                 onClick={() => setShowEmailTestModal(true)}
