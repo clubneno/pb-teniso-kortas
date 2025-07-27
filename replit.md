@@ -122,6 +122,8 @@ Preferred communication style: Simple, everyday language.
 - Added forgot password functionality to login page (/prisijungimas) with email-based password reset system (2025-07-27)
 - Implemented password reset email template with secure token-based recovery and 1-hour expiration (2025-07-27)
 - Enhanced auth page with professional forgot password modal featuring clear instructions and user-friendly flow (2025-07-27)
+- Fixed password reset email URL generation bug by updating emailService.ts to use proper base URL instead of undefined FRONTEND_URL (2025-07-27)
+- Updated forgot password button text from "Siųsti instrukcijas" to "Siųsti" for cleaner UI (2025-07-27)
 
 ### Reservation Management
 - Real-time availability checking

@@ -302,7 +302,9 @@ class EmailService {
   async sendPasswordReset(user: User, resetToken: string) {
     if (!user.email || !resend) return;
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    // Use production domain or localhost for development
+    const baseUrl = process.env.FRONTEND_URL || 'https://pbtenisokortas.lt';
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     const content = `
       <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
