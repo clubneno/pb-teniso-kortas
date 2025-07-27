@@ -387,7 +387,7 @@ export default function AuthPage() {
                                 Siunčiama...
                               </>
                             ) : (
-                              "Siųsti instrukcijas"
+                              "Siųsti"
                             )}
                           </Button>
                         </div>

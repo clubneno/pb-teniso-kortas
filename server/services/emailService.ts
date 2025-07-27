@@ -1,10 +1,13 @@
-import { Resend } from 'resend';
-import type { User, ReservationWithDetails } from '@shared/schema';
+import { Resend } from "resend";
+import type { User, ReservationWithDetails } from "@shared/schema";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 class EmailService {
-  private fromEmail = process.env.FROM_EMAIL || 'PB teniso kortas <noreply@pbtenisokortas.lt>';
+  private fromEmail =
+    process.env.FROM_EMAIL || "PB teniso kortas <noreply@pbtenisokortas.lt>";
 
   // Professional email template with proper styling
   private getEmailTemplate(content: string, title: string) {
@@ -135,14 +138,17 @@ class EmailService {
     `;
   }
 
-  async sendReservationConfirmation(user: User, reservation: ReservationWithDetails) {
+  async sendReservationConfirmation(
+    user: User,
+    reservation: ReservationWithDetails,
+  ) {
     if (!user.email || !resend) return;
 
     const formattedDate = this.formatDate(reservation.date);
     const timeRange = `${reservation.startTime}-${reservation.endTime}`;
 
     const content = `
-      <div class="greeting">Sveiki, ${user.firstName || 'Gerbiamas kliente'}!</div>
+      <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
       <p>Jūsų teniso korto rezervacija sėkmingai patvirtinta ir laukiame jūsų atvykimo!</p>
       
       <div class="details-card success">
@@ -181,11 +187,11 @@ class EmailService {
       await resend.emails.send({
         from: this.fromEmail,
         to: [user.email],
-        subject: '✅ Rezervacija patvirtinta - PB Teniso Kortas',
-        html: this.getEmailTemplate(content, 'Rezervacija patvirtinta'),
+        subject: "✅ Rezervacija patvirtinta - PB Teniso Kortas",
+        html: this.getEmailTemplate(content, "Rezervacija patvirtinta"),
       });
     } catch (error) {
-      console.error('Failed to send confirmation email:', error);
+      console.error("Failed to send confirmation email:", error);
       throw error;
     }
   }
@@ -197,7 +203,7 @@ class EmailService {
     const timeRange = `${reservation.startTime}-${reservation.endTime}`;
 
     const content = `
-      <div class="greeting">Sveiki, ${user.firstName || 'Gerbiamas kliente'}!</div>
+      <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
       <p>Informuojame, kad jūsų teniso korto rezervacija buvo pakeista:</p>
       
       <div class="details-card warning">
@@ -227,32 +233,32 @@ class EmailService {
       await resend.emails.send({
         from: this.fromEmail,
         to: [user.email],
-        subject: '⚠️ Rezervacija pakeista - PB Teniso Kortas',
-        html: this.getEmailTemplate(content, 'Rezervacija pakeista'),
+        subject: "⚠️ Rezervacija pakeista - PB Teniso Kortas",
+        html: this.getEmailTemplate(content, "Rezervacija pakeista"),
       });
     } catch (error) {
-      console.error('Failed to send update email:', error);
+      console.error("Failed to send update email:", error);
       throw error;
     }
   }
 
-  async sendReservationCancellation(params: { 
-    email: string; 
-    firstName: string; 
-    courtName: string; 
-    date: string; 
-    startTime: string; 
-    endTime: string; 
-    reason?: string; 
+  async sendReservationCancellation(params: {
+    email: string;
+    firstName: string;
+    courtName: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    reason?: string;
   }) {
     if (!params.email || !resend) return;
 
     const formattedDate = this.formatDate(params.date);
     const timeRange = `${params.startTime}-${params.endTime}`;
-    const reason = params.reason || 'Administratorių sprendimu';
+    const reason = params.reason || "Administratorių sprendimu";
 
     const content = `
-      <div class="greeting">Sveiki, ${params.firstName || 'Gerbiamas kliente'}!</div>
+      <div class="greeting">Sveiki, ${params.firstName || "Gerbiamas kliente"}!</div>
       <p>Pranešame, kad jūsų teniso korto rezervacija buvo atšaukta.</p>
       
       <div class="details-card danger">
@@ -284,11 +290,11 @@ class EmailService {
       await resend.emails.send({
         from: this.fromEmail,
         to: [params.email],
-        subject: '❌ Rezervacija atšaukta - PB Teniso Kortas',
-        html: this.getEmailTemplate(content, 'Rezervacija atšaukta'),
+        subject: "❌ Rezervacija atšaukta - PB Teniso Kortas",
+        html: this.getEmailTemplate(content, "Rezervacija atšaukta"),
       });
     } catch (error) {
-      console.error('Failed to send cancellation email:', error);
+      console.error("Failed to send cancellation email:", error);
       throw error;
     }
   }
@@ -296,27 +302,25 @@ class EmailService {
   async sendPasswordReset(user: User, resetToken: string) {
     if (!user.email || !resend) return;
 
-    // Use production domain or localhost for development
-    const baseUrl = process.env.FRONTEND_URL || 'https://pbtenisokortas.lt';
-    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     const content = `
-      <div class="greeting">Sveiki, ${user.firstName || 'Gerbiamas kliente'}!</div>
-      <p>Gavome užklausą pakeisti jūsų slaptažodį.</p>
+      <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
+      <p>Gavome užklausą atkurti jūsų slaptažodį.</p>
       
       <div class="details-card warning">
-        <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio keitimas</h3>
-        <p>Jei tikrai norite pakeisti slaptažodį, spauskite žemiau esantį mygtuką:</p>
+        <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio atkūrimas</h3>
+        <p>Jei tikrai norite atkurti slaptažodį, spauskite žemiau esantį mygtuką:</p>
         <div style="text-align: center; margin: 20px 0;">
-          <a href="${resetUrl}" class="btn">Pakeisti slaptažodį</a>
+          <a href="${resetUrl}" class="btn">Atkurti slaptažodį</a>
         </div>
         <p style="margin-bottom: 0;"><strong>Svarbu:</strong> Ši nuoroda galioja 1 valandą.</p>
       </div>
       
-      <p><strong>Saugumo sumetimai:</strong></p>
+      <p><strong>Saugumo sumetimais:</strong></p>
       <ul>
         <li>Jei slaptažodžio atkūrimo neprašėte, ignoruokite šį laišką</li>
-        <li>Niekada nedelskite šios nuorodos kitiems</li>
+        <li>Niekada nepersiųskite šios nuorodos kitiems</li>
         <li>Sukurkite stiprų, unikalų slaptažodį</li>
       </ul>
     `;
@@ -325,11 +329,11 @@ class EmailService {
       await resend.emails.send({
         from: this.fromEmail,
         to: [user.email],
-        subject: '🔑 Slaptažodžio atkūrimas - PB Teniso Kortas',
-        html: this.getEmailTemplate(content, 'Slaptažodžio atkūrimas'),
+        subject: "🔑 Slaptažodžio atkūrimas - PB Teniso Kortas",
+        html: this.getEmailTemplate(content, "Slaptažodžio atkūrimas"),
       });
     } catch (error) {
-      console.error('Failed to send password reset email:', error);
+      console.error("Failed to send password reset email:", error);
       throw error;
     }
   }
@@ -350,7 +354,7 @@ class EmailService {
     const timeRange = `${params.startTime}-${params.endTime}`;
 
     const content = `
-      <div class="greeting">Sveiki, ${params.firstName || 'Gerbiamas kliente'}!</div>
+      <div class="greeting">Sveiki, ${params.firstName || "Gerbiamas kliente"}!</div>
       <p>Informuojame apie planuojamus tvarkymo darbus, kurie paveiks jūsų rezervaciją.</p>
       
       <div class="details-card warning">
@@ -386,22 +390,22 @@ class EmailService {
       await resend.emails.send({
         from: this.fromEmail,
         to: [params.email],
-        subject: '🔧 Tvarkymo darbai - PB Teniso Kortas',
-        html: this.getEmailTemplate(content, 'Tvarkymo darbai'),
+        subject: "🔧 Tvarkymo darbai - PB Teniso Kortas",
+        html: this.getEmailTemplate(content, "Tvarkymo darbai"),
       });
     } catch (error) {
-      console.error('Failed to send maintenance notification:', error);
+      console.error("Failed to send maintenance notification:", error);
       throw error;
     }
   }
 
   private formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('lt-LT', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long'
+    return date.toLocaleDateString("lt-LT", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
     });
   }
 }
