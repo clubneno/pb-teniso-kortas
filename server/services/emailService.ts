@@ -308,21 +308,21 @@ class EmailService {
 
     const content = `
       <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
-      <p>Gavome užklausą atkurti jūsų slaptažodį.</p>
+      <p>Gavome užklausą pakeisti jūsų slaptažodį.</p>
       
       <div class="details-card warning">
-        <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio atkūrimas</h3>
-        <p>Jei tikrai norite atkurti slaptažodį, spauskite žemiau esantį mygtuką:</p>
+        <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio keitimas</h3>
+        <p>Jei tikrai norite pakeisti slaptažodį, spauskite žemiau esantį mygtuką:</p>
         <div style="text-align: center; margin: 20px 0;">
-          <a href="${resetUrl}" class="btn">Atkurti slaptažodį</a>
+          <a href="${resetUrl}" class="btn">Pakeisti slaptažodį</a>
         </div>
         <p style="margin-bottom: 0;"><strong>Svarbu:</strong> Ši nuoroda galioja 1 valandą.</p>
       </div>
       
-      <p><strong>Saugumo sumetimais:</strong></p>
+      <p><strong>Saugumo sumetimai:</strong></p>
       <ul>
         <li>Jei slaptažodžio atkūrimo neprašėte, ignoruokite šį laišką</li>
-        <li>Niekada nepersiųskite šios nuorodos kitiems</li>
+        <li>Niekada nedelskite šios nuorodos kitiems</li>
         <li>Sukurkite stiprų, unikalų slaptažodį</li>
       </ul>
     `;
@@ -331,8 +331,8 @@ class EmailService {
       await resend.emails.send({
         from: this.fromEmail,
         to: [user.email],
-        subject: "🔑 Slaptažodžio atkūrimas - PB Teniso Kortas",
-        html: this.getEmailTemplate(content, "Slaptažodžio atkūrimas"),
+        subject: "🔑 Slaptažodžio keitimas - PB Teniso Kortas",
+        html: this.getEmailTemplate(content, "Slaptažodžio keitimas"),
       });
     } catch (error) {
       console.error("Failed to send password reset email:", error);
