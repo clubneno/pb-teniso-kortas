@@ -168,8 +168,7 @@ class EmailService {
       <p><strong>Svarbūs priminimai:</strong></p>
       <ul>
         <li>Atvykite 5-10 minučių anksčiau registracijai</li>
-        <li>Turėkite teniso raketę ir kamuoliukus (galima nuomotis vietoje)</li>
-        <li>Dėvėkite tinkamą sportinę aprangą ir batus</li>
+        <li>Turėkite teniso raketę ir kamuoliukus</li>
         <li>Parkavimas nemokamas šalia korto</li>
       </ul>
       
@@ -254,7 +253,7 @@ class EmailService {
 
     const content = `
       <div class="greeting">Sveiki, ${params.firstName || 'Gerbiamas kliente'}!</div>
-      <p>Deja, turime pranešti, kad jūsų teniso korto rezervacija buvo atšaukta.</p>
+      <p>Pranešame, kad jūsų teniso korto rezervacija buvo atšaukta.</p>
       
       <div class="details-card danger">
         <h3 style="margin-top: 0; color: #721c24;">❌ Atšauktos rezervacijos duomenys</h3>
@@ -375,11 +374,10 @@ class EmailService {
       <p><strong>Ką tai reiškia:</strong></p>
       <ul>
         <li>Jūsų rezervacija šiuo laiku automatiškai atšaukta</li>
-        <li>Mokestis bus grąžintas arba galėsite pernešti rezervaciją</li>
-        <li>Kortas bus nedostupnas nurodytu laiku</li>
+        <li>Kortas nurodytu laiku bus uždarytas</li>
       </ul>
       
-      <p>Atsiprašome už nepatogumus. Tvarkymo darbai padės užtikrinti aukščiausią kortų kokybę!</p>
+      <p>Atsiprašome už nepatogumus.</p>
     `;
 
     try {
