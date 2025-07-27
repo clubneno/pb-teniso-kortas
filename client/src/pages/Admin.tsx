@@ -31,7 +31,8 @@ import {
   Activity,
   ToggleLeft,
   ToggleRight,
-  Plus
+  Plus,
+  Wrench
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import DatePicker from "@/components/DatePicker";
@@ -321,6 +322,41 @@ export default function Admin() {
   const thisWeekCancellations = thisWeekReservations.filter(r => r.status === 'cancelled').length;
   const thisWeekCancellationRate = thisWeekReservations.length > 0 ? 
     Math.round((thisWeekCancellations / thisWeekReservations.length) * 100) : 0;
+
+  // Calculate maintenance percentage for this week
+  const calculateThisWeekMaintenancePercentage = () => {
+    if (!maintenancePeriods || maintenancePeriods.length === 0) return "0";
+    
+    // Get all maintenance periods for this week
+    const thisWeekMaintenance = maintenancePeriods.filter((maintenance: any) => {
+      const maintenanceDate = new Date(maintenance.date);
+      return maintenanceDate >= thisWeekStart && maintenanceDate <= thisWeekEnd;
+    });
+    
+    if (thisWeekMaintenance.length === 0) return "0";
+    
+    // Calculate total maintenance minutes for the week
+    let totalMaintenanceMinutes = 0;
+    thisWeekMaintenance.forEach((maintenance: any) => {
+      const startTime = maintenance.startTime.split(':');
+      const endTime = maintenance.endTime.split(':');
+      const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
+      const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
+      totalMaintenanceMinutes += (endMinutes - startMinutes);
+    });
+    
+    // Calculate total available court time for the week (7 days × 14 hours × 60 minutes × number of courts)
+    const operatingHoursPerDay = 14; // 8:00-22:00
+    const daysInWeek = 7;
+    const totalAvailableMinutes = operatingHoursPerDay * 60 * daysInWeek * courts.length;
+    
+    if (totalAvailableMinutes === 0) return "0";
+    
+    const maintenancePercentage = (totalMaintenanceMinutes / totalAvailableMinutes) * 100;
+    return maintenancePercentage.toFixed(0);
+  };
+
+  const thisWeekMaintenancePercentage = calculateThisWeekMaintenancePercentage();
 
   // Calculate court usage for this week
   const thisWeekConfirmedReservations = thisWeekReservations.filter(r => r.status === 'confirmed');
@@ -955,7 +991,7 @@ export default function Admin() {
             <h2 className="text-xl font-semibold">Sistemos Apžvalga</h2>
             
             {/* Stats Cards */}
-            <div className="grid md:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-5 gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -1004,6 +1040,19 @@ export default function Admin() {
                       <p className="text-xs text-gray-500">Šią savaitę</p>
                     </div>
                     <TrendingDown className="text-red-600" size={32} />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-orange-600 text-sm font-medium">Tvarkymo Darbai</p>
+                      <p className="text-2xl font-bold text-orange-800">{thisWeekMaintenancePercentage}%</p>
+                      <p className="text-xs text-gray-500">Šią savaitę</p>
+                    </div>
+                    <Wrench className="text-orange-600" size={32} />
                   </div>
                 </CardContent>
               </Card>

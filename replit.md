@@ -112,6 +112,9 @@ Preferred communication style: Simple, everyday language.
 - Fixed maintenance period visibility issue caused by timezone date conversion between frontend and backend (2025-07-27)
 - Resolved maintenance time range visibility constraint: maintenance periods must be within 8:00-22:00 operating hours to display on frontend (2025-07-27)
 - Confirmed maintenance system fully operational for current and future dates with proper "Tvarkymo darbai" yellow styling across all pages (2025-07-27)
+- Implemented automatic reservation cancellation when maintenance periods conflict with existing bookings, with email notifications to affected users (2025-07-27)
+- Added maintenance percentage calculation card to admin dashboard showing weekly maintenance time as percentage of total court availability (2025-07-27)
+- Enhanced admin maintenance interface with unified time slot selection UI matching reservation system for consistent user experience (2025-07-27)
 
 ### Reservation Management
 - Real-time availability checking
