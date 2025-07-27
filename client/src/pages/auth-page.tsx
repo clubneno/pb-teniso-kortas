@@ -80,7 +80,7 @@ export default function AuthPage() {
     },
     onSuccess: (data) => {
       toast({
-        title: "Sėkmė",
+        title: "Užklausa sėkminga",
         description: data.message,
       });
       setShowForgotPassword(false);
