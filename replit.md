@@ -110,6 +110,8 @@ Preferred communication style: Simple, everyday language.
 - Added maintenance_periods table with court_id, date, start_time, end_time, description fields and proper timezone handling (2025-07-27)
 - Enhanced TimeSlotGrid component to display "Tvarkymo darbai" with yellow background for maintenance periods across all pages (2025-07-27)
 - Fixed maintenance period visibility issue caused by timezone date conversion between frontend and backend (2025-07-27)
+- Resolved maintenance time range visibility constraint: maintenance periods must be within 8:00-22:00 operating hours to display on frontend (2025-07-27)
+- Confirmed maintenance system fully operational for current and future dates with proper "Tvarkymo darbai" yellow styling across all pages (2025-07-27)
 
 ### Reservation Management
 - Real-time availability checking
