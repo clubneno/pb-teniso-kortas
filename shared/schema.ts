@@ -62,6 +62,18 @@ export const reservations = pgTable("reservations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Maintenance periods table for admin-managed court maintenance
+export const maintenancePeriods = pgTable("maintenance_periods", {
+  id: serial("id").primaryKey(),
+  courtId: integer("court_id").references(() => courts.id).notNull(),
+  date: varchar("date").notNull(), // YYYY-MM-DD format
+  startTime: varchar("start_time").notNull(), // HH:mm format
+  endTime: varchar("end_time").notNull(), // HH:mm format
+  description: text("description"), // Optional description of maintenance work
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
   reservations: many(reservations),
@@ -69,6 +81,14 @@ export const userRelations = relations(users, ({ many }) => ({
 
 export const courtRelations = relations(courts, ({ many }) => ({
   reservations: many(reservations),
+  maintenancePeriods: many(maintenancePeriods),
+}));
+
+export const maintenanceRelations = relations(maintenancePeriods, ({ one }) => ({
+  court: one(courts, {
+    fields: [maintenancePeriods.courtId],
+    references: [courts.id],
+  }),
 }));
 
 export const reservationRelations = relations(reservations, ({ one }) => ({
@@ -121,6 +141,12 @@ export const updateReservationSchema = createInsertSchema(reservations)
   })
   .partial();
 
+export const insertMaintenanceSchema = createInsertSchema(maintenancePeriods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -131,6 +157,8 @@ export type InsertCourt = z.infer<typeof insertCourtSchema>;
 export type Reservation = typeof reservations.$inferSelect;
 export type InsertReservation = z.infer<typeof insertReservationSchema>;
 export type UpdateReservation = z.infer<typeof updateReservationSchema>;
+export type MaintenancePeriod = typeof maintenancePeriods.$inferSelect;
+export type InsertMaintenancePeriod = z.infer<typeof insertMaintenanceSchema>;
 
 // Extended types for frontend
 export type ReservationWithDetails = Reservation & {

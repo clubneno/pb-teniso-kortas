@@ -69,7 +69,7 @@ export default function Landing() {
   const selectedDateStr = getVilniusDateString(selectedDate);
   
   // Use the same availability API as Dashboard for consistency
-  const { data: availabilityData = [], isLoading: availabilityLoading } = useQuery<{startTime: string; endTime: string}[]>({
+  const { data: availabilityData = [], isLoading: availabilityLoading } = useQuery<{startTime: string; endTime: string; type?: 'reservation' | 'maintenance'}[]>({
     queryKey: ["/api/courts", selectedCourtId, "availability", selectedDateStr],
     queryFn: () => fetch(`/api/courts/${selectedCourtId}/availability?date=${selectedDateStr}`).then(res => res.json()),
     enabled: !!selectedCourtId,
@@ -116,10 +116,15 @@ export default function Landing() {
       const startTime = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
       const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
       
-      // Check if this slot overlaps with any existing reservation
-      const isReserved = availabilityData.some((reservation) => {
-        // Check if time slots overlap
-        return !(endTime <= reservation.startTime || startTime >= reservation.endTime);
+      // Check if this slot overlaps with any unavailable period (reservation or maintenance)
+      const isReserved = availabilityData.some((period) => {
+        // Check if time slots overlap and it's a reservation
+        return period.type === 'reservation' && !(endTime <= period.startTime || startTime >= period.endTime);
+      });
+
+      const isMaintenance = availabilityData.some((period) => {
+        // Check if time slots overlap and it's maintenance
+        return period.type === 'maintenance' && !(endTime <= period.startTime || startTime >= period.endTime);
       });
 
       // Check how many courts are reserved at this time slot (overlapping)
@@ -135,6 +140,7 @@ export default function Landing() {
         endTime,
         timeDisplay: startTime,
         isReserved,
+        isMaintenance,
         totalReservations: allReservationsAtThisTime.length,
         reservedCourts: reservedCourts,
       });

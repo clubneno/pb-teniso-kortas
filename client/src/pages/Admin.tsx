@@ -134,6 +134,16 @@ export default function Admin() {
   const [pricing, setPricing] = useState({
     slotRate: "0.00" // 30-minute slot rate
   });
+  
+  // Maintenance state
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [maintenanceForm, setMaintenanceForm] = useState({
+    courtId: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+    description: ""
+  });
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -181,6 +191,17 @@ export default function Admin() {
 
   const { data: adminUsers = [], isLoading: usersLoading } = useQuery<UserWithStats[]>({
     queryKey: ["/api/admin/users"],
+    retry: false,
+  });
+
+  // Maintenance periods query
+  const { data: maintenancePeriods = [] } = useQuery({
+    queryKey: ['/api/admin/maintenance'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/maintenance');
+      if (!response.ok) throw new Error('Failed to fetch maintenance periods');
+      return response.json();
+    },
     retry: false,
   });
 
@@ -541,7 +562,97 @@ export default function Admin() {
     }
 
     createUserMutation.mutate(userForm);
+  }
+
+  // Maintenance mutations
+  const createMaintenanceMutation = useMutation({
+    mutationFn: async (maintenanceData: any) => {
+      const response = await fetch('/api/admin/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(maintenanceData),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create maintenance period');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/maintenance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
+      setShowMaintenanceModal(false);
+      setMaintenanceForm({ courtId: "", date: "", startTime: "", endTime: "", description: "" });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Tvarkymo darbai sėkmingai sukurti",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Klaida",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMaintenanceMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/maintenance/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete maintenance period');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/maintenance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Tvarkymo darbai sėkmingai pašalinti",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Klaida",  
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateMaintenance = () => {
+    if (!maintenanceForm.courtId || !maintenanceForm.date || !maintenanceForm.startTime || !maintenanceForm.endTime) {
+      toast({
+        title: "Klaida",
+        description: "Prašome užpildyti visus privalomus laukus",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createMaintenanceMutation.mutate({
+      courtId: parseInt(maintenanceForm.courtId),
+      date: maintenanceForm.date,
+      startTime: maintenanceForm.startTime,
+      endTime: maintenanceForm.endTime,
+      description: maintenanceForm.description || null,
+    });
   };
+
+  const handleDeleteMaintenance = (id: number, description: string, date: string, timeRange: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Pašalinti tvarkymo darbus",
+      message: `Ar tikrai norite pašalinti tvarkymo darbus "${description}" (${date} ${timeRange})?`,
+      onConfirm: () => {
+        deleteMaintenanceMutation.mutate(id);
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      },
+      isDestructive: true
+    });
+  };;
 
   const handleEditUser = (user: UserWithStats) => {
     setEditingUserId(user.id);
@@ -745,7 +856,7 @@ export default function Admin() {
 
         {/* Admin Navigation */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">
               <BarChart3 size={16} className="mr-2" />
               Apžvalga
@@ -753,6 +864,10 @@ export default function Admin() {
             <TabsTrigger value="reservations">
               <Calendar size={16} className="mr-2" />
               Rezervacijos
+            </TabsTrigger>
+            <TabsTrigger value="maintenance">
+              <Settings size={16} className="mr-2" />
+              Tvarkymo darbai
             </TabsTrigger>
             <TabsTrigger value="users">
               <Users size={16} className="mr-2" />
@@ -1220,6 +1335,82 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
+          {/* Maintenance Tab */}
+          <TabsContent value="maintenance" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Tvarkymo Darbų Valdymas</h2>
+              <Button 
+                className="bg-yellow-600 hover:bg-yellow-700"
+                onClick={() => setShowMaintenanceModal(true)}
+              >
+                <Plus size={16} className="mr-2" />
+                Sukurti Tvarkymo Darbus
+              </Button>
+            </div>
+
+            {/* Maintenance Periods Table */}
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Kortas</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Laikas</TableHead>
+                      <TableHead>Aprašymas</TableHead>
+                      <TableHead>Veiksmai</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {maintenancePeriods.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                          Tvarkymo darbai neplanuoti
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      maintenancePeriods.map((maintenance: any) => (
+                        <TableRow key={maintenance.id}>
+                          <TableCell>
+                            <div className="font-medium">{maintenance.court?.name || `Kortas #${maintenance.courtId}`}</div>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(maintenance.date).toLocaleDateString('lt-LT')}
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-mono text-sm">
+                              {maintenance.startTime} - {maintenance.endTime}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-xs truncate">
+                              {maintenance.description || "Nenurodyta"}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteMaintenance(
+                                maintenance.id, 
+                                maintenance.description || "Tvarkymo darbai",
+                                new Date(maintenance.date).toLocaleDateString('lt-LT'),
+                                `${maintenance.startTime}-${maintenance.endTime}`
+                              )}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Settings Tab */}
           <TabsContent value="settings">
             <h2 className="text-xl font-semibold mb-6">Sistemos Nustatymai</h2>
@@ -1358,7 +1549,7 @@ export default function Admin() {
         title={confirmModal.title}
         message={confirmModal.message}
         isDestructive={confirmModal.isDestructive}
-        isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending || deleteUserMutation.isPending}
+        isLoading={updateReservationMutation.isPending || deleteReservationMutation.isPending || deleteUserMutation.isPending || deleteMaintenanceMutation.isPending}
       />
       {/* Create Reservation Modal */}
       {createReservationModal && (
@@ -1785,6 +1976,104 @@ export default function Admin() {
                   className="bg-tennis-green-500 hover:bg-tennis-green-600"
                 >
                   {updateUserMutation.isPending ? "Atnaujinama..." : "Atnaujinti"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Maintenance Modal */}
+      {showMaintenanceModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md mx-auto shadow-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Sukurti Tvarkymo Darbus</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowMaintenanceModal(false)}
+                  className="h-6 w-6 hover:bg-gray-100"
+                >
+                  <Plus className="h-4 w-4 rotate-45" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="court">Kortas *</Label>
+                <Select 
+                  value={maintenanceForm.courtId} 
+                  onValueChange={(value) => setMaintenanceForm(prev => ({ ...prev, courtId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite kortą" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courts.map((court: any) => (
+                      <SelectItem key={court.id} value={court.id.toString()}>
+                        {court.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="date">Data *</Label>
+                <DatePicker
+                  value={maintenanceForm.date}
+                  onChange={(value) => setMaintenanceForm(prev => ({ ...prev, date: value }))}
+                  placeholder="YYYY-MM-DD"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startTime">Pradžios laikas *</Label>
+                  <Input
+                    id="startTime"
+                    type="time"
+                    value={maintenanceForm.startTime}
+                    onChange={(e) => setMaintenanceForm(prev => ({ ...prev, startTime: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endTime">Pabaigos laikas *</Label>
+                  <Input
+                    id="endTime"
+                    type="time"
+                    value={maintenanceForm.endTime}
+                    onChange={(e) => setMaintenanceForm(prev => ({ ...prev, endTime: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Aprašymas</Label>
+                <Input
+                  id="description"
+                  value={maintenanceForm.description}
+                  onChange={(e) => setMaintenanceForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Trumpas aprašymas (neprivaloma)"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowMaintenanceModal(false)}
+                  className="flex-1"
+                >
+                  Atšaukti
+                </Button>
+                <Button
+                  onClick={handleCreateMaintenance}
+                  disabled={createMaintenanceMutation.isPending}
+                  className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                >
+                  {createMaintenanceMutation.isPending ? "Kuriama..." : "Sukurti"}
                 </Button>
               </div>
             </CardContent>

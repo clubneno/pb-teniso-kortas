@@ -5,6 +5,7 @@ interface TimeSlot {
   endTime: string;
   timeDisplay: string;
   isReserved: boolean;
+  isMaintenance?: boolean;
   totalReservations?: number;
   reservedCourts?: string;
 }
@@ -51,6 +52,10 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
     
+    if (slot.isMaintenance) {
+      return `${baseClasses} bg-yellow-600 border border-yellow-700 cursor-not-allowed`;
+    }
+    
     if (slot.isReserved) {
       return `${baseClasses} bg-red-600 border border-red-700 cursor-not-allowed`;
     }
@@ -79,10 +84,12 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
     
-
-    
     if (isPast) {
       return "Praėjęs";
+    }
+    
+    if (slot.isMaintenance) {
+      return "Tvarkymo darbai";
     }
     
     if (slot.isReserved) {
@@ -107,9 +114,9 @@ export default function TimeSlotGrid({
           <div
             key={timeRange}
             className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center`}
-            onClick={() => !slot.isReserved && !isSlotInPast(slot) && !isPublicView && onSlotSelect(timeRange)}
+            onClick={() => !slot.isReserved && !slot.isMaintenance && !isSlotInPast(slot) && !isPublicView && onSlotSelect(timeRange)}
             style={{ 
-              pointerEvents: slot.isReserved || isSlotInPast(slot) || isPublicView ? 'none' : 'auto'
+              pointerEvents: slot.isReserved || slot.isMaintenance || isSlotInPast(slot) || isPublicView ? 'none' : 'auto'
             }}
           >
             <div className="text-center">

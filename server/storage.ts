@@ -2,6 +2,7 @@ import {
   users,
   courts,
   reservations,
+  maintenancePeriods,
   type User,
   type InsertUser,
   type Court,
@@ -10,6 +11,8 @@ import {
   type InsertReservation,
   type UpdateReservation,
   type ReservationWithDetails,
+  type MaintenancePeriod,
+  type InsertMaintenancePeriod,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, ne } from "drizzle-orm";
@@ -67,12 +70,18 @@ export interface IStorage {
   ): Promise<boolean>;
   
   // Get availability for a specific date and court
-  getCourtAvailability(courtId: number, date: string): Promise<{ startTime: string; endTime: string }[]>;
+  getCourtAvailability(courtId: number, date: string): Promise<{ startTime: string; endTime: string; type?: 'reservation' | 'maintenance' }[]>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
   getUserStats(userId: string): Promise<{ totalReservations: number; lastReservation?: string }>;
   checkUserHasActiveReservations(userId: string): Promise<boolean>;
+  
+  // Maintenance operations
+  getMaintenancePeriods(filters?: { courtId?: number; date?: string }): Promise<MaintenancePeriod[]>;
+  createMaintenancePeriod(maintenance: InsertMaintenancePeriod): Promise<MaintenancePeriod>;
+  updateMaintenancePeriod(id: number, data: Partial<MaintenancePeriod>): Promise<MaintenancePeriod | undefined>;
+  deleteMaintenancePeriod(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -316,22 +325,23 @@ export class DatabaseStorage implements IStorage {
     endTime: string,
     excludeId?: number
   ): Promise<boolean> {
-    const conditions = [
+    // Check reservation conflicts
+    const reservationConditions = [
       eq(reservations.courtId, courtId),
       eq(reservations.date, date),
       eq(reservations.status, "confirmed"),
     ];
 
     if (excludeId) {
-      conditions.push(ne(reservations.id, excludeId));
+      reservationConditions.push(ne(reservations.id, excludeId));
     }
 
-    const conflicts = await db
+    const reservationConflicts = await db
       .select()
       .from(reservations)
-      .where(and(...conditions));
+      .where(and(...reservationConditions));
 
-    return conflicts.some(conflict => {
+    const hasReservationConflict = reservationConflicts.some(conflict => {
       const conflictStart = conflict.startTime;
       const conflictEnd = conflict.endTime;
       
@@ -342,9 +352,35 @@ export class DatabaseStorage implements IStorage {
         (startTime <= conflictStart && endTime >= conflictEnd)
       );
     });
+
+    // Check maintenance conflicts
+    const maintenanceConflicts = await db
+      .select()
+      .from(maintenancePeriods)
+      .where(
+        and(
+          eq(maintenancePeriods.courtId, courtId),
+          eq(maintenancePeriods.date, date)
+        )
+      );
+
+    const hasMaintenanceConflict = maintenanceConflicts.some(conflict => {
+      const conflictStart = conflict.startTime;
+      const conflictEnd = conflict.endTime;
+      
+      // Check for time overlap
+      return (
+        (startTime >= conflictStart && startTime < conflictEnd) ||
+        (endTime > conflictStart && endTime <= conflictEnd) ||
+        (startTime <= conflictStart && endTime >= conflictEnd)
+      );
+    });
+
+    return hasReservationConflict || hasMaintenanceConflict;
   }
 
-  async getCourtAvailability(courtId: number, date: string): Promise<{ startTime: string; endTime: string }[]> {
+  async getCourtAvailability(courtId: number, date: string): Promise<{ startTime: string; endTime: string; type?: 'reservation' | 'maintenance' }[]> {
+    // Get reserved slots from reservations
     const reservedSlots = await db
       .select({
         startTime: reservations.startTime,
@@ -360,7 +396,28 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(asc(reservations.startTime));
 
-    return reservedSlots;
+    // Get maintenance periods
+    const maintenanceSlots = await db
+      .select({
+        startTime: maintenancePeriods.startTime,
+        endTime: maintenancePeriods.endTime,
+      })
+      .from(maintenancePeriods)
+      .where(
+        and(
+          eq(maintenancePeriods.courtId, courtId),
+          eq(maintenancePeriods.date, date)
+        )
+      )
+      .orderBy(asc(maintenancePeriods.startTime));
+
+    // Combine both types of unavailable slots
+    const unavailableSlots = [
+      ...reservedSlots.map(slot => ({ ...slot, type: 'reservation' as const })),
+      ...maintenanceSlots.map(slot => ({ ...slot, type: 'maintenance' as const }))
+    ].sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    return unavailableSlots;
   }
 
   // Admin operations
@@ -382,6 +439,44 @@ export class DatabaseStorage implements IStorage {
       totalReservations: userReservations.length,
       lastReservation: userReservations[0]?.date,
     };
+  }
+
+  // Maintenance operations
+  async getMaintenancePeriods(filters?: { courtId?: number; date?: string }): Promise<MaintenancePeriod[]> {
+    const conditions = [];
+    
+    if (filters?.courtId) {
+      conditions.push(eq(maintenancePeriods.courtId, filters.courtId));
+    }
+    
+    if (filters?.date) {
+      conditions.push(eq(maintenancePeriods.date, filters.date));
+    }
+    
+    return await db
+      .select()
+      .from(maintenancePeriods)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(asc(maintenancePeriods.date), asc(maintenancePeriods.startTime));
+  }
+
+  async createMaintenancePeriod(maintenance: InsertMaintenancePeriod): Promise<MaintenancePeriod> {
+    const [period] = await db.insert(maintenancePeriods).values(maintenance).returning();
+    return period;
+  }
+
+  async updateMaintenancePeriod(id: number, data: Partial<MaintenancePeriod>): Promise<MaintenancePeriod | undefined> {
+    const [period] = await db
+      .update(maintenancePeriods)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(maintenancePeriods.id, id))
+      .returning();
+    return period;
+  }
+
+  async deleteMaintenancePeriod(id: number): Promise<boolean> {
+    const result = await db.delete(maintenancePeriods).where(eq(maintenancePeriods.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

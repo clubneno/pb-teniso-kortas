@@ -10,6 +10,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
 
+  // Admin middleware
+  const requireAdmin = (req: any, res: any, next: any) => {
+    if (!req.user?.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  };
+
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -621,6 +629,93 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
     
     res.set('Content-Type', 'text/plain');
     res.send(robots);
+  });
+
+  // Maintenance periods routes (admin only)
+  app.get("/api/admin/maintenance", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { courtId, date } = req.query;
+      const filters: { courtId?: number; date?: string } = {};
+      
+      if (courtId) filters.courtId = parseInt(courtId as string);
+      if (date) filters.date = date as string;
+      
+      const periods = await storage.getMaintenancePeriods(filters);
+      res.json(periods);
+    } catch (error) {
+      console.error("Error fetching maintenance periods:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance periods" });
+    }
+  });
+
+  app.post("/api/admin/maintenance", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { courtId, date, startTime, endTime, description } = req.body;
+      
+      if (!courtId || !date || !startTime || !endTime) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Check for conflicts with existing reservations
+      const hasConflict = await storage.checkReservationConflict(
+        courtId,
+        date,
+        startTime,
+        endTime
+      );
+
+      if (hasConflict) {
+        return res.status(400).json({ 
+          message: "Šis laikas konfliktuoja su egzistuojančiomis rezervacijomis arba techninės priežiūros darbais" 
+        });
+      }
+
+      const period = await storage.createMaintenancePeriod({
+        courtId,
+        date,
+        startTime,
+        endTime,
+        description
+      });
+
+      res.status(201).json(period);
+    } catch (error) {
+      console.error("Error creating maintenance period:", error);
+      res.status(500).json({ message: "Failed to create maintenance period" });
+    }
+  });
+
+  app.patch("/api/admin/maintenance/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+
+      const period = await storage.updateMaintenancePeriod(id, updates);
+      if (!period) {
+        return res.status(404).json({ message: "Maintenance period not found" });
+      }
+
+      res.json(period);
+    } catch (error) {
+      console.error("Error updating maintenance period:", error);
+      res.status(500).json({ message: "Failed to update maintenance period" });
+    }
+  });
+
+  app.delete("/api/admin/maintenance/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+
+      const deleted = await storage.deleteMaintenancePeriod(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Maintenance period not found" });
+      }
+
+      res.json({ message: "Maintenance period deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting maintenance period:", error);
+      res.status(500).json({ message: "Failed to delete maintenance period" });
+    }
   });
 
   const httpServer = createServer(app);
