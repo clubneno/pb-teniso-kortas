@@ -122,6 +122,10 @@ export const registerSchema = z.object({
   phone: z.string().min(1, "Telefonas privalomas"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Netinkamas el. pašto formatas").min(1, "El. paštas privalomas"),
+});
+
 export const insertCourtSchema = createInsertSchema(courts).omit({
   id: true,
   createdAt: true,
@@ -152,6 +156,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type LoginData = z.infer<typeof loginSchema>;
 export type RegisterData = z.infer<typeof registerSchema>;
+export type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 export type Court = typeof courts.$inferSelect;
 export type InsertCourt = z.infer<typeof insertCourtSchema>;
 export type Reservation = typeof reservations.$inferSelect;

@@ -5,8 +5,9 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as AppUser } from "@shared/schema";
+import { User as AppUser, forgotPasswordSchema } from "@shared/schema";
 import connectPg from "connect-pg-simple";
+import { emailService } from "./services/emailService";
 
 declare global {
   namespace Express {
@@ -151,6 +152,43 @@ export function setupAuth(app: Express) {
       if (err) return next(err);
       res.sendStatus(200);
     });
+  });
+
+  // Forgot password route
+  app.post("/api/forgot-password", async (req, res) => {
+    try {
+      const validatedData = forgotPasswordSchema.parse(req.body);
+      const user = await storage.getUserByEmail(validatedData.email);
+      
+      if (!user) {
+        // Don't reveal if email exists for security
+        return res.json({ message: "Jei el. paštas egzistuoja, atkūrimo instrukcijos išsiųstos" });
+      }
+
+      // Generate reset token (simple implementation)
+      const resetToken = randomBytes(32).toString('hex');
+      const resetExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+      
+      // Store reset token in memory temporarily
+      // In production, this should be stored in database or Redis
+      const resetData = {
+        token: resetToken,
+        userId: user.id,
+        expires: resetExpiry
+      };
+      
+      // Simple in-memory storage (for demonstration)
+      (global as any).passwordResetTokens = (global as any).passwordResetTokens || new Map();
+      (global as any).passwordResetTokens.set(resetToken, resetData);
+      
+      // Send email
+      await emailService.sendPasswordReset(user, resetToken);
+      
+      res.json({ message: "Jei el. paštas egzistuoja, atkūrimo instrukcijos išsiųstos" });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Slaptažodžio atkūrimo klaida" });
+    }
   });
 
   app.get("/api/user", (req, res) => {

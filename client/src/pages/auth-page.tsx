@@ -8,16 +8,21 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, registerSchema, type LoginData, type RegisterData } from "@shared/schema";
+import { loginSchema, registerSchema, forgotPasswordSchema, type LoginData, type RegisterData, type ForgotPasswordData } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useLocation } from "wouter";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import TennisBallIcon from "@/components/TennisBallIcon";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const { toast } = useToast();
   
   // SEO optimization for auth page
   useSEO({
@@ -45,6 +50,48 @@ export default function AuthPage() {
       firstName: "",
       lastName: "",
       phone: "",
+    },
+  });
+
+  const forgotPasswordForm = useForm<ForgotPasswordData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  // Forgot password mutation
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: ForgotPasswordData) => {
+      const response = await fetch("/api/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Slaptažodžio atkūrimo klaida");
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Sėkmė",
+        description: data.message,
+      });
+      setShowForgotPassword(false);
+      forgotPasswordForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Klaida",
+        description: error.message || "Nepavyko išsiųsti atkūrimo instrukcijų",
+        variant: "destructive",
+      });
     },
   });
 
@@ -76,6 +123,10 @@ export default function AuthPage() {
         setLocation("/");
       },
     });
+  };
+
+  const handleForgotPassword = (data: ForgotPasswordData) => {
+    forgotPasswordMutation.mutate(data);
   };
 
   return (
@@ -152,6 +203,17 @@ export default function AuthPage() {
                             "Prisijungti"
                           )}
                         </Button>
+                        
+                        <div className="text-center mt-4">
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="text-sm text-tennis-green-600 hover:text-tennis-green-700"
+                            onClick={() => setShowForgotPassword(true)}
+                          >
+                            Pamiršote slaptažodį?
+                          </Button>
+                        </div>
                       </form>
                     </Form>
                   </CardContent>
@@ -257,9 +319,85 @@ export default function AuthPage() {
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <Card className="w-full max-w-md mx-auto shadow-xl">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowForgotPassword(false)}
+                        className="h-8 w-8"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <div>
+                        <CardTitle>Slaptažodžio atkūrimas</CardTitle>
+                        <CardDescription className="mt-1">
+                          Įveskite savo el. paštą, kuriuo registravotės
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Form {...forgotPasswordForm}>
+                      <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
+                        <FormField
+                          control={forgotPasswordForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>El. paštas</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="jonas@example.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-sm text-blue-800">
+                            <strong>Kaip tai veikia:</strong> Išsiųsime jums el. laišką su nuoroda slaptažodžio atkūrimui. 
+                            Nuoroda galioja 1 valandą.
+                          </p>
+                        </div>
+                        
+                        <div className="flex gap-3 pt-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowForgotPassword(false)}
+                            disabled={forgotPasswordMutation.isPending}
+                            className="flex-1"
+                          >
+                            Atšaukti
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            className="flex-1"
+                            disabled={forgotPasswordMutation.isPending}
+                          >
+                            {forgotPasswordMutation.isPending ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Siunčiama...
+                              </>
+                            ) : (
+                              "Siųsti instrukcijas"
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
-
-
         </div>
       </div>
     </div>

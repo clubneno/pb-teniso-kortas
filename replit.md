@@ -119,6 +119,9 @@ Preferred communication style: Simple, everyday language.
 - Created comprehensive email template system with confirmation, cancellation, maintenance, and password reset designs using modern CSS styling (2025-07-27)
 - Added email testing functionality in admin interface allowing administrators to preview different email types before deployment (2025-07-27)
 - Enhanced email service with proper error handling, fallback content, and mobile-responsive design supporting all major email clients (2025-07-27)
+- Added forgot password functionality to login page (/prisijungimas) with email-based password reset system (2025-07-27)
+- Implemented password reset email template with secure token-based recovery and 1-hour expiration (2025-07-27)
+- Enhanced auth page with professional forgot password modal featuring clear instructions and user-friendly flow (2025-07-27)
 
 ### Reservation Management
 - Real-time availability checking
