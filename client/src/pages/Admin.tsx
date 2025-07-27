@@ -140,10 +140,9 @@ export default function Admin() {
   const [maintenanceForm, setMaintenanceForm] = useState({
     courtId: "",
     date: "",
-    startTime: "",
-    endTime: "",
     description: ""
   });
+  const [selectedMaintenanceSlots, setSelectedMaintenanceSlots] = useState<string[]>([]);
   const { toast } = useToast();
 
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
@@ -231,6 +230,66 @@ export default function Admin() {
     },
     enabled: !!reservationForm.date && !!reservationForm.courtId,
   });
+
+  // Fetch availability for maintenance modal
+  const { data: maintenanceAvailability = [], isLoading: maintenanceAvailabilityLoading } = useQuery<any[]>({
+    queryKey: [`/api/courts/${maintenanceForm.courtId}/availability`, maintenanceForm.date],
+    queryFn: async () => {
+      if (!maintenanceForm.courtId || !maintenanceForm.date) return [];
+      const response = await fetch(`/api/courts/${maintenanceForm.courtId}/availability?date=${maintenanceForm.date}`);
+      return response.json();
+    },
+    enabled: !!maintenanceForm.date && !!maintenanceForm.courtId,
+  });
+
+  // Generate time slots for maintenance modal
+  const generateMaintenanceTimeSlots = () => {
+    if (!maintenanceForm.courtId || !maintenanceForm.date) return [];
+    
+    const slots = [];
+    let startMinutes = 8 * 60; // 8:00 in minutes
+    const endMinutes = 22 * 60; // 22:00 in minutes
+    
+    while (startMinutes < endMinutes) {
+      const endSlotMinutes = startMinutes + 30;
+      
+      const startHour = Math.floor(startMinutes / 60);
+      const startMin = startMinutes % 60;
+      const endHour = Math.floor(endSlotMinutes / 60);
+      const endMin = endSlotMinutes % 60;
+      
+      const startTime = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
+      const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
+      
+      // Check if this slot overlaps with any unavailable period
+      const isUnavailable = maintenanceAvailability.some((period) => {
+        return !(endTime <= period.startTime || startTime >= period.endTime);
+      });
+
+      slots.push({
+        startTime,
+        endTime,
+        timeDisplay: startTime,
+        isUnavailable,
+        timeRange: `${startTime}-${endTime}`
+      });
+      
+      startMinutes += 30;
+    }
+    return slots;
+  };
+
+  const maintenanceTimeSlots = generateMaintenanceTimeSlots();
+
+  const handleMaintenanceSlotSelect = (timeRange: string) => {
+    setSelectedMaintenanceSlots(prev => {
+      if (prev.includes(timeRange)) {
+        return prev.filter(slot => slot !== timeRange);
+      } else {
+        return [...prev, timeRange].sort();
+      }
+    });
+  };
 
   // Helper functions for weekly calculations
   const getWeekStart = (date: Date) => {
@@ -582,7 +641,8 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/maintenance'] });
       queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
       setShowMaintenanceModal(false);
-      setMaintenanceForm({ courtId: "", date: "", startTime: "", endTime: "", description: "" });
+      setMaintenanceForm({ courtId: "", date: "", description: "" });
+      setSelectedMaintenanceSlots([]);
       toast({
         title: "Pakeitimas išsaugotas",
         description: "Tvarkymo darbai sėkmingai sukurti",
@@ -623,20 +683,25 @@ export default function Admin() {
   });
 
   const handleCreateMaintenance = () => {
-    if (!maintenanceForm.courtId || !maintenanceForm.date || !maintenanceForm.startTime || !maintenanceForm.endTime) {
+    if (!maintenanceForm.courtId || !maintenanceForm.date || selectedMaintenanceSlots.length === 0) {
       toast({
         title: "Klaida",
-        description: "Prašome užpildyti visus privalomus laukus",
+        description: "Prašome pasirinkti kortą, datą ir bent vieną laiko intervalą",
         variant: "destructive",
       });
       return;
     }
 
+    // Sort slots and get continuous time range
+    const sortedSlots = selectedMaintenanceSlots.sort();
+    const startTime = sortedSlots[0].split('-')[0];
+    const endTime = sortedSlots[sortedSlots.length - 1].split('-')[1];
+
     createMaintenanceMutation.mutate({
       courtId: parseInt(maintenanceForm.courtId),
       date: maintenanceForm.date,
-      startTime: maintenanceForm.startTime,
-      endTime: maintenanceForm.endTime,
+      startTime: startTime,
+      endTime: endTime,
       description: maintenanceForm.description || null,
     });
   };
@@ -2029,26 +2094,48 @@ export default function Admin() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Time Slot Selection */}
+              {maintenanceForm.courtId && maintenanceForm.date && (
                 <div>
-                  <Label htmlFor="startTime">Pradžios laikas *</Label>
-                  <Input
-                    id="startTime"
-                    type="time"
-                    value={maintenanceForm.startTime}
-                    onChange={(e) => setMaintenanceForm(prev => ({ ...prev, startTime: e.target.value }))}
-                  />
+                  <Label>Laiko intervalai *</Label>
+                  {maintenanceAvailabilityLoading ? (
+                    <div className="flex justify-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-600"></div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3 bg-gray-50">
+                      {maintenanceTimeSlots.map((slot) => (
+                        <button
+                          key={slot.timeRange}
+                          type="button"
+                          onClick={() => !slot.isUnavailable && handleMaintenanceSlotSelect(slot.timeRange)}
+                          disabled={slot.isUnavailable}
+                          className={`
+                            p-2 text-xs rounded border text-center transition-colors
+                            ${slot.isUnavailable 
+                              ? "bg-red-200 text-red-800 border-red-300 cursor-not-allowed opacity-60" 
+                              : selectedMaintenanceSlots.includes(slot.timeRange)
+                                ? "bg-yellow-600 text-white border-yellow-700"
+                                : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50 hover:border-yellow-400"
+                            }
+                          `}
+                        >
+                          {slot.timeDisplay}
+                          <br />
+                          <span className="text-xs opacity-75">
+                            {slot.isUnavailable ? "Užimta" : "Laisva"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {selectedMaintenanceSlots.length > 0 && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      Pasirinkta: {selectedMaintenanceSlots.length} intervalų ({selectedMaintenanceSlots[0]?.split('-')[0]} - {selectedMaintenanceSlots[selectedMaintenanceSlots.length - 1]?.split('-')[1]})
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label htmlFor="endTime">Pabaigos laikas *</Label>
-                  <Input
-                    id="endTime"
-                    type="time"
-                    value={maintenanceForm.endTime}
-                    onChange={(e) => setMaintenanceForm(prev => ({ ...prev, endTime: e.target.value }))}
-                  />
-                </div>
-              </div>
+              )}
 
               <div>
                 <Label htmlFor="description">Aprašymas</Label>
