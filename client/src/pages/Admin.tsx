@@ -1502,22 +1502,13 @@ export default function Admin() {
           <TabsContent value="maintenance" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Tvarkymo Darbų Valdymas</h2>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowEmailTestModal(true)}
-                >
-                  <Calendar size={16} className="mr-2" />
-                  Testuoti El. Paštą
-                </Button>
-                <Button 
-                  className="bg-yellow-600 hover:bg-yellow-700"
-                  onClick={() => setShowMaintenanceModal(true)}
-                >
-                  <Plus size={16} className="mr-2" />
-                  Sukurti Tvarkymo Darbus
-                </Button>
-              </div>
+              <Button 
+                className="bg-yellow-600 hover:bg-yellow-700"
+                onClick={() => setShowMaintenanceModal(true)}
+              >
+                <Plus size={16} className="mr-2" />
+                Sukurti Tvarkymo Darbus
+              </Button>
             </div>
 
             {/* Maintenance Periods Table */}
@@ -1585,7 +1576,16 @@ export default function Admin() {
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <h2 className="text-xl font-semibold mb-6">Sistemos Nustatymai</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">Sistemos Nustatymai</h2>
+              <Button 
+                variant="outline"
+                onClick={() => setShowEmailTestModal(true)}
+              >
+                <Calendar size={16} className="mr-2" />
+                Testuoti El. Paštą
+              </Button>
+            </div>
             
             <div className="max-w-4xl space-y-8">
               {/* Court Settings */}
