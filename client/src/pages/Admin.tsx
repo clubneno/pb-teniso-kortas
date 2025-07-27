@@ -2278,10 +2278,13 @@ export default function Admin() {
       {/* Email Test Modal */}
       {showEmailTestModal && (
         <Dialog open={showEmailTestModal} onOpenChange={setShowEmailTestModal}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md" aria-describedby="email-test-description">
             <DialogHeader>
               <DialogTitle>Testuoti El. Paštą</DialogTitle>
             </DialogHeader>
+            <p id="email-test-description" className="text-sm text-gray-600 mb-4">
+              Išsiųskite testos el. laišką norėdami peržiūrėti šablono dizainą
+            </p>
             <div className="space-y-4">
               <div>
                 <Label>El. pašto adresas</Label>
