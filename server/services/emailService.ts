@@ -123,7 +123,7 @@ class EmailService {
         <div class="container">
           <div class="header">
             <h1>🎾 PB Teniso Kortas</h1>
-            <div class="subtitle">Profesionalūs teniso kortai</div>
+            <div class="subtitle">Pranešimas</div>
           </div>
           <div class="content">
             ${content}
@@ -149,10 +149,10 @@ class EmailService {
 
     const content = `
       <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
-      <p>Jūsų teniso korto rezervacija sėkmingai patvirtinta ir laukiame jūsų atvykimo!</p>
+      <p>Jūsų teniso korto rezervacija sėkmingai patvirtinta. Laukiame jūsų atvykimo!</p>
       
       <div class="details-card success">
-        <h3 style="margin-top: 0; color: #155724;">✅ Rezervacijos duomenys</h3>
+        <h3 style="margin-top: 0; color: #155724;">✅ Rezervacijos detalės</h3>
         <div class="detail-row">
           <span class="detail-label">📅 Data:</span>
           <span class="detail-value">${formattedDate}</span>
@@ -171,7 +171,7 @@ class EmailService {
         </div>
       </div>
       
-      <p><strong>Svarbūs priminimai:</strong></p>
+      <p><strong>Priminimai:</strong></p>
       <ul>
         <li>Atvykite 5-10 minučių anksčiau registracijai</li>
         <li>Turėkite teniso raketę ir kamuoliukus</li>
@@ -179,7 +179,7 @@ class EmailService {
       </ul>
       
       <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; margin-top: 20px;">
-        <p style="margin: 0; color: #2e6b4a;"><strong>💡 Patarimas:</strong> Geriausi žaidimo rezultatai pasiekiami saulėtos dienos metu!</p>
+        <p style="margin: 0; color: #2e6b4a;"><strong></p>
       </div>
     `;
 
@@ -281,7 +281,7 @@ class EmailService {
         </div>
       </div>
       
-      <p><strong>Atsiprašome už nepatogumus!</strong> Jei turite klausimų arba norite rezervuoti kitą laiką, susisiekite su mumis.</p>
+       <p><strong>Svarbu:</strong> Jei šie pakeitimai nebuvo jūsų inicijuoti, nedelsiant susisiekite su mumis.</p>
       
       <p>Laukiame jūsų ateityje!</p>
     `;
@@ -308,7 +308,7 @@ class EmailService {
 
     const content = `
       <div class="greeting">Sveiki, ${user.firstName || "Gerbiamas kliente"}!</div>
-      <p>Gavome užklausą pakeisti jūsų slaptažodį.</p>
+      <p>Gavome užklausą pakeisti jūsų paskyros slaptažodį.</p>
       
       <div class="details-card warning">
         <h3 style="margin-top: 0; color: #856404;">🔑 Slaptažodžio keitimas</h3>
@@ -321,8 +321,8 @@ class EmailService {
       
       <p><strong>Saugumo sumetimai:</strong></p>
       <ul>
-        <li>Jei slaptažodžio atkūrimo neprašėte, ignoruokite šį laišką</li>
-        <li>Niekada nedelskite šios nuorodos kitiems</li>
+        <li>Jei slaptažodžio keitimo neprašėte, ignoruokite šį laišką</li>
+        <li>Niekada nesidalinkite šia nuoroda su kitais</li>
         <li>Sukurkite stiprų, unikalų slaptažodį</li>
       </ul>
     `;
@@ -357,7 +357,7 @@ class EmailService {
 
     const content = `
       <div class="greeting">Sveiki, ${params.firstName || "Gerbiamas kliente"}!</div>
-      <p>Informuojame apie planuojamus tvarkymo darbus, kurie paveiks jūsų rezervaciją.</p>
+      <p>Informuojame apie planuojamus PB teniso korto tvarkymo darbus, kurie paveiks jūsų rezervaciją.</p>
       
       <div class="details-card warning">
         <h3 style="margin-top: 0; color: #856404;">🔧 Tvarkymo darbai</h3>
@@ -381,7 +381,7 @@ class EmailService {
       
       <p><strong>Ką tai reiškia:</strong></p>
       <ul>
-        <li>Jūsų rezervacija šiuo laiku automatiškai atšaukta</li>
+        <li>Jūsų rezervacija šiuo laiku - atšaukta</li>
         <li>Kortas nurodytu laiku bus uždarytas</li>
       </ul>
       
