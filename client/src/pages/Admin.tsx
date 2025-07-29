@@ -1519,7 +1519,7 @@ export default function Admin() {
           {/* Maintenance Tab */}
           <TabsContent value="maintenance" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Tvarkymo Darbai</h2>
+              <h2 className="text-xl font-semibold">Tvarkymų Valdymas</h2>
               <Button 
                 className="bg-yellow-600 hover:bg-yellow-700"
                 onClick={() => setShowMaintenanceModal(true)}
