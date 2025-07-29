@@ -1,0 +1,36 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tennis ball background -->
+  <circle cx="256" cy="256" r="240" fill="#2e6b4a" stroke="#1f4732" stroke-width="8"/>
+  
+  <!-- Tennis ball with curved seam lines -->
+  <circle cx="256" cy="256" r="220" fill="#4ade80" stroke="none"/>
+  
+  <!-- Curved seam line 1 -->
+  <path d="M 80 256 Q 160 180 256 180 Q 352 180 432 256" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+        
+  <!-- Curved seam line 2 -->  
+  <path d="M 80 256 Q 160 332 256 332 Q 352 332 432 256" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="4" 
+        stroke-linecap="round"/>
+        
+  <!-- Inner shadow for depth -->
+  <circle cx="256" cy="256" r="220" fill="url(#innerShadow)" stroke="none"/>
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <radialGradient id="innerShadow" cx="0.3" cy="0.3" r="0.7">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.3)"/>
+      <stop offset="70%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.2)"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Text overlay for branding -->
+  <text x="256" y="400" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">PB</text>
+</svg>

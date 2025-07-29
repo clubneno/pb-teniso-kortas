@@ -124,6 +124,12 @@ Preferred communication style: Simple, everyday language.
 - Enhanced auth page with professional forgot password modal featuring clear instructions and user-friendly flow (2025-07-27)
 - Fixed password reset email URL generation bug by updating emailService.ts to use proper base URL instead of undefined FRONTEND_URL (2025-07-27)
 - Updated forgot password button text from "Siųsti instrukcijas" to "Siųsti" for cleaner UI (2025-07-27)
+- Implemented comprehensive Progressive Web App (PWA) functionality with offline support and installable mobile app experience (2025-07-29)
+- Added PWA manifest with Lithuanian metadata, app shortcuts, and complete icon set (72px-512px) with tennis ball branding (2025-07-29)
+- Created service worker with cache-first strategy for static assets, network-first for API calls, and background sync capabilities (2025-07-29)
+- Enhanced HTML with PWA meta tags, Apple Touch icons, Windows tiles, and custom install prompt with Lithuanian text (2025-07-29)
+- Built React PWA hook (usePWA) providing install prompts, offline detection, update notifications, and push notification helpers (2025-07-29)
+- Optimized admin interface for mobile with larger touch targets, improved tab navigation, and responsive design enhancements (2025-07-29)
 
 ### Reservation Management
 - Real-time availability checking

@@ -34,12 +34,24 @@
     <meta name="twitter:description" content="Rezervuokite teniso kortus greitai ir patogiai. PB teniso kortas siūlo modernius teniso kortus su 90 minučių rezervacijos sistema." />
     <meta name="twitter:image" content="https://pbtenisokortas.lt/og-image.png" />
     
-    <!-- Additional SEO Meta Tags -->
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2e6b4a" />
     <meta name="msapplication-TileColor" content="#2e6b4a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="PB teniso kortas" />
+    <meta name="apple-mobile-web-app-title" content="PB Tennis" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
+    
+    <!-- MS Tile Icons -->
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
     
     <!-- Structured Data for Local Business -->
     <script type="application/ld+json">
@@ -76,6 +88,76 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('PWA: Service Worker registered successfully:', registration.scope);
+              
+              // Check for updates every 60 seconds
+              setInterval(() => {
+                registration.update();
+              }, 60000);
+            })
+            .catch((error) => {
+              console.log('PWA: Service Worker registration failed:', error);
+            });
+        });
+      }
+
+      // PWA Install prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('PWA: Install prompt triggered');
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show custom install button or banner
+        const installBanner = document.createElement('div');
+        installBanner.id = 'pwa-install-banner';
+        installBanner.innerHTML = `
+          <div style="position: fixed; top: 0; left: 0; right: 0; background: #2e6b4a; color: white; padding: 12px 16px; text-align: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+            <span style="margin-right: 12px;">📱 Įdiekite PB Tennis aplikaciją greičiau pateikimui!</span>
+            <button id="pwa-install-btn" style="background: white; color: #2e6b4a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 8px;">Įdiegti</button>
+            <button id="pwa-dismiss-btn" style="background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Atmesti</button>
+          </div>
+        `;
+        document.body.appendChild(installBanner);
+        
+        document.getElementById('pwa-install-btn').addEventListener('click', () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('PWA: User accepted the install prompt');
+            }
+            deferredPrompt = null;
+            document.getElementById('pwa-install-banner').remove();
+          });
+        });
+        
+        document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+          document.getElementById('pwa-install-banner').remove();
+        });
+      });
+
+      // PWA successful install
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA: App successfully installed');
+        deferredPrompt = null;
+        
+        // Track installation
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'pwa_install', {
+            event_category: 'PWA',
+            event_label: 'App Installed'
+          });
+        }
+      });
+    </script>
+    
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
