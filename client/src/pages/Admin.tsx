@@ -1602,7 +1602,7 @@ export default function Admin() {
                 onClick={() => setShowEmailTestModal(true)}
               >
                 <Calendar size={16} className="mr-2" />
-                Testuoti El. Paštą
+                Testuoti e-pašto pranešimus
               </Button>
             </div>
             
