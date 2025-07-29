@@ -119,13 +119,16 @@
         const installBanner = document.createElement('div');
         installBanner.id = 'pwa-install-banner';
         installBanner.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; right: 0; background: #2e6b4a; color: white; padding: 12px 16px; text-align: center; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+          <div style="position: fixed; top: 0; left: 0; right: 0; background: #2e6b4a; color: white; padding: 8px 16px; text-align: center; z-index: 9999; box-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: 14px;">
             <span style="margin-right: 12px;">📱 Įdiekite PBtenisokortaas aplikaciją greitesniam rezervavimui</span>
-            <button id="pwa-install-btn" style="background: white; color: #2e6b4a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 8px;">Įdiegti</button>
-            <button id="pwa-dismiss-btn" style="background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Atmesti</button>
+            <button id="pwa-install-btn" style="background: white; color: #2e6b4a; border: none; padding: 4px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 8px; font-size: 12px;">Įdiegti</button>
+            <button id="pwa-dismiss-btn" style="background: transparent; color: white; border: 1px solid white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Atmesti</button>
           </div>
         `;
         document.body.appendChild(installBanner);
+        
+        // Push page content down to avoid overlap
+        document.body.style.paddingTop = '48px';
         
         document.getElementById('pwa-install-btn').addEventListener('click', () => {
           deferredPrompt.prompt();
@@ -135,11 +138,13 @@
             }
             deferredPrompt = null;
             document.getElementById('pwa-install-banner').remove();
+            document.body.style.paddingTop = '0';
           });
         });
         
         document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
           document.getElementById('pwa-install-banner').remove();
+          document.body.style.paddingTop = '0';
         });
       });
 
