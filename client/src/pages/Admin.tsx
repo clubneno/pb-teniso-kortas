@@ -1008,23 +1008,23 @@ export default function Admin() {
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="overflow-x-auto">
             <TabsList className="inline-flex w-max min-w-full">
-              <TabsTrigger value="overview" className="whitespace-nowrap">
+              <TabsTrigger value="overview" className="whitespace-nowrap" title="Sistemos apžvalga ir statistikos">
                 <BarChart3 size={16} className="mr-2" />
                 <span className="hidden sm:inline">Apžvalga</span>
               </TabsTrigger>
-              <TabsTrigger value="reservations" className="whitespace-nowrap">
+              <TabsTrigger value="reservations" className="whitespace-nowrap" title="Rezervacijų valdymas ir peržiūra">
                 <Calendar size={16} className="mr-2" />
                 <span className="hidden sm:inline">Rezervacijos</span>
               </TabsTrigger>
-              <TabsTrigger value="maintenance" className="whitespace-nowrap">
+              <TabsTrigger value="maintenance" className="whitespace-nowrap" title="Kortų tvarkymo darbų planavimas">
                 <Settings size={16} className="mr-2" />
                 <span className="hidden sm:inline">Tvarkymo darbai</span>
               </TabsTrigger>
-              <TabsTrigger value="users" className="whitespace-nowrap">
+              <TabsTrigger value="users" className="whitespace-nowrap" title="Naudotojų valdymas ir administravimas">
                 <Users size={16} className="mr-2" />
                 <span className="hidden sm:inline">Naudotojai</span>
               </TabsTrigger>
-              <TabsTrigger value="settings" className="whitespace-nowrap">
+              <TabsTrigger value="settings" className="whitespace-nowrap" title="Sistemos nustatymai ir konfigūracija">
                 <Settings size={16} className="mr-2" />
                 <span className="hidden sm:inline">Nustatymai</span>
               </TabsTrigger>
