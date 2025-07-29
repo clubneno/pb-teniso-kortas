@@ -1027,8 +1027,11 @@ export default function Admin() {
                 value="maintenance" 
                 className="flex-col items-center justify-start px-3 py-2 min-w-[80px] min-h-[60px] sm:flex-row sm:min-w-auto sm:py-2 sm:min-h-auto sm:justify-center"
               >
-                <Wrench size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm text-center leading-tight">Tvarkymo<br className="sm:hidden" />darbai</span>
+                <Wrench size={20} className="sm:mr-2 mb-1 sm:mb-0 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-center leading-none">
+                  <span className="block sm:inline">Tvarkymo</span>
+                  <span className="block sm:inline sm:ml-1">darbai</span>
+                </span>
               </TabsTrigger>
               <TabsTrigger 
                 value="users" 
