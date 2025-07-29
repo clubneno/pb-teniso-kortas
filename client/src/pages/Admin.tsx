@@ -1395,8 +1395,7 @@ export default function Admin() {
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Naudotojų 
-              Valdymas</h2>
+              <h2 className="text-xl font-semibold">Naudotojų<br />Valdymas</h2>
               <Button 
                 className="bg-tennis-green-500 hover:bg-tennis-green-600"
                 onClick={() => setCreateUserModal(true)}
