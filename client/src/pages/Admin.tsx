@@ -1006,26 +1006,26 @@ export default function Admin() {
 
         {/* Admin Navigation */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">
-              <BarChart3 size={16} className="mr-2" />
-              Apžvalga
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto md:h-10">
+            <TabsTrigger value="overview" className="flex-col md:flex-row p-2 md:p-3 h-auto md:h-auto">
+              <BarChart3 size={16} className="md:mr-2 mb-1 md:mb-0" />
+              <span className="text-xs md:text-sm">Apžvalga</span>
             </TabsTrigger>
-            <TabsTrigger value="reservations">
-              <Calendar size={16} className="mr-2" />
-              Rezervacijos
+            <TabsTrigger value="reservations" className="flex-col md:flex-row p-2 md:p-3 h-auto md:h-auto">
+              <Calendar size={16} className="md:mr-2 mb-1 md:mb-0" />
+              <span className="text-xs md:text-sm">Rezervacijos</span>
             </TabsTrigger>
-            <TabsTrigger value="maintenance">
-              <Settings size={16} className="mr-2" />
-              Tvarkymo darbai
+            <TabsTrigger value="maintenance" className="flex-col md:flex-row p-2 md:p-3 h-auto md:h-auto">
+              <Settings size={16} className="md:mr-2 mb-1 md:mb-0" />
+              <span className="text-xs md:text-sm">Tvarkymo darbai</span>
             </TabsTrigger>
-            <TabsTrigger value="users">
-              <Users size={16} className="mr-2" />
-              Naudotojai
+            <TabsTrigger value="users" className="flex-col md:flex-row p-2 md:p-3 h-auto md:h-auto">
+              <Users size={16} className="md:mr-2 mb-1 md:mb-0" />
+              <span className="text-xs md:text-sm">Naudotojai</span>
             </TabsTrigger>
-            <TabsTrigger value="settings">
-              <Settings size={16} className="mr-2" />
-              Nustatymai
+            <TabsTrigger value="settings" className="flex-col md:flex-row p-2 md:p-3 h-auto md:h-auto col-span-2 md:col-span-1">
+              <Settings size={16} className="md:mr-2 mb-1 md:mb-0" />
+              <span className="text-xs md:text-sm">Nustatymai</span>
             </TabsTrigger>
           </TabsList>
 
