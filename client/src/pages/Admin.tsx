@@ -1008,41 +1008,41 @@ export default function Admin() {
         {/* Admin Navigation */}
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="overflow-x-auto scrollbar-hide">
-            <TabsList className="inline-flex w-max gap-1 h-auto p-1">
+            <TabsList className="inline-flex w-max gap-2 h-auto p-2">
               <TabsTrigger 
                 value="overview" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-center px-4 py-3 min-w-[90px] h-auto sm:flex-row sm:min-w-auto sm:py-3"
               >
-                <BarChart3 size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Apžvalga</span>
+                <BarChart3 size={24} className="sm:mr-3 mb-1 sm:mb-0" />
+                <span className="text-sm sm:text-base">Apžvalga</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="reservations" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-center px-4 py-3 min-w-[90px] h-auto sm:flex-row sm:min-w-auto sm:py-3"
               >
-                <Calendar size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Rezervacijos</span>
+                <Calendar size={24} className="sm:mr-3 mb-1 sm:mb-0" />
+                <span className="text-sm sm:text-base">Rezervacijos</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="maintenance" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[80px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-center px-4 py-3 min-w-[100px] h-auto sm:flex-row sm:min-w-auto sm:py-3"
               >
-                <Wrench size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm leading-tight">Tvarkymo<br className="sm:hidden" />darbai</span>
+                <Wrench size={24} className="sm:mr-3 mb-1 sm:mb-0" />
+                <span className="text-sm sm:text-base leading-tight">Tvarkymo<br className="sm:hidden" />darbai</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="users" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-center px-4 py-3 min-w-[90px] h-auto sm:flex-row sm:min-w-auto sm:py-3"
               >
-                <Users size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Naudotojai</span>
+                <Users size={24} className="sm:mr-3 mb-1 sm:mb-0" />
+                <span className="text-sm sm:text-base">Naudotojai</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="settings" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-center px-4 py-3 min-w-[90px] h-auto sm:flex-row sm:min-w-auto sm:py-3"
               >
-                <Settings size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Nustatymai</span>
+                <Settings size={24} className="sm:mr-3 mb-1 sm:mb-0" />
+                <span className="text-sm sm:text-base">Nustatymai</span>
               </TabsTrigger>
             </TabsList>
           </div>
