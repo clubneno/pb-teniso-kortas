@@ -130,6 +130,8 @@ Preferred communication style: Simple, everyday language.
 - Enhanced HTML with PWA meta tags, Apple Touch icons, Windows tiles, and custom install prompt with Lithuanian text (2025-07-29)
 - Built React PWA hook (usePWA) providing install prompts, offline detection, update notifications, and push notification helpers (2025-07-29)
 - Optimized admin interface for mobile with larger touch targets, improved tab navigation, and responsive design enhancements (2025-07-29)
+- Updated PWA icons to match exact TennisBallIcon design with tennis green (#2e6b4a) branding across all 8 icon sizes (2025-07-29)
+- Changed PWA installation prompt text to "Įdiekite PBtenisokortaas aplikaciją greitesniam rezervavimui" for clearer messaging (2025-07-29)
 
 ### Reservation Management
 - Real-time availability checking
