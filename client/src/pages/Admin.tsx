@@ -1011,38 +1011,38 @@ export default function Admin() {
             <TabsList className="inline-flex w-max gap-1 h-auto p-1">
               <TabsTrigger 
                 value="overview" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-start px-3 py-2 min-w-[70px] min-h-[60px] sm:flex-row sm:min-w-auto sm:py-2 sm:min-h-auto sm:justify-center"
               >
                 <BarChart3 size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Apžvalga</span>
+                <span className="text-xs sm:text-sm text-center">Apžvalga</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="reservations" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-start px-3 py-2 min-w-[70px] min-h-[60px] sm:flex-row sm:min-w-auto sm:py-2 sm:min-h-auto sm:justify-center"
               >
                 <Calendar size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Rezervacijos</span>
+                <span className="text-xs sm:text-sm text-center">Rezervacijos</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="maintenance" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[80px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-start px-3 py-2 min-w-[80px] min-h-[60px] sm:flex-row sm:min-w-auto sm:py-2 sm:min-h-auto sm:justify-center"
               >
                 <Wrench size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm leading-tight">Tvarkymo<br className="sm:hidden" />darbai</span>
+                <span className="text-xs sm:text-sm text-center leading-tight">Tvarkymo<br className="sm:hidden" />darbai</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="users" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-start px-3 py-2 min-w-[70px] min-h-[60px] sm:flex-row sm:min-w-auto sm:py-2 sm:min-h-auto sm:justify-center"
               >
                 <Users size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Naudotojai</span>
+                <span className="text-xs sm:text-sm text-center">Naudotojai</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="settings" 
-                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+                className="flex-col items-center justify-start px-3 py-2 min-w-[70px] min-h-[60px] sm:flex-row sm:min-w-auto sm:py-2 sm:min-h-auto sm:justify-center"
               >
                 <Settings size={20} className="sm:mr-2 mb-1 sm:mb-0" />
-                <span className="text-xs sm:text-sm">Nustatymai</span>
+                <span className="text-xs sm:text-sm text-center">Nustatymai</span>
               </TabsTrigger>
             </TabsList>
           </div>
