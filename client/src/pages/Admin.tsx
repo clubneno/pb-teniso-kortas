@@ -1007,32 +1007,42 @@ export default function Admin() {
 
         {/* Admin Navigation */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-max min-w-full">
-              <TabsTrigger value="overview" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
-                <BarChart3 size={14} className="mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:hidden">Stats</span>
-                <span className="hidden sm:inline">Apžvalga</span>
+          <div className="overflow-x-auto scrollbar-hide">
+            <TabsList className="inline-flex w-max gap-1 h-auto p-1">
+              <TabsTrigger 
+                value="overview" 
+                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+              >
+                <BarChart3 size={20} className="sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-xs sm:text-sm">Apžvalga</span>
               </TabsTrigger>
-              <TabsTrigger value="reservations" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
-                <Calendar size={14} className="mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:hidden">Rez.</span>
-                <span className="hidden sm:inline">Rezervacijos</span>
+              <TabsTrigger 
+                value="reservations" 
+                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+              >
+                <Calendar size={20} className="sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-xs sm:text-sm">Rezervacijos</span>
               </TabsTrigger>
-              <TabsTrigger value="maintenance" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
-                <Settings size={14} className="mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:hidden">Darb.</span>
-                <span className="hidden sm:inline">Tvarkymo darbai</span>
+              <TabsTrigger 
+                value="maintenance" 
+                className="flex-col items-center justify-center px-3 py-2 min-w-[80px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+              >
+                <Settings size={20} className="sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-xs sm:text-sm leading-tight">Tvarkymo<br className="sm:hidden" />darbai</span>
               </TabsTrigger>
-              <TabsTrigger value="users" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
-                <Users size={14} className="mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:hidden">Vart.</span>
-                <span className="hidden sm:inline">Naudotojai</span>
+              <TabsTrigger 
+                value="users" 
+                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+              >
+                <Users size={20} className="sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-xs sm:text-sm">Naudotojai</span>
               </TabsTrigger>
-              <TabsTrigger value="settings" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
-                <Settings size={14} className="mr-1 sm:mr-2" />
-                <span className="hidden xs:inline sm:hidden">Nust.</span>
-                <span className="hidden sm:inline">Nustatymai</span>
+              <TabsTrigger 
+                value="settings" 
+                className="flex-col items-center justify-center px-3 py-2 min-w-[70px] h-auto sm:flex-row sm:min-w-auto sm:py-2"
+              >
+                <Settings size={20} className="sm:mr-2 mb-1 sm:mb-0" />
+                <span className="text-xs sm:text-sm">Nustatymai</span>
               </TabsTrigger>
             </TabsList>
           </div>
