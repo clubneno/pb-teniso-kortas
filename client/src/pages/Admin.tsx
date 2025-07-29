@@ -1519,7 +1519,7 @@ export default function Admin() {
           {/* Maintenance Tab */}
           <TabsContent value="maintenance" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Tvarkymo Darbų Valdymas</h2>
+              <h2 className="text-xl font-semibold">Tvarkymo Darbai</h2>
               <Button 
                 className="bg-yellow-600 hover:bg-yellow-700"
                 onClick={() => setShowMaintenanceModal(true)}
@@ -2043,7 +2043,6 @@ export default function Admin() {
           </Card>
         </div>
       )}
-      
       {/* Edit User Modal */}
       {editUserModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -2173,7 +2172,6 @@ export default function Admin() {
           </Card>
         </div>
       )}
-
       {/* Maintenance Modal */}
       {showMaintenanceModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -2293,7 +2291,6 @@ export default function Admin() {
           </Card>
         </div>
       )}
-
       {/* Email Test Modal */}
       {showEmailTestModal && (
         <Dialog open={showEmailTestModal} onOpenChange={setShowEmailTestModal}>
