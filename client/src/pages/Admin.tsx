@@ -1008,69 +1008,33 @@ export default function Admin() {
         {/* Admin Navigation */}
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="overflow-x-auto">
-            <TooltipProvider>
-              <TabsList className="inline-flex w-max min-w-full">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="overview" className="whitespace-nowrap">
-                      <BarChart3 size={16} className="mr-2" />
-                      <span className="hidden sm:inline">Apžvalga</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent className="sm:hidden">
-                    <p>Sistemos apžvalga ir statistikos</p>
-                  </TooltipContent>
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="reservations" className="whitespace-nowrap">
-                      <Calendar size={16} className="mr-2" />
-                      <span className="hidden sm:inline">Rezervacijos</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent className="sm:hidden">
-                    <p>Rezervacijų valdymas ir peržiūra</p>
-                  </TooltipContent>
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="maintenance" className="whitespace-nowrap">
-                      <Settings size={16} className="mr-2" />
-                      <span className="hidden sm:inline">Tvarkymo darbai</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent className="sm:hidden">
-                    <p>Kortų tvarkymo darbų planavimas</p>
-                  </TooltipContent>
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="users" className="whitespace-nowrap">
-                      <Users size={16} className="mr-2" />
-                      <span className="hidden sm:inline">Naudotojai</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent className="sm:hidden">
-                    <p>Naudotojų valdymas ir administravimas</p>
-                  </TooltipContent>
-                </Tooltip>
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <TabsTrigger value="settings" className="whitespace-nowrap">
-                      <Settings size={16} className="mr-2" />
-                      <span className="hidden sm:inline">Nustatymai</span>
-                    </TabsTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent className="sm:hidden">
-                    <p>Sistemos nustatymai ir konfigūracija</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TabsList>
-            </TooltipProvider>
+            <TabsList className="inline-flex w-max min-w-full">
+              <TabsTrigger value="overview" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
+                <BarChart3 size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden xs:inline sm:hidden">Stats</span>
+                <span className="hidden sm:inline">Apžvalga</span>
+              </TabsTrigger>
+              <TabsTrigger value="reservations" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
+                <Calendar size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden xs:inline sm:hidden">Rez.</span>
+                <span className="hidden sm:inline">Rezervacijos</span>
+              </TabsTrigger>
+              <TabsTrigger value="maintenance" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
+                <Settings size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden xs:inline sm:hidden">Darb.</span>
+                <span className="hidden sm:inline">Tvarkymo darbai</span>
+              </TabsTrigger>
+              <TabsTrigger value="users" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
+                <Users size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden xs:inline sm:hidden">Vart.</span>
+                <span className="hidden sm:inline">Naudotojai</span>
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3">
+                <Settings size={14} className="mr-1 sm:mr-2" />
+                <span className="hidden xs:inline sm:hidden">Nust.</span>
+                <span className="hidden sm:inline">Nustatymai</span>
+              </TabsTrigger>
+            </TabsList>
           </div>
 
           {/* Overview Tab */}
