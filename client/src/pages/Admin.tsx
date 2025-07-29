@@ -35,11 +35,12 @@ import {
   Wrench
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import DatePicker from "@/components/DatePicker";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import TennisBallIcon from "@/components/TennisBallIcon";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ReservationWithDetails {
   id: number;
@@ -1007,28 +1008,69 @@ export default function Admin() {
         {/* Admin Navigation */}
         <Tabs defaultValue="overview" className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-max min-w-full">
-              <TabsTrigger value="overview" className="whitespace-nowrap" title="Sistemos apžvalga ir statistikos">
-                <BarChart3 size={16} className="mr-2" />
-                <span className="hidden sm:inline">Apžvalga</span>
-              </TabsTrigger>
-              <TabsTrigger value="reservations" className="whitespace-nowrap" title="Rezervacijų valdymas ir peržiūra">
-                <Calendar size={16} className="mr-2" />
-                <span className="hidden sm:inline">Rezervacijos</span>
-              </TabsTrigger>
-              <TabsTrigger value="maintenance" className="whitespace-nowrap" title="Kortų tvarkymo darbų planavimas">
-                <Settings size={16} className="mr-2" />
-                <span className="hidden sm:inline">Tvarkymo darbai</span>
-              </TabsTrigger>
-              <TabsTrigger value="users" className="whitespace-nowrap" title="Naudotojų valdymas ir administravimas">
-                <Users size={16} className="mr-2" />
-                <span className="hidden sm:inline">Naudotojai</span>
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="whitespace-nowrap" title="Sistemos nustatymai ir konfigūracija">
-                <Settings size={16} className="mr-2" />
-                <span className="hidden sm:inline">Nustatymai</span>
-              </TabsTrigger>
-            </TabsList>
+            <TooltipProvider>
+              <TabsList className="inline-flex w-max min-w-full">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="overview" className="whitespace-nowrap">
+                      <BarChart3 size={16} className="mr-2" />
+                      <span className="hidden sm:inline">Apžvalga</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden">
+                    <p>Sistemos apžvalga ir statistikos</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="reservations" className="whitespace-nowrap">
+                      <Calendar size={16} className="mr-2" />
+                      <span className="hidden sm:inline">Rezervacijos</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden">
+                    <p>Rezervacijų valdymas ir peržiūra</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="maintenance" className="whitespace-nowrap">
+                      <Settings size={16} className="mr-2" />
+                      <span className="hidden sm:inline">Tvarkymo darbai</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden">
+                    <p>Kortų tvarkymo darbų planavimas</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="users" className="whitespace-nowrap">
+                      <Users size={16} className="mr-2" />
+                      <span className="hidden sm:inline">Naudotojai</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden">
+                    <p>Naudotojų valdymas ir administravimas</p>
+                  </TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="settings" className="whitespace-nowrap">
+                      <Settings size={16} className="mr-2" />
+                      <span className="hidden sm:inline">Nustatymai</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden">
+                    <p>Sistemos nustatymai ir konfigūracija</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TabsList>
+            </TooltipProvider>
           </div>
 
           {/* Overview Tab */}
@@ -1160,7 +1202,7 @@ export default function Admin() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="week" />
                       <YAxis />
-                      <Tooltip formatter={(value, name) => [
+                      <ChartTooltip formatter={(value, name) => [
                         `${value}%`, 
                         name === 'usage' ? 'Kortų Užimtumas' : 'Atšaukimų Dažnis'
                       ]} />
@@ -1197,7 +1239,7 @@ export default function Admin() {
                       <XAxis dataKey="week" />
                       <YAxis yAxisId="left" />
                       <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip formatter={(value, name, props) => {
+                      <ChartTooltip formatter={(value, name, props) => {
                         if (name === 'revenue') return [`${value}€`, 'Pajamos'];
                         if (name === 'reservations') return [`${value}`, 'Rezervacijos'];
                         return [value, name];
