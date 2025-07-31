@@ -2,20 +2,21 @@
   <!-- White background -->
   <rect width="512" height="512" fill="#ffffff"/>
   
-  <!-- Tennis ball icon - exactly matching TennisBallIcon but scaled and centered -->
-  <g transform="translate(256, 256) scale(3.7) translate(-34.724, -34.724)">
-    <!-- Use exact viewBox and coordinates from TennisBallIcon -->
-    <g transform="scale(1) translate(0, 0)">
-      <!-- Main tennis ball circle - tennis green -->  
-      <path 
-        d="M69.447,34.724a34.719,34.719,0,1,1-34.72-34.724A34.724,34.724,0,0,1,69.447,34.724Z" 
-        fill="#2e6b4a"
-      />
-      <!-- Tennis ball seam lines - exact paths from original -->
-      <path 
-        d="M39.375,0.345a35.139,35.139,0,0,0-4.61-.344,41.069,41.069,0,0,1-34.369,29.735,34.3,34.3,0,0,0-.381,4.635l.183-.026a45.921,45.921,0,0,0,39.149-33.881Zm29.721,34.692a45.487,45.487,0,0,0-33.488,34.054l-.071.313a34.54,34.54,0,0,0,4.818-.455,41.218,41.218,0,0,1,28.686-29.194,36.059,36.059,0,0,0,.388-4.8Z" 
-        fill="white"
-      />
-    </g>
+  <!-- Tennis ball - recreated to match the visual appearance -->
+  <g transform="translate(256, 256)">
+    <!-- Main tennis green circle -->
+    <circle cx="0" cy="0" r="200" fill="#2e6b4a"/>
+    
+    <!-- Tennis ball characteristic curved seam lines -->
+    <!-- Left curved seam -->
+    <path d="M -140,-140 Q -60,-60 0,0 Q 60,60 140,140" 
+          fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    
+    <!-- Right curved seam -->  
+    <path d="M 140,-140 Q 60,-60 0,0 Q -60,60 -140,140" 
+          fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
   </g>
+  
+  <!-- Subtle border -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#e5e5e5" stroke-width="2"/>
 </svg>
