@@ -17,7 +17,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import heroImage from '@assets/WhatsApp Image 2025-07-22 at 22.06.17_1753261982317.jpeg';
 import TennisBallIcon from "@/components/TennisBallIcon";
 import { pageVariants, staggerContainer, staggerItem, fadeIn, glassCardHover } from "@/lib/animations";
 
@@ -212,7 +211,7 @@ export default function Landing() {
       <div className="relative text-white py-20 md:py-32 overflow-hidden">
         {/* Background Image */}
         <img
-          src={heroImage}
+          src="/images/court-hero.jpg"
           alt="Tennis court"
           className="absolute inset-0 w-full h-full object-cover"
         />
