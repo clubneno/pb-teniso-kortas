@@ -1,14 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
 
 const app = express();
 
-// Domain restriction middleware - only allow access from custom domain
+// Simple health check that doesn't require any dependencies
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Domain restriction middleware
 app.use((req, res, next) => {
   const host = req.get('host');
   const allowedDomains = ['pbtenisokortas.lt', 'www.pbtenisokortas.lt'];
 
-  // Allow localhost, Vercel preview URLs, and development domains
   if (process.env.NODE_ENV === 'development' ||
       host?.includes('localhost') ||
       host?.includes('127.0.0.1') ||
@@ -16,7 +19,6 @@ app.use((req, res, next) => {
     return next();
   }
 
-  // Check if host is in allowed domains
   if (!host || !allowedDomains.includes(host)) {
     return res.redirect(301, `https://pbtenisokortas.lt${req.originalUrl}`);
   }
@@ -68,7 +70,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Register routes with static import (works with bundled code)
+// Register routes with error capturing
 let routesInitialized = false;
 let initPromise: Promise<void> | null = null;
 let initError: Error | null = null;
@@ -82,11 +84,21 @@ async function initRoutes() {
     initPromise = (async () => {
       try {
         console.log("Starting route initialization...");
+        
+        // Import routes module
+        console.log("Importing routes module...");
+        const routesModule = await import("./routes.js");
+        console.log("Routes module imported:", Object.keys(routesModule));
+        
+        const { registerRoutes } = routesModule;
+        console.log("registerRoutes function found");
+        
         await registerRoutes(app);
         routesInitialized = true;
         console.log("Routes initialized successfully");
       } catch (error) {
         console.error("Failed to initialize routes:", error);
+        console.error("Error stack:", (error as Error).stack);
         initError = error as Error;
         throw error;
       }
@@ -106,6 +118,11 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 // Export for Vercel serverless
 export default async function handler(req: Request, res: Response) {
+  // Health check doesn't need routes
+  if (req.url === '/api/health' || req.url?.startsWith('/api/health?')) {
+    return app(req, res);
+  }
+  
   try {
     await initRoutes();
     return app(req, res);
