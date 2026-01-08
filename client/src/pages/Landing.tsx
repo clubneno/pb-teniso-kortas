@@ -20,6 +20,9 @@ import {
 import TennisBallIcon from "@/components/TennisBallIcon";
 import { pageVariants, staggerContainer, staggerItem, fadeIn, glassCardHover } from "@/lib/animations";
 
+// Import hero image through Vite for guaranteed bundling
+import heroCourtImage from "/images/court-hero.jpg";
+
 interface Court {
   id: number;
   name: string;
@@ -211,8 +214,8 @@ export default function Landing() {
       <div className="relative text-white py-20 md:py-32 overflow-hidden">
         {/* Background Image - using img element */}
         <img
-          src="/images/court-hero.jpg"
-          alt=""
+          src={heroCourtImage}
+          alt="Tennis court background"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ zIndex: 0 }}
         />
