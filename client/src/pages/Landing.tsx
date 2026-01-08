@@ -208,8 +208,17 @@ export default function Landing() {
           </div>
         </div>
       </nav>
-      {/* Hero Section */}
-      <div className="relative text-white py-20 md:py-32">
+      {/* Hero Section with Court Image */}
+      <div className="relative text-white py-20 md:py-32 overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        />
+        {/* Glass overlay on image */}
+        <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-b from-tennis-green-700/70 via-tennis-green-600/60 to-tennis-green-700/80" />
+
+        {/* Content */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -217,31 +226,37 @@ export default function Landing() {
             variants={staggerContainer}
             className="text-center"
           >
-            <motion.h1
-              variants={staggerItem}
-              className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg"
-            >
-              Rezervuokite PB teniso kortą
-            </motion.h1>
-            <motion.p
-              variants={staggerItem}
-              className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto drop-shadow"
-            >
-              Rinkitės datą, laiką, rezervuokite PB kortą ir mėgaukitės žaidimu.
-            </motion.p>
+            {/* Glass Card for Hero Content */}
             <motion.div
               variants={staggerItem}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="inline-block backdrop-blur-[12px] bg-white/10 border border-white/20 rounded-3xl p-8 md:p-12 shadow-glass-lg"
             >
-              <Button
-                size="lg"
-                variant="glassGreen"
-                onClick={() => window.location.href = '/prisijungimas'}
-                className="font-bold text-lg shadow-glow-green animate-glow-pulse"
+              <motion.h1
+                variants={staggerItem}
+                className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg"
               >
-                <CalendarIcon size={20} className="mr-2" />
-                Rezervuoti Dabar
-              </Button>
+                Rezervuokite PB teniso kortą
+              </motion.h1>
+              <motion.p
+                variants={staggerItem}
+                className="text-xl md:text-2xl mb-8 text-white/90 max-w-3xl mx-auto drop-shadow"
+              >
+                Rinkitės datą, laiką, rezervuokite PB kortą ir mėgaukitės žaidimu.
+              </motion.p>
+              <motion.div
+                variants={staggerItem}
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+              >
+                <Button
+                  size="lg"
+                  variant="glassGreen"
+                  onClick={() => window.location.href = '/prisijungimas'}
+                  className="font-bold text-lg shadow-glow-green animate-glow-pulse"
+                >
+                  <CalendarIcon size={20} className="mr-2" />
+                  Rezervuoti Dabar
+                </Button>
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>
