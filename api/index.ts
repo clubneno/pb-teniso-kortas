@@ -1,3 +1,4 @@
-// This file intentionally left empty
-// The actual API handler is in api/index.js (built from server/api-entry.ts)
-// DO NOT add exports here - Vercel should use api/index.js instead
+// Vercel compiles this file directly with TypeScript
+// Re-export the handler from server/api-entry.ts using relative import
+import handler from "../server/api-entry";
+export default handler;
