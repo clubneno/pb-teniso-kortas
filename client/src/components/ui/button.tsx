@@ -18,9 +18,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        glass: "backdrop-blur-[8px] bg-white/40 border border-white/50 text-white shadow-glass-sm hover:bg-white/50 hover:shadow-glass",
-        glassGreen: "backdrop-blur-[8px] bg-[rgba(76,175,80,0.6)] border border-[rgba(76,175,80,0.7)] text-white shadow-glow-green hover:bg-[rgba(76,175,80,0.7)]",
-        glassOutline: "backdrop-blur-[4px] bg-white/15 border-2 border-white/50 text-white hover:bg-white/25",
+        glass: "bg-white text-tennis-green-700 font-semibold border-0 shadow-lg hover:bg-gray-100 hover:shadow-xl",
+        glassGreen: "bg-tennis-green-600 text-white font-semibold border-0 shadow-lg hover:bg-tennis-green-700 hover:shadow-xl",
+        glassOutline: "backdrop-blur-[4px] bg-white/20 border-2 border-white/60 text-white hover:bg-white/30",
         glassDark: "backdrop-blur-[8px] bg-white/25 border border-white/30 text-white hover:bg-white/35",
       },
       size: {
