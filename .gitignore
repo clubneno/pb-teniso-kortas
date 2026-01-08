@@ -6,3 +6,5 @@ dist
 .DS_Store
 api/index.js
 api/index.mjs
+api/_index.ts
+api/index.ts
