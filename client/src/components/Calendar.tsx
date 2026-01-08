@@ -155,10 +155,10 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
                 className={`
                   text-center py-2 text-sm rounded-lg transition-all duration-200
                   ${!calDay.isCurrentMonth ? 'text-white/30' : ''}
-                  ${isSelected ? 'bg-tennis-yellow text-black font-bold shadow-glow-yellow' : ''}
-                  ${isTodayDate && !isSelected ? 'bg-white/20 text-tennis-yellow font-medium border border-tennis-yellow/30' : ''}
-                  ${isPast && calDay.isCurrentMonth && !isSelected ? 'text-white/30' : ''}
-                  ${!isPast && calDay.isCurrentMonth && !isSelected ? 'hover:bg-white/20 text-white' : ''}
+                  ${isSelected ? 'text-tennis-yellow font-bold' : ''}
+                  ${isTodayDate && !isSelected ? 'text-tennis-green-400 font-medium' : ''}
+                  ${isPast && calDay.isCurrentMonth && !isSelected && !isTodayDate ? 'text-white/30' : ''}
+                  ${!isPast && calDay.isCurrentMonth && !isSelected && !isTodayDate ? 'hover:bg-white/20 text-white' : ''}
                   ${isPast ? 'cursor-not-allowed' : 'cursor-pointer'}
                 `}
                 onClick={() => !isPast && onDateSelect(calDay.date)}

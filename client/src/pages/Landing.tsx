@@ -320,11 +320,13 @@ export default function Landing() {
                     <h3 className="text-xl font-semibold mb-4 text-white">Kortai</h3>
 
                     {/* Court Selection */}
+                    {courts.length === 0 ? (
+                      <div className="text-white/60 text-center py-4">Kraunami kortai...</div>
+                    ) : (
                     <motion.div
                       variants={staggerContainer}
                       initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true }}
+                      animate="visible"
                       className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"
                     >
                       {courts.map((court) => (
@@ -365,6 +367,7 @@ export default function Landing() {
                         </motion.div>
                       ))}
                     </motion.div>
+                    )}
 
                     {/* Time Slots */}
                     <div className="border-t border-white/20 pt-6">
