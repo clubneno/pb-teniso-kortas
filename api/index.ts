@@ -1,5 +1,4 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "../server/routes";
 
 const app = express();
 
@@ -68,15 +67,30 @@ app.use((req, res, next) => {
   next();
 });
 
-// Register routes
+// Register routes with proper error handling
 let routesInitialized = false;
 let initPromise: Promise<void> | null = null;
+let initError: Error | null = null;
 
 async function initRoutes() {
+  if (initError) {
+    throw initError;
+  }
+  
   if (!routesInitialized && !initPromise) {
     initPromise = (async () => {
-      await registerRoutes(app);
-      routesInitialized = true;
+      try {
+        console.log("Starting route initialization...");
+        const { registerRoutes } = await import("../server/routes");
+        console.log("Routes module imported successfully");
+        await registerRoutes(app);
+        routesInitialized = true;
+        console.log("Routes initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize routes:", error);
+        initError = error as Error;
+        throw error;
+      }
     })();
   }
   if (initPromise) {
@@ -85,13 +99,23 @@ async function initRoutes() {
 }
 
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("Express error handler:", err);
   const status = err.status || err.statusCode || 500;
   const message = err.message || "Internal Server Error";
-  res.status(status).json({ message });
+  res.status(status).json({ message, error: String(err) });
 });
 
 // Export for Vercel serverless
 export default async function handler(req: Request, res: Response) {
-  await initRoutes();
-  return app(req, res);
+  try {
+    await initRoutes();
+    return app(req, res);
+  } catch (error) {
+    console.error("Handler error:", error);
+    res.status(500).json({ 
+      message: "Server initialization failed", 
+      error: String(error),
+      stack: (error as Error).stack 
+    });
+  }
 }
