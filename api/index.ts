@@ -1,4 +1,5 @@
-// Vercel compiles this file directly with TypeScript
-// Re-export the handler from server/api-entry.ts using relative import
-import handler from "../server/api-entry";
+// This file is compiled by Vercel's TypeScript compiler
+// It imports the bundled handler created by our build:api script
+// @ts-ignore - bundled.js is created during build
+import handler from "./bundled.js";
 export default handler;
