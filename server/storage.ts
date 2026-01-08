@@ -13,7 +13,7 @@ import {
   type ReservationWithDetails,
   type MaintenancePeriod,
   type InsertMaintenancePeriod,
-} from "@shared/schema";
+} from "../shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, ne } from "drizzle-orm";
 import { scrypt, randomBytes } from "crypto";

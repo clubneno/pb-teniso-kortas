@@ -5,7 +5,7 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as AppUser, forgotPasswordSchema } from "@shared/schema";
+import { User as AppUser, forgotPasswordSchema } from "../shared/schema";
 import { emailService } from "./services/emailService";
 
 declare global {

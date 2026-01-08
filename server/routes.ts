@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertReservationSchema, updateReservationSchema, insertCourtSchema, registerSchema, loginSchema } from "@shared/schema";
+import { insertReservationSchema, updateReservationSchema, insertCourtSchema, registerSchema, loginSchema } from "../shared/schema";
 import { emailService } from "./services/emailService";
 import { z } from "zod";
 

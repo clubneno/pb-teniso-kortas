@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { User, ReservationWithDetails } from "@shared/schema";
+import type { User, ReservationWithDetails } from "../../shared/schema";
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
