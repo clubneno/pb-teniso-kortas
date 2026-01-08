@@ -353,21 +353,22 @@ export class DatabaseStorage implements IStorage {
       );
     });
 
-    // Check maintenance conflicts
+    // Check maintenance conflicts - query maintenance periods that include this date
     const maintenanceConflicts = await db
       .select()
       .from(maintenancePeriods)
       .where(
         and(
           eq(maintenancePeriods.courtId, courtId),
-          eq(maintenancePeriods.date, date)
+          lte(maintenancePeriods.startDate, date),
+          gte(maintenancePeriods.endDate, date)
         )
       );
 
     const hasMaintenanceConflict = maintenanceConflicts.some(conflict => {
       const conflictStart = conflict.startTime;
       const conflictEnd = conflict.endTime;
-      
+
       // Check for time overlap
       return (
         (startTime >= conflictStart && startTime < conflictEnd) ||
@@ -396,7 +397,7 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(asc(reservations.startTime));
 
-    // Get maintenance periods
+    // Get maintenance periods that include this date
     const maintenanceSlots = await db
       .select({
         startTime: maintenancePeriods.startTime,
@@ -406,7 +407,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(maintenancePeriods.courtId, courtId),
-          eq(maintenancePeriods.date, date)
+          lte(maintenancePeriods.startDate, date),
+          gte(maintenancePeriods.endDate, date)
         )
       )
       .orderBy(asc(maintenancePeriods.startTime));
@@ -444,20 +446,22 @@ export class DatabaseStorage implements IStorage {
   // Maintenance operations
   async getMaintenancePeriods(filters?: { courtId?: number; date?: string }): Promise<MaintenancePeriod[]> {
     const conditions = [];
-    
+
     if (filters?.courtId) {
       conditions.push(eq(maintenancePeriods.courtId, filters.courtId));
     }
-    
+
+    // If date is provided, find maintenance periods that include this date
     if (filters?.date) {
-      conditions.push(eq(maintenancePeriods.date, filters.date));
+      conditions.push(lte(maintenancePeriods.startDate, filters.date));
+      conditions.push(gte(maintenancePeriods.endDate, filters.date));
     }
-    
+
     return await db
       .select()
       .from(maintenancePeriods)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(asc(maintenancePeriods.date), asc(maintenancePeriods.startTime));
+      .orderBy(asc(maintenancePeriods.startDate), asc(maintenancePeriods.startTime));
   }
 
   async createMaintenancePeriod(maintenance: InsertMaintenancePeriod): Promise<MaintenancePeriod> {

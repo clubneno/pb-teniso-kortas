@@ -66,9 +66,10 @@ export const reservations = pgTable("reservations", {
 export const maintenancePeriods = pgTable("maintenance_periods", {
   id: serial("id").primaryKey(),
   courtId: integer("court_id").references(() => courts.id).notNull(),
-  date: varchar("date").notNull(), // YYYY-MM-DD format
-  startTime: varchar("start_time").notNull(), // HH:mm format
-  endTime: varchar("end_time").notNull(), // HH:mm format
+  startDate: varchar("start_date").notNull(), // YYYY-MM-DD format - start of maintenance period
+  endDate: varchar("end_date").notNull(), // YYYY-MM-DD format - end of maintenance period
+  startTime: varchar("start_time").notNull(), // HH:mm format - daily start time
+  endTime: varchar("end_time").notNull(), // HH:mm format - daily end time
   description: text("description"), // Optional description of maintenance work
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

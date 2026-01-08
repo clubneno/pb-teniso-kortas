@@ -142,10 +142,12 @@ export default function Admin() {
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   const [maintenanceForm, setMaintenanceForm] = useState({
     courtId: "",
-    date: "",
+    startDate: "",
+    endDate: "",
+    startTime: "08:00",
+    endTime: "22:00",
     description: ""
   });
-  const [selectedMaintenanceSlots, setSelectedMaintenanceSlots] = useState<string[]>([]);
   
   // Email testing state
   const [showEmailTestModal, setShowEmailTestModal] = useState(false);
@@ -241,55 +243,14 @@ export default function Admin() {
     enabled: !!reservationForm.date && !!reservationForm.courtId,
   });
 
-  // Fetch availability for maintenance modal
-  const { data: maintenanceAvailability = [], isLoading: maintenanceAvailabilityLoading } = useQuery<any[]>({
-    queryKey: [`/api/courts/${maintenanceForm.courtId}/availability`, maintenanceForm.date],
-    queryFn: async () => {
-      if (!maintenanceForm.courtId || !maintenanceForm.date) return [];
-      const response = await fetch(`/api/courts/${maintenanceForm.courtId}/availability?date=${maintenanceForm.date}`);
-      return response.json();
-    },
-    enabled: !!maintenanceForm.date && !!maintenanceForm.courtId,
-  });
-
-  // Generate time slots for maintenance modal
-  const generateMaintenanceTimeSlots = () => {
-    if (!maintenanceForm.courtId || !maintenanceForm.date) return [];
-    
-    const slots = [];
-    let startMinutes = 8 * 60; // 8:00 in minutes
-    const endMinutes = 22 * 60; // 22:00 in minutes
-    
-    while (startMinutes < endMinutes) {
-      const endSlotMinutes = startMinutes + 30;
-      
-      const startHour = Math.floor(startMinutes / 60);
-      const startMin = startMinutes % 60;
-      const endHour = Math.floor(endSlotMinutes / 60);
-      const endMin = endSlotMinutes % 60;
-      
-      const startTime = `${startHour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}`;
-      const endTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
-      
-      // Check if this slot overlaps with any unavailable period
-      const isUnavailable = maintenanceAvailability.some((period) => {
-        return !(endTime <= period.startTime || startTime >= period.endTime);
-      });
-
-      slots.push({
-        startTime,
-        endTime,
-        timeDisplay: startTime,
-        isUnavailable,
-        timeRange: `${startTime}-${endTime}`
-      });
-      
-      startMinutes += 30;
+  // Generate time options for maintenance modal
+  const timeOptions = [];
+  for (let hour = 8; hour <= 22; hour++) {
+    timeOptions.push(`${hour.toString().padStart(2, '0')}:00`);
+    if (hour < 22) {
+      timeOptions.push(`${hour.toString().padStart(2, '0')}:30`);
     }
-    return slots;
-  };
-
-  const maintenanceTimeSlots = generateMaintenanceTimeSlots();
+  }
 
   // Email test mutation
   const emailTestMutation = useMutation({
@@ -326,16 +287,6 @@ export default function Admin() {
     }
   });
 
-  const handleMaintenanceSlotSelect = (timeRange: string) => {
-    setSelectedMaintenanceSlots(prev => {
-      if (prev.includes(timeRange)) {
-        return prev.filter(slot => slot !== timeRange);
-      } else {
-        return [...prev, timeRange].sort();
-      }
-    });
-  };
-
   // Helper functions for weekly calculations
   const getWeekStart = (date: Date) => {
     const d = new Date(date);
@@ -370,32 +321,42 @@ export default function Admin() {
   // Calculate maintenance percentage for this week
   const calculateThisWeekMaintenancePercentage = () => {
     if (!maintenancePeriods || maintenancePeriods.length === 0) return "0";
-    
-    // Get all maintenance periods for this week
+
+    // Get maintenance periods that overlap with this week
     const thisWeekMaintenance = maintenancePeriods.filter((maintenance: any) => {
-      const maintenanceDate = new Date(maintenance.date);
-      return maintenanceDate >= thisWeekStart && maintenanceDate <= thisWeekEnd;
+      const maintenanceStart = new Date(maintenance.startDate);
+      const maintenanceEnd = new Date(maintenance.endDate);
+      // Check if maintenance period overlaps with this week
+      return maintenanceStart <= thisWeekEnd && maintenanceEnd >= thisWeekStart;
     });
-    
+
     if (thisWeekMaintenance.length === 0) return "0";
-    
+
     // Calculate total maintenance minutes for the week
     let totalMaintenanceMinutes = 0;
     thisWeekMaintenance.forEach((maintenance: any) => {
+      const maintenanceStart = new Date(maintenance.startDate);
+      const maintenanceEnd = new Date(maintenance.endDate);
+
+      // Calculate overlapping days with this week
+      const overlapStart = maintenanceStart > thisWeekStart ? maintenanceStart : thisWeekStart;
+      const overlapEnd = maintenanceEnd < thisWeekEnd ? maintenanceEnd : thisWeekEnd;
+      const overlapDays = Math.ceil((overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
       const startTime = maintenance.startTime.split(':');
       const endTime = maintenance.endTime.split(':');
       const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
       const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
-      totalMaintenanceMinutes += (endMinutes - startMinutes);
+      totalMaintenanceMinutes += (endMinutes - startMinutes) * overlapDays;
     });
-    
+
     // Calculate total available court time for the week (7 days × 14 hours × 60 minutes × number of courts)
     const operatingHoursPerDay = 14; // 8:00-22:00
     const daysInWeek = 7;
     const totalAvailableMinutes = operatingHoursPerDay * 60 * daysInWeek * courts.length;
-    
+
     if (totalAvailableMinutes === 0) return "0";
-    
+
     const maintenancePercentage = (totalMaintenanceMinutes / totalAvailableMinutes) * 100;
     return maintenancePercentage.toFixed(0);
   };
@@ -722,13 +683,12 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/reservations'] });
       setShowMaintenanceModal(false);
-      setMaintenanceForm({ courtId: "", date: "", description: "" });
-      setSelectedMaintenanceSlots([]);
-      
-      const message = data.cancelledReservations > 0 
+      setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", description: "" });
+
+      const message = data.cancelledReservations > 0
         ? `Tvarkymo darbai sukurti. Atšauktos ${data.cancelledReservations} konfliktuojančios rezervacijos.`
         : "Tvarkymo darbai sėkmingai sukurti";
-        
+
       toast({
         title: "Pakeitimas išsaugotas",
         description: message,
@@ -769,25 +729,30 @@ export default function Admin() {
   });
 
   const handleCreateMaintenance = () => {
-    if (!maintenanceForm.courtId || !maintenanceForm.date || selectedMaintenanceSlots.length === 0) {
+    if (!maintenanceForm.courtId || !maintenanceForm.startDate || !maintenanceForm.endDate || !maintenanceForm.startTime || !maintenanceForm.endTime) {
       toast({
         title: "Klaida",
-        description: "Prašome pasirinkti kortą, datą ir bent vieną laiko intervalą",
+        description: "Prašome užpildyti visus laukus",
         variant: "destructive",
       });
       return;
     }
 
-    // Sort slots and get continuous time range
-    const sortedSlots = selectedMaintenanceSlots.sort();
-    const startTime = sortedSlots[0].split('-')[0];
-    const endTime = sortedSlots[sortedSlots.length - 1].split('-')[1];
+    if (maintenanceForm.startDate > maintenanceForm.endDate) {
+      toast({
+        title: "Klaida",
+        description: "Pradžios data negali būti vėlesnė už pabaigos datą",
+        variant: "destructive",
+      });
+      return;
+    }
 
     createMaintenanceMutation.mutate({
       courtId: parseInt(maintenanceForm.courtId),
-      date: maintenanceForm.date,
-      startTime: startTime,
-      endTime: endTime,
+      startDate: maintenanceForm.startDate,
+      endDate: maintenanceForm.endDate,
+      startTime: maintenanceForm.startTime,
+      endTime: maintenanceForm.endTime,
       description: maintenanceForm.description || null,
     });
   };
@@ -1536,8 +1501,8 @@ export default function Admin() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Kortas</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Laikas</TableHead>
+                      <TableHead>Laikotarpis</TableHead>
+                      <TableHead>Dienos laikas</TableHead>
                       <TableHead>Aprašymas</TableHead>
                       <TableHead>Veiksmai</TableHead>
                     </TableRow>
@@ -1556,7 +1521,9 @@ export default function Admin() {
                             <div className="font-medium">{maintenance.court?.name || `Kortas #${maintenance.courtId}`}</div>
                           </TableCell>
                           <TableCell>
-                            {new Date(maintenance.date).toLocaleDateString('lt-LT')}
+                            <div className="text-sm">
+                              {new Date(maintenance.startDate).toLocaleDateString('lt-LT')} - {new Date(maintenance.endDate).toLocaleDateString('lt-LT')}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="font-mono text-sm">
@@ -1569,13 +1536,13 @@ export default function Admin() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               variant="outline"
                               onClick={() => handleDeleteMaintenance(
-                                maintenance.id, 
+                                maintenance.id,
                                 maintenance.description || "Tvarkymo darbai",
-                                new Date(maintenance.date).toLocaleDateString('lt-LT'),
+                                `${new Date(maintenance.startDate).toLocaleDateString('lt-LT')} - ${new Date(maintenance.endDate).toLocaleDateString('lt-LT')}`,
                                 `${maintenance.startTime}-${maintenance.endTime}`
                               )}
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -2192,8 +2159,8 @@ export default function Admin() {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="court">Kortas *</Label>
-                <Select 
-                  value={maintenanceForm.courtId} 
+                <Select
+                  value={maintenanceForm.courtId}
                   onValueChange={(value) => setMaintenanceForm(prev => ({ ...prev, courtId: value }))}
                 >
                   <SelectTrigger>
@@ -2209,57 +2176,63 @@ export default function Admin() {
                 </Select>
               </div>
 
-              <div>
-                <Label htmlFor="date">Data *</Label>
-                <DatePicker
-                  value={maintenanceForm.date}
-                  onChange={(value) => setMaintenanceForm(prev => ({ ...prev, date: value }))}
-                  placeholder="YYYY-MM-DD"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="startDate">Pradžios data *</Label>
+                  <DatePicker
+                    value={maintenanceForm.startDate}
+                    onChange={(value) => setMaintenanceForm(prev => ({ ...prev, startDate: value }))}
+                    placeholder="YYYY-MM-DD"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="endDate">Pabaigos data *</Label>
+                  <DatePicker
+                    value={maintenanceForm.endDate}
+                    onChange={(value) => setMaintenanceForm(prev => ({ ...prev, endDate: value }))}
+                    placeholder="YYYY-MM-DD"
+                  />
+                </div>
               </div>
 
-              {/* Time Slot Selection */}
-              {maintenanceForm.courtId && maintenanceForm.date && (
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Laiko intervalai *</Label>
-                  {maintenanceAvailabilityLoading ? (
-                    <div className="flex justify-center py-4">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-600"></div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3 bg-gray-50">
-                      {maintenanceTimeSlots.map((slot) => (
-                        <button
-                          key={slot.timeRange}
-                          type="button"
-                          onClick={() => !slot.isUnavailable && handleMaintenanceSlotSelect(slot.timeRange)}
-                          disabled={slot.isUnavailable}
-                          className={`
-                            p-2 text-xs rounded border text-center transition-colors
-                            ${slot.isUnavailable 
-                              ? "bg-red-200 text-red-800 border-red-300 cursor-not-allowed opacity-60" 
-                              : selectedMaintenanceSlots.includes(slot.timeRange)
-                                ? "bg-yellow-600 text-white border-yellow-700"
-                                : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50 hover:border-yellow-400"
-                            }
-                          `}
-                        >
-                          {slot.timeDisplay}
-                          <br />
-                          <span className="text-xs opacity-75">
-                            {slot.isUnavailable ? "Užimta" : "Laisva"}
-                          </span>
-                        </button>
+                  <Label htmlFor="startTime">Pradžios laikas *</Label>
+                  <Select
+                    value={maintenanceForm.startTime}
+                    onValueChange={(value) => setMaintenanceForm(prev => ({ ...prev, startTime: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pasirinkite laiką" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeOptions.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
                       ))}
-                    </div>
-                  )}
-                  {selectedMaintenanceSlots.length > 0 && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      Pasirinkta: {selectedMaintenanceSlots.length} intervalų ({selectedMaintenanceSlots[0]?.split('-')[0]} - {selectedMaintenanceSlots[selectedMaintenanceSlots.length - 1]?.split('-')[1]})
-                    </div>
-                  )}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
+                <div>
+                  <Label htmlFor="endTime">Pabaigos laikas *</Label>
+                  <Select
+                    value={maintenanceForm.endTime}
+                    onValueChange={(value) => setMaintenanceForm(prev => ({ ...prev, endTime: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pasirinkite laiką" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeOptions.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
               <div>
                 <Label htmlFor="description">Aprašymas</Label>

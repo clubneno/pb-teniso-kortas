@@ -658,28 +658,29 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
 
   app.post("/api/admin/maintenance", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const { courtId, date, startTime, endTime, description } = req.body;
-      
-      if (!courtId || !date || !startTime || !endTime) {
+      const { courtId, startDate, endDate, startTime, endTime, description } = req.body;
+
+      if (!courtId || !startDate || !endDate || !startTime || !endTime) {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // Find and cancel conflicting reservations
+      // Find and cancel conflicting reservations within the date range
       const conflictingReservations = await storage.getReservations({
         courtId,
-        date,
+        startDate,
+        endDate,
         status: 'confirmed'
       });
 
       const reservationsToCancel = conflictingReservations.filter(reservation => {
-        // Check if maintenance period overlaps with reservation
+        // Check if maintenance period overlaps with reservation time
         return !(endTime <= reservation.startTime || startTime >= reservation.endTime);
       });
 
       // Cancel conflicting reservations
       for (const reservation of reservationsToCancel) {
         await storage.updateReservation(reservation.id, { status: 'cancelled' });
-        
+
         // Send email notification about cancellation
         try {
           await emailService.sendReservationCancellation({
@@ -699,7 +700,8 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
 
       const period = await storage.createMaintenancePeriod({
         courtId,
-        date,
+        startDate,
+        endDate,
         startTime,
         endTime,
         description

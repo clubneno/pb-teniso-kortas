@@ -60,7 +60,7 @@ export default function Landing() {
   });
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   
-  const { data: courts = [] } = useQuery<Court[]>({
+  const { data: courts = [], isLoading: courtsLoading } = useQuery<Court[]>({
     queryKey: ["/api/courts"],
   });
 
@@ -320,8 +320,10 @@ export default function Landing() {
                     <h3 className="text-xl font-semibold mb-4 text-white">Kortai</h3>
 
                     {/* Court Selection */}
-                    {courts.length === 0 ? (
+                    {courtsLoading ? (
                       <div className="text-white/60 text-center py-4">Kraunami kortai...</div>
+                    ) : courts.length === 0 ? (
+                      <div className="text-white/60 text-center py-4">Kortai neprieinami</div>
                     ) : (
                     <motion.div
                       variants={staggerContainer}
@@ -360,7 +362,7 @@ export default function Landing() {
                             <p className="text-sm text-white/70 mb-2">{court.description}</p>
                             <div className="flex justify-between items-center">
                               <span className="text-tennis-yellow font-bold text-lg drop-shadow">
-                                {(parseFloat(court.hourlyRate) / 2).toFixed(2)}€/30min.
+                                {parseFloat(court.hourlyRate).toFixed(2)}€/val.
                               </span>
                             </div>
                           </div>
