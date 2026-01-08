@@ -1,12 +1,11 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertReservationSchema, updateReservationSchema, insertCourtSchema, registerSchema, loginSchema } from "@shared/schema";
 import { emailService } from "./services/emailService";
 import { z } from "zod";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<void> {
   // Auth middleware
   setupAuth(app);
 
@@ -816,7 +815,4 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
       res.status(500).json({ error: 'Failed to send test email' });
     }
   });
-
-  const httpServer = createServer(app);
-  return httpServer;
 }

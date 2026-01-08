@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { registerRoutes } from "./routes";
 
 const app = express();
 
@@ -67,7 +68,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Register routes with proper error handling
+// Register routes with static import (works with bundled code)
 let routesInitialized = false;
 let initPromise: Promise<void> | null = null;
 let initError: Error | null = null;
@@ -81,8 +82,6 @@ async function initRoutes() {
     initPromise = (async () => {
       try {
         console.log("Starting route initialization...");
-        const { registerRoutes } = await import("./routes");
-        console.log("Routes module imported successfully");
         await registerRoutes(app);
         routesInitialized = true;
         console.log("Routes initialized successfully");
