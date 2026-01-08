@@ -6,7 +6,6 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as AppUser, forgotPasswordSchema } from "@shared/schema";
-import createMemoryStore from "memorystore";
 import { emailService } from "./services/emailService";
 
 declare global {
@@ -46,15 +45,10 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const MemoryStore = createMemoryStore(session);
-
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
-    }),
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
