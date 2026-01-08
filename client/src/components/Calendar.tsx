@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -105,23 +106,23 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
   const calendarDays = generateCalendarDays();
 
   return (
-    <Card>
+    <Card variant="glassDark" className="overflow-hidden">
       <CardContent className="p-4">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium text-lg">
+          <h3 className="font-medium text-lg text-white">
             {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
           </h3>
           <div className="flex gap-2">
             <Button
-              variant="outline"
+              variant="glassDark"
               size="sm"
               onClick={() => navigateMonth('prev')}
             >
               <ChevronLeft size={16} />
             </Button>
             <Button
-              variant="outline"
+              variant="glassDark"
               size="sm"
               onClick={() => navigateMonth('next')}
             >
@@ -133,7 +134,7 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
         {/* Day names */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {dayNames.map(day => (
-            <div key={day} className="text-center font-medium text-gray-500 py-2 text-sm">
+            <div key={day} className="text-center font-medium text-white/60 py-2 text-sm">
               {day}
             </div>
           ))}
@@ -145,24 +146,26 @@ export default function Calendar({ selectedDate, onDateSelect }: CalendarProps) 
             const isSelected = isDateSelected(calDay.date);
             const isTodayDate = isToday(calDay.date);
             const isPast = isPastDate(calDay.date);
-            
+
             return (
-              <button
+              <motion.button
                 key={index}
+                whileHover={!isPast ? { scale: 1.1 } : {}}
+                whileTap={!isPast ? { scale: 0.95 } : {}}
                 className={`
-                  text-center py-2 text-sm rounded-lg transition-colors
-                  ${!calDay.isCurrentMonth ? 'text-gray-400' : ''}
-                  ${isSelected ? 'bg-yellow-400 text-black font-bold shadow-lg border-2 border-yellow-500' : ''}
-                  ${isTodayDate && !isSelected ? 'bg-tennis-green-100 text-tennis-green-700 font-medium' : ''}
-                  ${isPast && calDay.isCurrentMonth && !isSelected ? 'text-gray-400' : ''}
-                  ${!isPast && calDay.isCurrentMonth && !isSelected ? 'hover:bg-tennis-green-50 text-gray-800' : ''}
+                  text-center py-2 text-sm rounded-lg transition-all duration-200
+                  ${!calDay.isCurrentMonth ? 'text-white/30' : ''}
+                  ${isSelected ? 'bg-tennis-yellow text-black font-bold shadow-glow-yellow' : ''}
+                  ${isTodayDate && !isSelected ? 'bg-white/20 text-tennis-yellow font-medium border border-tennis-yellow/30' : ''}
+                  ${isPast && calDay.isCurrentMonth && !isSelected ? 'text-white/30' : ''}
+                  ${!isPast && calDay.isCurrentMonth && !isSelected ? 'hover:bg-white/20 text-white' : ''}
                   ${isPast ? 'cursor-not-allowed' : 'cursor-pointer'}
                 `}
                 onClick={() => !isPast && onDateSelect(calDay.date)}
                 disabled={isPast}
               >
                 {calDay.day}
-              </button>
+              </motion.button>
             );
           })}
         </div>

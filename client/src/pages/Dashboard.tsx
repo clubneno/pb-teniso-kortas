@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,13 +14,14 @@ import Calendar from "@/components/Calendar";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import ReservationCard from "@/components/ReservationCard";
 import ProfileEdit from "@/components/ProfileEdit";
-import { 
-  CalendarPlus, 
-  List, 
-  UserPen, 
-  LogOut 
+import {
+  CalendarPlus,
+  List,
+  UserPen,
+  LogOut
 } from "lucide-react";
 import TennisBallIcon from "@/components/TennisBallIcon";
+import { staggerContainer, staggerItem } from "@/lib/animations";
 
 interface Court {
   id: number;
@@ -342,28 +344,51 @@ export default function Dashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-tennis-green-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-tennis-green-700 via-tennis-green-600 to-tennis-green-700">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-lg border-b-2 border-tennis-green-500">
+    <div className="min-h-screen bg-gradient-to-br from-tennis-green-700 via-tennis-green-600 to-tennis-green-700 relative overflow-hidden">
+      {/* Animated background mesh */}
+      <div className="fixed inset-0 glass-mesh-bg opacity-60 pointer-events-none" />
+
+      {/* Floating decorative orbs */}
+      <motion.div
+        animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed top-40 right-20 w-48 h-48 rounded-full bg-tennis-yellow/15 blur-3xl pointer-events-none"
+      />
+      <motion.div
+        animate={{ y: [0, 10, 0], x: [0, -10, 0] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed bottom-40 left-20 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none"
+      />
+
+      {/* Navigation - Glass Effect */}
+      <nav className="sticky top-0 z-50 backdrop-blur-[16px] bg-white/10 border-b border-white/20 shadow-glass">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <TennisBallIcon size={20} className="text-tennis-green-600" />
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center space-x-3"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30 shadow-glass-sm">
+                <TennisBallIcon size={20} className="text-tennis-yellow" />
               </div>
-              <span className="text-xl font-bold text-tennis-green-600">PB teniso kortas</span>
-            </div>
-            
-            <div className="flex items-center space-x-3">
+              <span className="text-xl font-bold text-white drop-shadow-lg">PB teniso kortas</span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center space-x-3"
+            >
               <Button
-                variant="outline"
+                variant="glass"
                 onClick={async () => {
                   try {
                     await fetch('/api/logout', { method: 'POST' });
@@ -371,7 +396,6 @@ export default function Dashboard() {
                     window.location.href = '/';
                   } catch (error) {
                     console.error('Logout error:', error);
-                    // Fallback: clear cache and redirect anyway
                     queryClient.clear();
                     window.location.href = '/';
                   }
@@ -380,43 +404,58 @@ export default function Dashboard() {
                 <LogOut size={16} className="mr-2" />
                 Atsijungti
               </Button>
-            </div>
+            </motion.div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* User Profile Header */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <div className="w-20 h-20 bg-tennis-green-100 rounded-full flex items-center justify-center">
-                <TennisBallIcon size={32} className="text-tennis-green-600" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card variant="glass" className="mb-8">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30 shadow-glass animate-glow-pulse">
+                  <TennisBallIcon size={32} className="text-tennis-yellow" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
+                    Sveiki, {user?.firstName || 'Naudotojau'}!
+                  </h1>
+                  <p className="text-white/80 mb-4">
+                    {user?.email} {user?.phone && ` | ${user.phone}`}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Sveiki, {user?.firstName || 'Naudotojau'}!
-                </h1>
-                <p className="text-gray-600 mb-4">
-                  {user?.email} {user?.phone && ` | ${user.phone}`}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Navigation Tabs */}
         <Tabs defaultValue="booking" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="booking">
+          <TabsList className="grid w-full grid-cols-3 backdrop-blur-[8px] bg-white/10 border border-white/20 rounded-lg p-1">
+            <TabsTrigger
+              value="booking"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow-glass-sm text-white/70 rounded-md transition-all"
+            >
               <CalendarPlus size={16} className="mr-2" />
               Nauja Rezervacija
             </TabsTrigger>
-            <TabsTrigger value="reservations">
+            <TabsTrigger
+              value="reservations"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow-glass-sm text-white/70 rounded-md transition-all"
+            >
               <List size={16} className="mr-2" />
               Mano Rezervacijos
             </TabsTrigger>
-            <TabsTrigger value="profile">
+            <TabsTrigger
+              value="profile"
+              className="data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow-glass-sm text-white/70 rounded-md transition-all"
+            >
               <UserPen size={16} className="mr-2" />
               Profilio Redagavimas
             </TabsTrigger>
@@ -424,198 +463,236 @@ export default function Dashboard() {
 
           {/* Booking Tab */}
           <TabsContent value="booking">
-            <Card>
-              <CardHeader>
-                <CardTitle>Rezervuoti Teniso Kortą</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid lg:grid-cols-2 gap-8">
-                  {/* Calendar Selection */}
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Pasirinkite Datą</h3>
-                    <Calendar
-                      selectedDate={selectedDate}
-                      onDateSelect={setSelectedDate}
-                    />
-                  </div>
-
-                  {/* Time Slots Selection */}
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Pasirinkite Kortą ir Laiką</h3>
-                    
-                    {/* Court Selection */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                      {courts.map((court) => (
-                        <Button
-                          key={court.id}
-                          variant={selectedCourtId === court.id ? "default" : "outline"}
-                          onClick={() => setSelectedCourtId(court.id)}
-                          className={selectedCourtId === court.id 
-                            ? "bg-tennis-green-500 hover:bg-tennis-green-600" 
-                            : ""}
-                        >
-                          {court.name}
-                          <Badge variant="secondary" className="ml-2">
-                            {(parseFloat(court.hourlyRate) / 2).toFixed(2)}€/30min.
-                          </Badge>
-                        </Button>
-                      ))}
-                    </div>
-
-                    {/* Time Slots */}
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <p className="text-sm text-gray-600">
-                            {selectedDate.toLocaleDateString('lt-LT')} prieinami laikai:
-                          </p>
-                          {selectedTimeSlots.length > 0 && (
-                            <span className="text-xs text-tennis-green-600 font-medium">
-                              {selectedTimeSlots.length} pasirinkta
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 mb-2">
-                          Maksimalus rezervacijos laikas: 120 min. (4 intervalai). Intervalai turi būti iš eilės.
-                        </p>
-                        {selectedTimeSlots.length > 0 && (
-                          <p className="text-sm text-tennis-green-600 mb-2">
-                            Pasirinkta: {selectedTimeSlots.length}/4 intervalų ({selectedTimeSlots.length * 30} min.)
-                          </p>
-                        )}
-                      </div>
-                      
-                      <TimeSlotGrid
-                        timeSlots={timeSlots}
-                        onSlotSelect={(slot) => {
-                          if (selectedTimeSlots.includes(slot)) {
-                            setSelectedTimeSlots(prev => prev.filter(s => s !== slot));
-                          } else {
-                            // Check if adding this slot would exceed the 4-slot limit
-                            if (selectedTimeSlots.length >= 4) {
-                              toast({
-                                title: "Viršytas limitas",
-                                description: "Maksimaliai galite pasirinkti 4 laiko intervalus (120 min.)",
-                                variant: "destructive",
-                              });
-                              return;
-                            }
-                            setSelectedTimeSlots(prev => [...prev, slot]);
-                          }
-                        }}
-                        selectedSlots={selectedTimeSlots}
-                        selectedDate={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
-                        isPublicView={false}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card variant="glassDark">
+                <CardHeader>
+                  <CardTitle className="text-white">Rezervuoti Teniso Kortą</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Calendar Selection */}
+                    <div>
+                      <h3 className="text-lg font-medium mb-4 text-white">Pasirinkite Datą</h3>
+                      <Calendar
+                        selectedDate={selectedDate}
+                        onDateSelect={setSelectedDate}
                       />
                     </div>
 
-                    {/* Booking Summary */}
-                    {selectedTimeSlots.length > 0 && selectedCourtId && (
-                      <Card className="mt-6 bg-tennis-green-50 border-tennis-green-200">
-                        <CardContent className="p-4">
-                          <h4 className="font-medium text-tennis-green-800 mb-2">Rezervacijos Santrauka</h4>
-                          <div className="text-sm text-tennis-green-700 space-y-1">
-                            <div><strong>Data:</strong> {selectedDate.toLocaleDateString('lt-LT')}</div>
-                            <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
-                            <div><strong>Kortas:</strong> {courts.find(c => c.id === selectedCourtId)?.name}</div>
-                            <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
-                            <div><strong>Kaina:</strong> {(() => {
-                              const court = courts.find(c => c.id === selectedCourtId);
-                              const hourlyRate = parseFloat(court?.hourlyRate || '0');
-                              const slotRate = hourlyRate / 2; // 30-minute slot rate
-                              return (slotRate * selectedTimeSlots.length).toFixed(2);
-                            })()}€</div>
-                          </div>
-                          <div className="mt-3 mb-3">
-                            <Button 
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedTimeSlots([])}
-                              className="text-xs"
-                            >
-                              Išvalyti pasirinkimus
-                            </Button>
-                          </div>
-                          <Button 
-                            className="w-full mt-4 bg-tennis-green-500 hover:bg-tennis-green-600"
-                            onClick={handleReservation}
-                            disabled={createReservationMutation.isPending}
+                    {/* Time Slots Selection */}
+                    <div>
+                      <h3 className="text-lg font-medium mb-4 text-white">Pasirinkite Kortą ir Laiką</h3>
+
+                      {/* Court Selection */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                        {courts.map((court) => (
+                          <motion.div
+                            key={court.id}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                           >
-                            {createReservationMutation.isPending ? "Rezervuojama..." : "Patvirtinti Rezervaciją"}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    )}
+                            <Button
+                              variant={selectedCourtId === court.id ? "glassGreen" : "glassDark"}
+                              onClick={() => setSelectedCourtId(court.id)}
+                              className="w-full justify-between"
+                            >
+                              {court.name}
+                              <Badge className="ml-2 bg-tennis-yellow/20 text-tennis-yellow border-tennis-yellow/30">
+                                {(parseFloat(court.hourlyRate) / 2).toFixed(2)}€/30min.
+                              </Badge>
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* Time Slots */}
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="text-sm text-white/70">
+                              {selectedDate.toLocaleDateString('lt-LT')} prieinami laikai:
+                            </p>
+                            {selectedTimeSlots.length > 0 && (
+                              <span className="text-xs text-tennis-yellow font-medium">
+                                {selectedTimeSlots.length} pasirinkta
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-white/60 mb-2">
+                            Maksimalus rezervacijos laikas: 120 min. (4 intervalai). Intervalai turi būti iš eilės.
+                          </p>
+                          {selectedTimeSlots.length > 0 && (
+                            <p className="text-sm text-tennis-yellow mb-2">
+                              Pasirinkta: {selectedTimeSlots.length}/4 intervalų ({selectedTimeSlots.length * 30} min.)
+                            </p>
+                          )}
+                        </div>
+
+                        <TimeSlotGrid
+                          timeSlots={timeSlots}
+                          onSlotSelect={(slot) => {
+                            if (selectedTimeSlots.includes(slot)) {
+                              setSelectedTimeSlots(prev => prev.filter(s => s !== slot));
+                            } else {
+                              if (selectedTimeSlots.length >= 4) {
+                                toast({
+                                  title: "Viršytas limitas",
+                                  description: "Maksimaliai galite pasirinkti 4 laiko intervalus (120 min.)",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+                              setSelectedTimeSlots(prev => [...prev, slot]);
+                            }
+                          }}
+                          selectedSlots={selectedTimeSlots}
+                          selectedDate={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
+                          isPublicView={false}
+                        />
+                      </div>
+
+                      {/* Booking Summary */}
+                      {selectedTimeSlots.length > 0 && selectedCourtId && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                        >
+                          <Card variant="glassGreen" className="mt-6">
+                            <CardContent className="p-4">
+                              <h4 className="font-medium text-white mb-2">Rezervacijos Santrauka</h4>
+                              <div className="text-sm text-white/90 space-y-1">
+                                <div><strong>Data:</strong> {selectedDate.toLocaleDateString('lt-LT')}</div>
+                                <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
+                                <div><strong>Kortas:</strong> {courts.find(c => c.id === selectedCourtId)?.name}</div>
+                                <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
+                                <div><strong>Kaina:</strong> {(() => {
+                                  const court = courts.find(c => c.id === selectedCourtId);
+                                  const hourlyRate = parseFloat(court?.hourlyRate || '0');
+                                  const slotRate = hourlyRate / 2;
+                                  return (slotRate * selectedTimeSlots.length).toFixed(2);
+                                })()}€</div>
+                              </div>
+                              <div className="mt-3 mb-3">
+                                <Button
+                                  variant="glassDark"
+                                  size="sm"
+                                  onClick={() => setSelectedTimeSlots([])}
+                                  className="text-xs"
+                                >
+                                  Išvalyti pasirinkimus
+                                </Button>
+                              </div>
+                              <Button
+                                variant="glassGreen"
+                                className="w-full mt-4 font-semibold shadow-glow-green"
+                                onClick={handleReservation}
+                                disabled={createReservationMutation.isPending}
+                              >
+                                {createReservationMutation.isPending ? "Rezervuojama..." : "Patvirtinti Rezervaciją"}
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
           {/* Reservations Tab */}
           <TabsContent value="reservations" className="space-y-6">
-            {/* Active Reservations */}
-            <div>
-              <h3 className="text-lg font-medium mb-4 text-green-600">Aktyvios Rezervacijos</h3>
-              {reservationsLoading ? (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tennis-green-600 mx-auto"></div>
-                  </CardContent>
-                </Card>
-              ) : activeReservations.length > 0 ? (
-                <div className="space-y-4">
-                  {activeReservations.map((reservation) => (
-                    <ReservationCard 
-                      key={reservation.id} 
-                      reservation={reservation} 
-                      showActions={true}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="p-6 text-center text-gray-500">
-                    Neturite aktyvių rezervacijų
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {/* Active Reservations */}
+              <div className="mb-8">
+                <h3 className="text-lg font-medium mb-4 text-tennis-yellow drop-shadow">Aktyvios Rezervacijos</h3>
+                {reservationsLoading ? (
+                  <Card variant="glassDark">
+                    <CardContent className="p-6 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                    </CardContent>
+                  </Card>
+                ) : activeReservations.length > 0 ? (
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-4"
+                  >
+                    {activeReservations.map((reservation) => (
+                      <motion.div key={reservation.id} variants={staggerItem}>
+                        <ReservationCard
+                          reservation={reservation}
+                          showActions={true}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <Card variant="glassDark">
+                    <CardContent className="p-6 text-center text-white/60">
+                      Neturite aktyvių rezervacijų
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
 
-            {/* Past Reservations */}
-            <div>
-              <h3 className="text-lg font-medium mb-4 text-gray-600">Rezervacijų Istorija</h3>
-              {pastReservations.length > 0 ? (
-                <div className="space-y-4">
-                  {pastReservations.map((reservation) => (
-                    <ReservationCard 
-                      key={reservation.id} 
-                      reservation={reservation} 
-                      showActions={false}
-                      isPast={true}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="p-6 text-center text-gray-500">
-                    Neturite rezervacijų istorijos
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+              {/* Past Reservations */}
+              <div>
+                <h3 className="text-lg font-medium mb-4 text-white/70">Rezervacijų Istorija</h3>
+                {pastReservations.length > 0 ? (
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-4"
+                  >
+                    {pastReservations.map((reservation) => (
+                      <motion.div key={reservation.id} variants={staggerItem}>
+                        <ReservationCard
+                          reservation={reservation}
+                          showActions={false}
+                          isPast={true}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <Card variant="glassDark">
+                    <CardContent className="p-6 text-center text-white/60">
+                      Neturite rezervacijų istorijos
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </motion.div>
           </TabsContent>
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            {user && <ProfileEdit user={{
-              id: user.id,
-              email: user.email,
-              firstName: user.firstName || undefined,
-              lastName: user.lastName || undefined,
-              phone: user.phone || undefined,
-              isAdmin: user.isAdmin || undefined
-            }} />}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {user && <ProfileEdit user={{
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName || undefined,
+                lastName: user.lastName || undefined,
+                phone: user.phone || undefined,
+                isAdmin: user.isAdmin || undefined
+              }} />}
+            </motion.div>
           </TabsContent>
         </Tabs>
       </div>

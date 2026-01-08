@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useSEO } from "@/hooks/useSEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import TennisBallIcon from "@/components/TennisBallIcon";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { staggerContainer, staggerItem } from "@/lib/animations";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
@@ -130,33 +132,68 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-tennis-green-700 via-tennis-green-600 to-tennis-green-700 relative overflow-hidden">
+      {/* Animated background mesh */}
+      <div className="fixed inset-0 glass-mesh-bg opacity-60 pointer-events-none" />
+
+      {/* Floating decorative orbs */}
+      <motion.div
+        animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed top-20 right-20 w-64 h-64 rounded-full bg-tennis-yellow/20 blur-3xl pointer-events-none"
+      />
+      <motion.div
+        animate={{ y: [0, 15, 0], x: [0, -15, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed bottom-20 left-20 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none"
+      />
+
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="flex items-center justify-center min-h-screen">
-          <div className="max-w-md mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-md mx-auto w-full"
+          >
             <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                  <TennisBallIcon size={20} className="text-tennis-green-600" />
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="flex items-center justify-center gap-3 mb-4"
+              >
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30 shadow-glass animate-glow-pulse">
+                  <TennisBallIcon size={24} className="text-tennis-yellow" />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">PB teniso kortas</h1>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400">
+                <h1 className="text-3xl font-bold text-white drop-shadow-lg">PB teniso kortas</h1>
+              </motion.div>
+              <p className="text-white/80">
                 Prisijunkite prie savo paskyros arba sukurkite naują
               </p>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Prisijungimas</TabsTrigger>
-                <TabsTrigger value="register">Registracija</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 backdrop-blur-[8px] bg-white/10 border border-white/20 rounded-lg p-1">
+                <TabsTrigger
+                  value="login"
+                  className="data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow-glass-sm text-white/70 rounded-md transition-all"
+                >
+                  Prisijungimas
+                </TabsTrigger>
+                <TabsTrigger
+                  value="register"
+                  className="data-[state=active]:bg-white/20 data-[state=active]:text-white data-[state=active]:shadow-glass-sm text-white/70 rounded-md transition-all"
+                >
+                  Registracija
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
-                <Card>
+                <Card variant="glass" className="mt-4">
                   <CardHeader>
-                    <CardTitle>Prisijungimas</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">Prisijungimas</CardTitle>
+                    <CardDescription className="text-white/70">
                       Įveskite savo duomenis, kad prisijungtumėte
                     </CardDescription>
                   </CardHeader>
@@ -168,11 +205,16 @@ export default function AuthPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>El. paštas</FormLabel>
+                              <FormLabel className="text-white/90">El. paštas</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="jonas@example.com" {...field} />
+                                <Input
+                                  type="email"
+                                  placeholder="jonas@example.com"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-300" />
                             </FormItem>
                           )}
                         />
@@ -181,17 +223,23 @@ export default function AuthPage() {
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Slaptažodis</FormLabel>
+                              <FormLabel className="text-white/90">Slaptažodis</FormLabel>
                               <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
+                                <Input
+                                  type="password"
+                                  placeholder="••••••••"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-300" />
                             </FormItem>
                           )}
                         />
-                        <Button 
-                          type="submit" 
-                          className="w-full"
+                        <Button
+                          type="submit"
+                          variant="glassGreen"
+                          className="w-full font-semibold"
                           disabled={loginMutation.isPending}
                         >
                           {loginMutation.isPending ? (
@@ -203,12 +251,12 @@ export default function AuthPage() {
                             "Prisijungti"
                           )}
                         </Button>
-                        
+
                         <div className="text-center mt-4">
                           <Button
                             type="button"
                             variant="link"
-                            className="text-sm text-tennis-green-600 hover:text-tennis-green-700"
+                            className="text-sm text-tennis-yellow hover:text-tennis-yellow/80"
                             onClick={() => setShowForgotPassword(true)}
                           >
                             Pamiršote slaptažodį?
@@ -221,10 +269,10 @@ export default function AuthPage() {
               </TabsContent>
 
               <TabsContent value="register">
-                <Card>
+                <Card variant="glass" className="mt-4">
                   <CardHeader>
-                    <CardTitle>Registracija</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">Registracija</CardTitle>
+                    <CardDescription className="text-white/70">
                       Sukurkite naują paskyrą rezervacijoms
                     </CardDescription>
                   </CardHeader>
@@ -237,11 +285,15 @@ export default function AuthPage() {
                             name="firstName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Vardas</FormLabel>
+                                <FormLabel className="text-white/90">Vardas</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Jonas" {...field} />
+                                  <Input
+                                    placeholder="Jonas"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                    {...field}
+                                  />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="text-red-300" />
                               </FormItem>
                             )}
                           />
@@ -250,11 +302,15 @@ export default function AuthPage() {
                             name="lastName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Pavardė</FormLabel>
+                                <FormLabel className="text-white/90">Pavardė</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Jonaitis" {...field} />
+                                  <Input
+                                    placeholder="Jonaitis"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                    {...field}
+                                  />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="text-red-300" />
                               </FormItem>
                             )}
                           />
@@ -265,11 +321,16 @@ export default function AuthPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>El. paštas</FormLabel>
+                              <FormLabel className="text-white/90">El. paštas</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="jonas@example.com" {...field} />
+                                <Input
+                                  type="email"
+                                  placeholder="jonas@example.com"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-300" />
                             </FormItem>
                           )}
                         />
@@ -278,11 +339,15 @@ export default function AuthPage() {
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Telefono numeris *</FormLabel>
+                              <FormLabel className="text-white/90">Telefono numeris *</FormLabel>
                               <FormControl>
-                                <Input placeholder="+370 6XX XXXXX" {...field} />
+                                <Input
+                                  placeholder="+370 6XX XXXXX"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-300" />
                             </FormItem>
                           )}
                         />
@@ -291,17 +356,23 @@ export default function AuthPage() {
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Slaptažodis</FormLabel>
+                              <FormLabel className="text-white/90">Slaptažodis</FormLabel>
                               <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
+                                <Input
+                                  type="password"
+                                  placeholder="••••••••"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="text-red-300" />
                             </FormItem>
                           )}
                         />
-                        <Button 
-                          type="submit" 
-                          className="w-full"
+                        <Button
+                          type="submit"
+                          variant="glassGreen"
+                          className="w-full font-semibold"
                           disabled={registerMutation.isPending}
                         >
                           {registerMutation.isPending ? (
@@ -322,82 +393,98 @@ export default function AuthPage() {
 
             {/* Forgot Password Modal */}
             {showForgotPassword && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <Card className="w-full max-w-md mx-auto shadow-xl">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowForgotPassword(false)}
-                        className="h-8 w-8"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                      </Button>
-                      <div>
-                        <CardTitle>Slaptažodžio atkūrimas</CardTitle>
-                        <CardDescription className="mt-1">
-                          Įveskite savo el. paštą, kuriuo registravotės
-                        </CardDescription>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <Card variant="glass" className="w-full max-w-md mx-auto shadow-glass-lg">
+                    <CardHeader>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="glassDark"
+                          size="icon"
+                          onClick={() => setShowForgotPassword(false)}
+                          className="h-8 w-8"
+                        >
+                          <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <div>
+                          <CardTitle className="text-white">Slaptažodžio atkūrimas</CardTitle>
+                          <CardDescription className="mt-1 text-white/70">
+                            Įveskite savo el. paštą, kuriuo registravotės
+                          </CardDescription>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...forgotPasswordForm}>
-                      <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
-                        <FormField
-                          control={forgotPasswordForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>El. paštas</FormLabel>
-                              <FormControl>
-                                <Input type="email" placeholder="jonas@example.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <p className="text-sm text-blue-800">
-                            <strong>Kaip tai veikia:</strong> Išsiųsime jums el. laišką su nuoroda slaptažodžio atkūrimui. 
-                            Nuoroda galioja 1 valandą.
-                          </p>
-                        </div>
-                        
-                        <div className="flex gap-3 pt-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowForgotPassword(false)}
-                            disabled={forgotPasswordMutation.isPending}
-                            className="flex-1"
-                          >
-                            Atšaukti
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="flex-1"
-                            disabled={forgotPasswordMutation.isPending}
-                          >
-                            {forgotPasswordMutation.isPending ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Siunčiama...
-                              </>
-                            ) : (
-                              "Siųsti"
+                    </CardHeader>
+                    <CardContent>
+                      <Form {...forgotPasswordForm}>
+                        <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="space-y-4">
+                          <FormField
+                            control={forgotPasswordForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white/90">El. paštas</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    placeholder="jonas@example.com"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage className="text-red-300" />
+                              </FormItem>
                             )}
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </div>
+                          />
+
+                          <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-lg p-3">
+                            <p className="text-sm text-white/80">
+                              <strong className="text-white">Kaip tai veikia:</strong> Išsiųsime jums el. laišką su nuoroda slaptažodžio atkūrimui.
+                              Nuoroda galioja 1 valandą.
+                            </p>
+                          </div>
+
+                          <div className="flex gap-3 pt-2">
+                            <Button
+                              type="button"
+                              variant="glassDark"
+                              onClick={() => setShowForgotPassword(false)}
+                              disabled={forgotPasswordMutation.isPending}
+                              className="flex-1"
+                            >
+                              Atšaukti
+                            </Button>
+                            <Button
+                              type="submit"
+                              variant="glassGreen"
+                              className="flex-1"
+                              disabled={forgotPasswordMutation.isPending}
+                            >
+                              {forgotPasswordMutation.isPending ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Siunčiama...
+                                </>
+                              ) : (
+                                "Siųsti"
+                              )}
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

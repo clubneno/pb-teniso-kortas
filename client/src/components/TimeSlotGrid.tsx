@@ -1,4 +1,4 @@
-// Button component removed - using div for better text color control
+import { motion } from "framer-motion";
 
 interface TimeSlot {
   startTime: string;
@@ -18,12 +18,12 @@ interface TimeSlotGridProps {
   isPublicView?: boolean;
 }
 
-export default function TimeSlotGrid({ 
-  timeSlots, 
-  onSlotSelect, 
-  selectedSlots, 
+export default function TimeSlotGrid({
+  timeSlots,
+  onSlotSelect,
+  selectedSlots,
   selectedDate,
-  isPublicView = false 
+  isPublicView = false
 }: TimeSlotGridProps) {
   
   const isSlotInPast = (slot: TimeSlot) => {
@@ -48,36 +48,36 @@ export default function TimeSlotGrid({
   };
 
   const getSlotClassName = (slot: TimeSlot) => {
-    const baseClasses = "text-center transition-colors text-white";
+    const baseClasses = "text-center transition-all duration-200 text-white backdrop-blur-[8px] rounded-lg";
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
-    
+
     if (slot.isMaintenance) {
-      return `${baseClasses} bg-yellow-600 border border-yellow-700 cursor-not-allowed`;
+      return `${baseClasses} bg-yellow-600/60 border border-yellow-500/50 cursor-not-allowed`;
     }
-    
+
     if (slot.isReserved) {
-      return `${baseClasses} bg-red-600 border border-red-700 cursor-not-allowed`;
+      return `${baseClasses} bg-red-600/60 border border-red-500/50 cursor-not-allowed`;
     }
-    
+
     // Show partial availability for public view when other courts are reserved
     if (isPublicView && slot.totalReservations && slot.totalReservations > 0 && !slot.isReserved) {
-      return `${baseClasses} bg-orange-600 border border-orange-700`;
+      return `${baseClasses} bg-orange-500/50 border border-orange-400/50`;
     }
-    
+
     if (isPast) {
-      return `${baseClasses} bg-gray-500 border border-gray-600 cursor-not-allowed opacity-60`;
+      return `${baseClasses} bg-white/10 border border-white/10 cursor-not-allowed opacity-50`;
     }
-    
+
     if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
-      return `${baseClasses} bg-tennis-green-600 border border-tennis-green-700`;
+      return `${baseClasses} bg-tennis-yellow/60 border border-tennis-yellow/70 text-black shadow-glow-yellow`;
     }
-    
+
     if (isPublicView) {
-      return `${baseClasses} bg-green-600 border border-green-700`;
+      return `${baseClasses} bg-green-500/50 border border-green-400/50`;
     }
-    
-    return `${baseClasses} bg-green-500 border border-green-600 hover:bg-green-600`;
+
+    return `${baseClasses} bg-green-500/40 border border-green-400/40 hover:bg-green-500/60 hover:border-green-400/60 hover:shadow-glass-sm`;
   };
 
   const getStatusText = (slot: TimeSlot) => {
@@ -107,27 +107,33 @@ export default function TimeSlotGrid({
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-      {timeSlots.map((slot) => {
+      {timeSlots.map((slot, index) => {
         const timeRange = `${slot.startTime}-${slot.endTime}`;
-        
+        const isClickable = !slot.isReserved && !slot.isMaintenance && !isSlotInPast(slot) && !isPublicView;
+
         return (
-          <div
+          <motion.div
             key={timeRange}
-            className={`${getSlotClassName(slot)} cursor-pointer rounded-md p-3 min-h-[60px] flex items-center justify-center`}
-            onClick={() => !slot.isReserved && !slot.isMaintenance && !isSlotInPast(slot) && !isPublicView && onSlotSelect(timeRange)}
-            style={{ 
-              pointerEvents: slot.isReserved || slot.isMaintenance || isSlotInPast(slot) || isPublicView ? 'none' : 'auto'
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.02, duration: 0.2 }}
+            whileHover={isClickable ? { scale: 1.05, y: -2 } : {}}
+            whileTap={isClickable ? { scale: 0.95 } : {}}
+            className={`${getSlotClassName(slot)} cursor-pointer p-3 min-h-[60px] flex items-center justify-center`}
+            onClick={() => isClickable && onSlotSelect(timeRange)}
+            style={{
+              pointerEvents: isClickable ? 'auto' : 'none'
             }}
           >
             <div className="text-center">
-              <div className="text-sm font-medium">
+              <div className="text-sm font-medium drop-shadow">
                 {slot.timeDisplay}
               </div>
-              <div className="text-xs">
+              <div className="text-xs opacity-80">
                 {getStatusText(slot)}
               </div>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>

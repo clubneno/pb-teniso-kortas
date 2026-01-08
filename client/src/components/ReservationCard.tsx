@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,12 +99,11 @@ export default function ReservationCard({ reservation, showActions = false, isPa
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return <Badge className="bg-green-100 text-green-800">Patvirtinta</Badge>;
-
+        return <Badge className="bg-green-500/30 text-green-200 border border-green-400/40">Patvirtinta</Badge>;
       case 'cancelled':
-        return <Badge variant="destructive">Atšaukta</Badge>;
+        return <Badge className="bg-red-500/30 text-red-200 border border-red-400/40">Atšaukta</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge className="bg-white/20 text-white/80 border border-white/30">{status}</Badge>;
     }
   };
 
@@ -118,69 +118,74 @@ export default function ReservationCard({ reservation, showActions = false, isPa
 
   return (
     <>
-      <Card className={`hover:shadow-md transition-shadow ${isPast ? 'bg-gray-50' : ''}`}>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className={`font-medium ${isPast ? 'text-gray-700' : 'text-gray-900'}`}>
-                {formatDate(reservation.date)}
-              </div>
-              <div className={`text-sm ${isPast ? 'text-gray-500' : 'text-gray-600'}`}>
-                {reservation.startTime}-{reservation.endTime} | {reservation.court.name}
-              </div>
-              <div className="mt-1">
-                {getStatusBadge(reservation.status)}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className={`font-medium ${isPast ? 'text-gray-700' : 'text-gray-900'}`}>
-                {reservation.totalPrice}€
-              </div>
-              {showActions && !isPast && (
-                <div className="mt-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-red-600 border-red-300 hover:bg-red-50"
-                    onClick={handleCancel}
-                    disabled={cancelReservationMutation.isPending}
-                  >
-                    <Trash2 size={14} className="mr-1" />
-                    {cancelReservationMutation.isPending ? "Atšaukiama..." : "Atšaukti"}
-                  </Button>
+      <motion.div
+        whileHover={{ scale: 1.01, y: -2 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        <Card variant={isPast ? "glassDark" : "glass"} className={`${isPast ? 'opacity-70' : ''}`}>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1">
+                <div className={`font-medium ${isPast ? 'text-white/70' : 'text-white'}`}>
+                  {formatDate(reservation.date)}
                 </div>
-              )}
+                <div className={`text-sm ${isPast ? 'text-white/50' : 'text-white/70'}`}>
+                  {reservation.startTime}-{reservation.endTime} | {reservation.court.name}
+                </div>
+                <div className="mt-1">
+                  {getStatusBadge(reservation.status)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`font-medium text-tennis-yellow ${isPast ? 'opacity-70' : ''}`}>
+                  {reservation.totalPrice}€
+                </div>
+                {showActions && !isPast && (
+                  <div className="mt-2">
+                    <Button
+                      size="sm"
+                      variant="glassDark"
+                      className="text-red-300 border-red-400/30 hover:bg-red-500/20"
+                      onClick={handleCancel}
+                      disabled={cancelReservationMutation.isPending}
+                    >
+                      <Trash2 size={14} className="mr-1" />
+                      {cancelReservationMutation.isPending ? "Atšaukiama..." : "Atšaukti"}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          
-          {reservation.notes && (
-            <div className={`mt-3 text-sm ${isPast ? 'text-gray-500' : 'text-gray-600'} italic`}>
-              Pastabos: {reservation.notes}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {reservation.notes && (
+              <div className={`mt-3 text-sm ${isPast ? 'text-white/40' : 'text-white/60'} italic`}>
+                Pastabos: {reservation.notes}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="backdrop-blur-[16px] bg-white/20 border border-white/30 shadow-glass-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Atšaukti rezervaciją</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-white">Atšaukti rezervaciją</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/80">
               Ar tikrai norite atšaukti šią rezervaciją?
               <br />
               <br />
-              <strong>Data:</strong> {formatDate(reservation.date)}
+              <strong className="text-white">Data:</strong> {formatDate(reservation.date)}
               <br />
-              <strong>Laikas:</strong> {reservation.startTime}-{reservation.endTime}
+              <strong className="text-white">Laikas:</strong> {reservation.startTime}-{reservation.endTime}
               <br />
-              <strong>Kortas:</strong> {reservation.court.name}
+              <strong className="text-white">Kortas:</strong> {reservation.court.name}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Ne, grįžti</AlertDialogCancel>
+            <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20">Ne, grįžti</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCancel}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-500/60 hover:bg-red-500/80 text-white border border-red-400/40"
             >
               Taip, atšaukti
             </AlertDialogAction>

@@ -32,6 +32,18 @@
   --tennis-green-700: hsl(148, 43%, 22%);
   --tennis-yellow: hsl(66, 70%, 54%);
   --tennis-clay: hsl(19, 26%, 46%);
+
+  /* Glassmorphism variables */
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --glass-bg-light: rgba(255, 255, 255, 0.15);
+  --glass-bg-dark: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-border-strong: rgba(255, 255, 255, 0.35);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+  /* Tennis glass variants */
+  --tennis-glass-green: rgba(76, 175, 80, 0.2);
+  --tennis-glass-yellow: rgba(255, 235, 59, 0.2);
 }
 
 .dark {
@@ -126,5 +138,93 @@
   
   .border-tennis-green-600 {
     border-color: var(--tennis-green-600);
+  }
+}
+
+@layer components {
+  /* Glass Card Base */
+  .glass-card {
+    @apply backdrop-blur-[12px] border rounded-2xl transition-all duration-300;
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-card-dark {
+    @apply backdrop-blur-[12px] border rounded-2xl transition-all duration-300;
+    background: var(--glass-bg-dark);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Glass Button */
+  .glass-button {
+    @apply backdrop-blur-[8px] border rounded-xl transition-all duration-200;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Glass Input */
+  .glass-input {
+    @apply backdrop-blur-[8px] border rounded-lg transition-all duration-200;
+    background: var(--glass-bg-light);
+    border-color: var(--glass-border);
+  }
+
+  .glass-input:focus {
+    background: var(--glass-bg);
+    border-color: var(--glass-border-strong);
+  }
+
+  /* Glass Navigation */
+  .glass-nav {
+    @apply backdrop-blur-[16px] border-b;
+    background: rgba(255, 255, 255, 0.3);
+    border-color: var(--glass-border);
+  }
+
+  /* Glass Overlay */
+  .glass-overlay {
+    @apply backdrop-blur-[8px];
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Tennis Glass Variants */
+  .glass-green {
+    @apply backdrop-blur-[12px] border rounded-2xl;
+    background: var(--tennis-glass-green);
+    border-color: rgba(76, 175, 80, 0.3);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.2);
+  }
+
+  .glass-yellow {
+    @apply backdrop-blur-[12px] border rounded-2xl;
+    background: var(--tennis-glass-yellow);
+    border-color: rgba(255, 235, 59, 0.3);
+    box-shadow: 0 0 20px rgba(255, 235, 59, 0.2);
+  }
+
+  /* Gradient Backgrounds */
+  .glass-gradient-bg {
+    background: linear-gradient(
+      135deg,
+      hsl(122, 39%, 30%) 0%,
+      hsl(148, 43%, 22%) 50%,
+      hsl(122, 39%, 20%) 100%
+    );
+  }
+
+  .glass-mesh-bg {
+    background-image:
+      radial-gradient(at 40% 20%, hsla(122, 39%, 49%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(66, 70%, 54%, 0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(148, 40%, 30%, 0.4) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(19, 26%, 46%, 0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(122, 39%, 49%, 0.3) 0px, transparent 50%);
   }
 }
