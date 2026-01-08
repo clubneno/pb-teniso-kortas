@@ -210,13 +210,14 @@ export default function Landing() {
       </nav>
       {/* Hero Section with Court Image */}
       <div className="relative text-white py-20 md:py-32 overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroImage})` }}
+        {/* Background Image */}
+        <img
+          src={heroImage}
+          alt="Tennis court"
+          className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Glass overlay on image */}
-        <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-b from-tennis-green-700/70 via-tennis-green-600/60 to-tennis-green-700/80" />
+        <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-b from-tennis-green-700/60 via-tennis-green-600/50 to-tennis-green-700/70" />
 
         {/* Content */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
