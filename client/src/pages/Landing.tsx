@@ -211,22 +211,37 @@ export default function Landing() {
         </div>
       </nav>
       {/* Hero Section with Court Image */}
-      <div className="relative text-white py-20 md:py-32 overflow-hidden">
+      <div className="relative text-white overflow-hidden" style={{ minHeight: '400px' }}>
         {/* Background Image - using img element */}
         <img
           src={heroCourtImage}
           alt="Tennis court background"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ zIndex: 0 }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 1
+          }}
         />
         {/* Glass overlay on image */}
         <div
-          className="absolute inset-0 backdrop-blur-[1px] bg-gradient-to-b from-tennis-green-700/50 via-tennis-green-600/40 to-tennis-green-700/60"
-          style={{ zIndex: 1 }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backdropFilter: 'blur(1px)',
+            background: 'linear-gradient(to bottom, rgba(46, 125, 50, 0.5), rgba(56, 142, 60, 0.4), rgba(46, 125, 50, 0.6))',
+            zIndex: 2
+          }}
         />
 
         {/* Content */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ zIndex: 2 }}>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32" style={{ zIndex: 3 }}>
           <motion.div
             initial="hidden"
             animate="visible"
