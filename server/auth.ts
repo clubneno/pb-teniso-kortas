@@ -2,11 +2,14 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
+import pgSession from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as AppUser, forgotPasswordSchema } from "../shared/schema";
 import { emailService } from "./services/emailService";
+
+const PgStore = pgSession(session);
 
 declare global {
   namespace Express {
@@ -45,7 +48,15 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Use PostgreSQL session store for serverless environment persistence
+  const sessionStore = new PgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true,
+    tableName: 'session',
+  });
+
   const sessionSettings: session.SessionOptions = {
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
