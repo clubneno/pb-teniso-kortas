@@ -2,14 +2,13 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
-import pgSession from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as AppUser, forgotPasswordSchema } from "../shared/schema";
 import { emailService } from "./services/emailService";
-
-const PgStore = pgSession(session);
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 declare global {
   namespace Express {
@@ -47,13 +46,99 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+// Custom session store using Drizzle ORM with Neon
+class DrizzleSessionStore extends session.Store {
+  private initialized = false;
+
+  async initTable() {
+    if (this.initialized) return;
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS "session" (
+          "sid" VARCHAR(255) PRIMARY KEY,
+          "sess" JSON NOT NULL,
+          "expire" TIMESTAMP(6) NOT NULL
+        )
+      `);
+      await db.execute(sql`
+        CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")
+      `);
+      this.initialized = true;
+    } catch (error) {
+      console.error("Failed to create session table:", error);
+    }
+  }
+
+  get = (sid: string, callback: (err: any, session?: session.SessionData | null) => void) => {
+    this.initTable().then(async () => {
+      try {
+        const result = await db.execute(sql`
+          SELECT sess FROM "session" WHERE sid = ${sid} AND expire > NOW()
+        `);
+        if (result.rows && result.rows.length > 0) {
+          const sess = result.rows[0].sess;
+          callback(null, typeof sess === 'string' ? JSON.parse(sess) : sess);
+        } else {
+          callback(null, null);
+        }
+      } catch (error) {
+        callback(error);
+      }
+    });
+  };
+
+  set = (sid: string, sessionData: session.SessionData, callback?: (err?: any) => void) => {
+    this.initTable().then(async () => {
+      try {
+        const maxAge = sessionData.cookie?.maxAge || 86400000; // 1 day default
+        const expireTime = new Date(Date.now() + maxAge);
+        const sessJson = JSON.stringify(sessionData);
+        
+        await db.execute(sql`
+          INSERT INTO "session" (sid, sess, expire)
+          VALUES (${sid}, ${sessJson}::json, ${expireTime})
+          ON CONFLICT (sid) DO UPDATE SET
+            sess = ${sessJson}::json,
+            expire = ${expireTime}
+        `);
+        callback?.();
+      } catch (error) {
+        callback?.(error);
+      }
+    });
+  };
+
+  destroy = (sid: string, callback?: (err?: any) => void) => {
+    this.initTable().then(async () => {
+      try {
+        await db.execute(sql`DELETE FROM "session" WHERE sid = ${sid}`);
+        callback?.();
+      } catch (error) {
+        callback?.(error);
+      }
+    });
+  };
+
+  touch = (sid: string, sessionData: session.SessionData, callback?: (err?: any) => void) => {
+    this.initTable().then(async () => {
+      try {
+        const maxAge = sessionData.cookie?.maxAge || 86400000;
+        const expireTime = new Date(Date.now() + maxAge);
+        
+        await db.execute(sql`
+          UPDATE "session" SET expire = ${expireTime} WHERE sid = ${sid}
+        `);
+        callback?.();
+      } catch (error) {
+        callback?.(error);
+      }
+    });
+  };
+}
+
 export function setupAuth(app: Express) {
-  // Use PostgreSQL session store for serverless environment persistence
-  const sessionStore = new PgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
-    tableName: 'session',
-  });
+  // Use custom Drizzle session store for serverless with Neon
+  const sessionStore = new DrizzleSessionStore();
 
   const sessionSettings: session.SessionOptions = {
     store: sessionStore,
