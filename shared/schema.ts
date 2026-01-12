@@ -62,6 +62,15 @@ export const reservations = pgTable("reservations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Password reset tokens table for serverless persistence
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  token: varchar("token").unique().notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Maintenance periods table for admin-managed court maintenance
 export const maintenancePeriods = pgTable("maintenance_periods", {
   id: serial("id").primaryKey(),

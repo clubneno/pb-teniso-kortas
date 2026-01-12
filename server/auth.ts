@@ -5,10 +5,10 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as AppUser, forgotPasswordSchema } from "../shared/schema";
+import { User as AppUser, forgotPasswordSchema, passwordResetTokens } from "../shared/schema";
 import { emailService } from "./services/emailService";
 import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { sql, eq, gt } from "drizzle-orm";
 
 declare global {
   namespace Express {
@@ -248,31 +248,29 @@ export function setupAuth(app: Express) {
     try {
       const validatedData = forgotPasswordSchema.parse(req.body);
       const user = await storage.getUserByEmail(validatedData.email);
-      
+
       if (!user) {
         // Don't reveal if email exists for security
         return res.json({ message: "Jei el. paštas egzistuoja, atkūrimo instrukcijos išsiųstos" });
       }
 
-      // Generate reset token (simple implementation)
+      // Generate reset token
       const resetToken = randomBytes(32).toString('hex');
       const resetExpiry = new Date(Date.now() + 3600000); // 1 hour from now
-      
-      // Store reset token in memory temporarily
-      // In production, this should be stored in database or Redis
-      const resetData = {
+
+      // Delete any existing tokens for this user
+      await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, user.id));
+
+      // Store reset token in database
+      await db.insert(passwordResetTokens).values({
         token: resetToken,
         userId: user.id,
-        expires: resetExpiry
-      };
-      
-      // Simple in-memory storage (for demonstration)
-      (global as any).passwordResetTokens = (global as any).passwordResetTokens || new Map();
-      (global as any).passwordResetTokens.set(resetToken, resetData);
-      
+        expiresAt: resetExpiry,
+      });
+
       // Send email
       await emailService.sendPasswordReset(user, resetToken);
-      
+
       res.json({ message: "Jei el. paštas egzistuoja, atkūrimo instrukcijos išsiųstos" });
     } catch (error) {
       console.error("Forgot password error:", error);
@@ -284,25 +282,27 @@ export function setupAuth(app: Express) {
   app.get("/api/validate-reset-token", async (req, res) => {
     try {
       const { token } = req.query;
-      
+
       if (!token || typeof token !== 'string') {
         return res.status(400).json({ valid: false, message: "Netinkama nuoroda" });
       }
 
-      // Check if token exists and is not expired
-      const resetTokens = (global as any).passwordResetTokens || new Map();
-      const resetData = resetTokens.get(token);
-      
+      // Check if token exists and is not expired in database
+      const [resetData] = await db
+        .select()
+        .from(passwordResetTokens)
+        .where(eq(passwordResetTokens.token, token));
+
       if (!resetData) {
         return res.status(400).json({ valid: false, message: "Netinkama nuoroda" });
       }
-      
-      if (new Date() > resetData.expires) {
+
+      if (new Date() > resetData.expiresAt) {
         // Clean up expired token
-        resetTokens.delete(token);
+        await db.delete(passwordResetTokens).where(eq(passwordResetTokens.token, token));
         return res.status(400).json({ valid: false, message: "Nuorodos galiojimas pasibaigė" });
       }
-      
+
       res.json({ valid: true });
     } catch (error) {
       console.error('Token validation error:', error);
@@ -314,7 +314,7 @@ export function setupAuth(app: Express) {
   app.post("/api/reset-password", async (req, res) => {
     try {
       const { token, password } = req.body;
-      
+
       if (!token || !password) {
         return res.status(400).json({ message: "Netinkami duomenys" });
       }
@@ -323,25 +323,27 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Slaptažodis turi būti bent 6 simbolių" });
       }
 
-      // Check if token exists and is not expired
-      const resetTokens = (global as any).passwordResetTokens || new Map();
-      const resetData = resetTokens.get(token);
-      
+      // Check if token exists and is not expired in database
+      const [resetData] = await db
+        .select()
+        .from(passwordResetTokens)
+        .where(eq(passwordResetTokens.token, token));
+
       if (!resetData) {
         return res.status(400).json({ message: "Netinkama arba pasibaigusi nuoroda" });
       }
-      
-      if (new Date() > resetData.expires) {
+
+      if (new Date() > resetData.expiresAt) {
         // Clean up expired token
-        resetTokens.delete(token);
+        await db.delete(passwordResetTokens).where(eq(passwordResetTokens.token, token));
         return res.status(400).json({ message: "Nuorodos galiojimas pasibaigė" });
       }
 
       // Update user password using the existing updateUser method
       await storage.updateUser(resetData.userId, { password });
-      
+
       // Clean up used token
-      resetTokens.delete(token);
+      await db.delete(passwordResetTokens).where(eq(passwordResetTokens.token, token));
       res.json({ message: "Slaptažodis sėkmingai pakeistas" });
     } catch (error) {
       console.error('Reset password error:', error);
