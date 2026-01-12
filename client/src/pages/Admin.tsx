@@ -121,6 +121,7 @@ export default function Admin() {
   const [createUserModal, setCreateUserModal] = useState(false);
   const [editUserModal, setEditUserModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [selectedUserForReservations, setSelectedUserForReservations] = useState<UserWithStats | null>(null);
   const [userForm, setUserForm] = useState({
     email: "",
     password: "",
@@ -1415,7 +1416,11 @@ export default function Admin() {
                             .includes(searchTerm.toLowerCase())
                         )
                         .map((user) => (
-                        <TableRow key={user.id}>
+                        <TableRow
+                          key={user.id}
+                          className="cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => setSelectedUserForReservations(user)}
+                        >
                           <TableCell>
                             <div className="flex items-center">
                               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center mr-3">
@@ -1455,17 +1460,23 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
-                                onClick={() => handleEditUser(user)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditUser(user);
+                                }}
                               >
                                 <Edit size={14} />
                               </Button>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
-                                onClick={() => handleDeleteUser(user.id, `${user.firstName} ${user.lastName}`)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteUser(user.id, `${user.firstName} ${user.lastName}`);
+                                }}
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               >
                                 <Trash2 size={14} />
@@ -2315,6 +2326,100 @@ export default function Admin() {
                   disabled={emailTestMutation.isPending}
                 >
                   Atšaukti
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* User Reservations History Modal */}
+      {selectedUserForReservations && (
+        <Dialog open={!!selectedUserForReservations} onOpenChange={(open) => !open && setSelectedUserForReservations(null)}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarCheck size={20} />
+                {selectedUserForReservations.firstName} {selectedUserForReservations.lastName} - Rezervacijų istorija
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">El. paštas:</span>
+                    <div className="font-medium">{selectedUserForReservations.email}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Telefonas:</span>
+                    <div className="font-medium">{selectedUserForReservations.phone || "-"}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Viso rezervacijų:</span>
+                    <div className="font-medium">{selectedUserForReservations.totalReservations}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Registracijos data:</span>
+                    <div className="font-medium">{new Date(selectedUserForReservations.createdAt).toLocaleDateString('lt-LT')}</div>
+                  </div>
+                </div>
+              </div>
+
+              {adminReservations.filter(r => r.userId === selectedUserForReservations.id).length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Calendar size={48} className="mx-auto mb-2 opacity-50" />
+                  <p>Šis naudotojas neturi rezervacijų</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Laikas</TableHead>
+                      <TableHead>Kortas</TableHead>
+                      <TableHead>Kaina</TableHead>
+                      <TableHead>Būsena</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {adminReservations
+                      .filter(r => r.userId === selectedUserForReservations.id)
+                      .sort((a, b) => {
+                        // Sort by date descending (newest first)
+                        const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
+                        if (dateCompare !== 0) return dateCompare;
+                        // Then by time descending
+                        return b.startTime.localeCompare(a.startTime);
+                      })
+                      .map((reservation) => (
+                        <TableRow key={reservation.id}>
+                          <TableCell>
+                            {new Date(reservation.date).toLocaleDateString('lt-LT', {
+                              weekday: 'short',
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            {reservation.startTime} - {reservation.endTime}
+                          </TableCell>
+                          <TableCell>{reservation.court?.name || `Kortas ${reservation.courtId}`}</TableCell>
+                          <TableCell>{parseFloat(reservation.totalPrice).toFixed(2)} EUR</TableCell>
+                          <TableCell>
+                            <Badge variant={reservation.status === 'confirmed' ? 'default' : 'destructive'}>
+                              {reservation.status === 'confirmed' ? 'Patvirtinta' : 'Atšaukta'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              )}
+
+              <div className="flex justify-end mt-4">
+                <Button variant="outline" onClick={() => setSelectedUserForReservations(null)}>
+                  Uždaryti
                 </Button>
               </div>
             </div>
