@@ -6,6 +6,7 @@ interface TimeSlot {
   timeDisplay: string;
   isReserved: boolean;
   isMaintenance?: boolean;
+  maintenanceType?: string; // 'maintenance' or 'winter_season'
   totalReservations?: number;
   reservedCourts?: string;
 }
@@ -53,6 +54,10 @@ export default function TimeSlotGrid({
     const isPast = isSlotInPast(slot);
 
     if (slot.isMaintenance) {
+      // Different colors for winter season vs maintenance
+      if (slot.maintenanceType === 'winter_season') {
+        return `${baseClasses} bg-blue-600/60 border border-blue-500/50 cursor-not-allowed`;
+      }
       return `${baseClasses} bg-yellow-600/60 border border-yellow-500/50 cursor-not-allowed`;
     }
 
@@ -83,23 +88,23 @@ export default function TimeSlotGrid({
   const getStatusText = (slot: TimeSlot) => {
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
-    
+
     if (isPast) {
       return "Praėjęs";
     }
-    
+
     if (slot.isMaintenance) {
-      return "Tvarkymo darbai";
+      return slot.maintenanceType === 'winter_season' ? "Žiemos sezonas" : "Tvarkymo darbai";
     }
-    
+
     if (slot.isReserved) {
       return "Užimta";
     }
-    
+
     if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
       return "Pasirinkta";
     }
-    
+
     return "Laisva";
   };
 

@@ -79,6 +79,7 @@ export const maintenancePeriods = pgTable("maintenance_periods", {
   endDate: varchar("end_date").notNull(), // YYYY-MM-DD format - end of maintenance period
   startTime: varchar("start_time").notNull(), // HH:mm format - daily start time
   endTime: varchar("end_time").notNull(), // HH:mm format - daily end time
+  type: varchar("type").notNull().default("maintenance"), // 'maintenance' or 'winter_season'
   description: text("description"), // Optional description of maintenance work
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

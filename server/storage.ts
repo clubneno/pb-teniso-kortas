@@ -70,7 +70,7 @@ export interface IStorage {
   ): Promise<boolean>;
   
   // Get availability for a specific date and court
-  getCourtAvailability(courtId: number, date: string): Promise<{ startTime: string; endTime: string; type?: 'reservation' | 'maintenance' }[]>;
+  getCourtAvailability(courtId: number, date: string): Promise<{ startTime: string; endTime: string; type?: 'reservation' | 'maintenance'; maintenanceType?: string }[]>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -402,6 +402,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         startTime: maintenancePeriods.startTime,
         endTime: maintenancePeriods.endTime,
+        maintenanceType: maintenancePeriods.type,
       })
       .from(maintenancePeriods)
       .where(
@@ -415,8 +416,8 @@ export class DatabaseStorage implements IStorage {
 
     // Combine both types of unavailable slots
     const unavailableSlots = [
-      ...reservedSlots.map(slot => ({ ...slot, type: 'reservation' as const })),
-      ...maintenanceSlots.map(slot => ({ ...slot, type: 'maintenance' as const }))
+      ...reservedSlots.map(slot => ({ ...slot, type: 'reservation' as const, maintenanceType: undefined })),
+      ...maintenanceSlots.map(slot => ({ ...slot, type: 'maintenance' as const, maintenanceType: slot.maintenanceType }))
     ].sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     return unavailableSlots;

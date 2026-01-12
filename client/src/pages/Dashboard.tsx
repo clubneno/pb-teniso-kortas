@@ -194,25 +194,29 @@ export default function Dashboard() {
         return period.type === 'reservation' && !(endTime <= period.startTime || startTime >= period.endTime);
       });
 
-      const isMaintenance = availabilityData.some((period) => {
+      const maintenancePeriod = availabilityData.find((period: any) => {
         // Check if time slots overlap and it's maintenance
         return period.type === 'maintenance' && !(endTime <= period.startTime || startTime >= period.endTime);
       });
 
+      const isMaintenance = !!maintenancePeriod;
+      const maintenanceType = maintenancePeriod?.maintenanceType;
+
       // Check how many courts are reserved at this time slot (overlapping)
-      const allReservationsAtThisTime = allReservationsForDate.filter((r: any) => 
+      const allReservationsAtThisTime = allReservationsForDate.filter((r: any) =>
         !(endTime <= r.startTime || startTime >= r.endTime)
       );
-      
+
       // Get court names that have reservations at this time
       const reservedCourts = allReservationsAtThisTime.map((r: any) => r.court.name).join(', ');
-      
+
       slots.push({
         startTime,
         endTime,
         timeDisplay: startTime,
         isReserved,
         isMaintenance,
+        maintenanceType,
         totalReservations: allReservationsAtThisTime.length,
         reservedCourts: reservedCourts,
       });

@@ -657,10 +657,16 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
 
   app.post("/api/admin/maintenance", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const { courtId, startDate, endDate, startTime, endTime, description } = req.body;
+      const { courtId, startDate, endDate, startTime, endTime, type, description } = req.body;
 
       if (!courtId || !startDate || !endDate || !startTime || !endTime) {
         return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Validate type
+      const maintenanceType = type || 'maintenance';
+      if (!['maintenance', 'winter_season'].includes(maintenanceType)) {
+        return res.status(400).json({ message: "Invalid maintenance type" });
       }
 
       // Find and cancel conflicting reservations within the date range
@@ -676,6 +682,11 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
         return !(endTime <= reservation.startTime || startTime >= reservation.endTime);
       });
 
+      // Cancellation reason based on type
+      const cancellationReason = maintenanceType === 'winter_season'
+        ? 'Žiemos sezonas - kortas uždarytas'
+        : 'Korto techninės priežiūros darbai';
+
       // Cancel conflicting reservations
       for (const reservation of reservationsToCancel) {
         await storage.updateReservation(reservation.id, { status: 'cancelled' });
@@ -689,7 +700,7 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
             date: reservation.date,
             startTime: reservation.startTime,
             endTime: reservation.endTime,
-            reason: 'Korto techninės priežiūros darbai'
+            reason: cancellationReason
           });
         } catch (emailError) {
           console.error("Failed to send cancellation email:", emailError);
@@ -703,6 +714,7 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
         endDate,
         startTime,
         endTime,
+        type: maintenanceType,
         description
       });
 
@@ -722,6 +734,11 @@ Sitemap: https://pbtenisokortas.lt/sitemap.xml`;
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
+
+      // Validate type if provided
+      if (updates.type && !['maintenance', 'winter_season'].includes(updates.type)) {
+        return res.status(400).json({ message: "Invalid maintenance type" });
+      }
 
       const period = await storage.updateMaintenancePeriod(id, updates);
       if (!period) {

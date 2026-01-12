@@ -141,12 +141,14 @@ export default function Admin() {
   
   // Maintenance state
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [editingMaintenanceId, setEditingMaintenanceId] = useState<number | null>(null);
   const [maintenanceForm, setMaintenanceForm] = useState({
     courtId: "",
     startDate: "",
     endDate: "",
     startTime: "08:00",
     endTime: "22:00",
+    type: "maintenance" as "maintenance" | "winter_season",
     description: ""
   });
   
@@ -684,15 +686,50 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/reservations'] });
       setShowMaintenanceModal(false);
-      setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", description: "" });
+      setEditingMaintenanceId(null);
+      setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", type: "maintenance", description: "" });
 
+      const typeLabel = data.type === 'winter_season' ? 'Žiemos sezonas' : 'Tvarkymo darbai';
       const message = data.cancelledReservations > 0
-        ? `Tvarkymo darbai sukurti. Atšauktos ${data.cancelledReservations} konfliktuojančios rezervacijos.`
-        : "Tvarkymo darbai sėkmingai sukurti";
+        ? `${typeLabel} sukurti. Atšauktos ${data.cancelledReservations} konfliktuojančios rezervacijos.`
+        : `${typeLabel} sėkmingai sukurti`;
 
       toast({
         title: "Pakeitimas išsaugotas",
         description: message,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Klaida",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMaintenanceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/admin/maintenance/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update maintenance period');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/maintenance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
+      setShowMaintenanceModal(false);
+      setEditingMaintenanceId(null);
+      setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", type: "maintenance", description: "" });
+      toast({
+        title: "Pakeitimas išsaugotas",
+        description: "Tvarkymo darbai sėkmingai atnaujinti",
       });
     },
     onError: (error: Error) => {
@@ -748,14 +785,35 @@ export default function Admin() {
       return;
     }
 
-    createMaintenanceMutation.mutate({
+    const maintenanceData = {
       courtId: parseInt(maintenanceForm.courtId),
       startDate: maintenanceForm.startDate,
       endDate: maintenanceForm.endDate,
       startTime: maintenanceForm.startTime,
       endTime: maintenanceForm.endTime,
+      type: maintenanceForm.type,
       description: maintenanceForm.description || null,
+    };
+
+    if (editingMaintenanceId) {
+      updateMaintenanceMutation.mutate({ id: editingMaintenanceId, data: maintenanceData });
+    } else {
+      createMaintenanceMutation.mutate(maintenanceData);
+    }
+  };
+
+  const handleEditMaintenance = (maintenance: any) => {
+    setEditingMaintenanceId(maintenance.id);
+    setMaintenanceForm({
+      courtId: maintenance.courtId.toString(),
+      startDate: maintenance.startDate,
+      endDate: maintenance.endDate,
+      startTime: maintenance.startTime,
+      endTime: maintenance.endTime,
+      type: maintenance.type || "maintenance",
+      description: maintenance.description || "",
     });
+    setShowMaintenanceModal(true);
   };
 
   const handleDeleteMaintenance = (id: number, description: string, date: string, timeRange: string) => {
@@ -1512,6 +1570,7 @@ export default function Admin() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Kortas</TableHead>
+                      <TableHead>Tipas</TableHead>
                       <TableHead>Laikotarpis</TableHead>
                       <TableHead>Dienos laikas</TableHead>
                       <TableHead>Aprašymas</TableHead>
@@ -1521,7 +1580,7 @@ export default function Admin() {
                   <TableBody>
                     {maintenancePeriods.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                           Tvarkymo darbai neplanuoti
                         </TableCell>
                       </TableRow>
@@ -1530,6 +1589,17 @@ export default function Admin() {
                         <TableRow key={maintenance.id}>
                           <TableCell>
                             <div className="font-medium">{maintenance.court?.name || `Kortas #${maintenance.courtId}`}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={maintenance.type === 'winter_season'
+                                ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                : 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                              }
+                            >
+                              {maintenance.type === 'winter_season' ? 'Žiemos sezonas' : 'Tvarkymo darbai'}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
@@ -1547,19 +1617,28 @@ export default function Admin() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteMaintenance(
-                                maintenance.id,
-                                maintenance.description || "Tvarkymo darbai",
-                                `${new Date(maintenance.startDate).toLocaleDateString('lt-LT')} - ${new Date(maintenance.endDate).toLocaleDateString('lt-LT')}`,
-                                `${maintenance.startTime}-${maintenance.endTime}`
-                              )}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 size={14} />
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditMaintenance(maintenance)}
+                              >
+                                <Edit size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteMaintenance(
+                                  maintenance.id,
+                                  maintenance.type === 'winter_season' ? 'Žiemos sezonas' : (maintenance.description || "Tvarkymo darbai"),
+                                  `${new Date(maintenance.startDate).toLocaleDateString('lt-LT')} - ${new Date(maintenance.endDate).toLocaleDateString('lt-LT')}`,
+                                  `${maintenance.startTime}-${maintenance.endTime}`
+                                )}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -2156,11 +2235,17 @@ export default function Admin() {
           <Card className="w-full max-w-md mx-auto shadow-xl">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Sukurti Tvarkymo Darbus</CardTitle>
+                <CardTitle className="text-lg">
+                  {editingMaintenanceId ? 'Redaguoti Tvarkymo Darbus' : 'Sukurti Tvarkymo Darbus'}
+                </CardTitle>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setShowMaintenanceModal(false)}
+                  onClick={() => {
+                    setShowMaintenanceModal(false);
+                    setEditingMaintenanceId(null);
+                    setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", type: "maintenance", description: "" });
+                  }}
                   className="h-6 w-6 hover:bg-gray-100"
                 >
                   <Plus className="h-4 w-4 rotate-45" />
@@ -2183,6 +2268,22 @@ export default function Admin() {
                         {court.name}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="type">Tipas *</Label>
+                <Select
+                  value={maintenanceForm.type}
+                  onValueChange={(value: "maintenance" | "winter_season") => setMaintenanceForm(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite tipą" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="maintenance">Tvarkymo darbai</SelectItem>
+                    <SelectItem value="winter_season">Žiemos sezonas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -2258,17 +2359,24 @@ export default function Admin() {
               <div className="flex gap-3 pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setShowMaintenanceModal(false)}
+                  onClick={() => {
+                    setShowMaintenanceModal(false);
+                    setEditingMaintenanceId(null);
+                    setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", type: "maintenance", description: "" });
+                  }}
                   className="flex-1"
                 >
                   Atšaukti
                 </Button>
                 <Button
                   onClick={handleCreateMaintenance}
-                  disabled={createMaintenanceMutation.isPending}
-                  className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                  disabled={createMaintenanceMutation.isPending || updateMaintenanceMutation.isPending}
+                  className={`flex-1 ${maintenanceForm.type === 'winter_season' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-yellow-600 hover:bg-yellow-700'}`}
                 >
-                  {createMaintenanceMutation.isPending ? "Kuriama..." : "Sukurti"}
+                  {createMaintenanceMutation.isPending || updateMaintenanceMutation.isPending
+                    ? (editingMaintenanceId ? "Atnaujinama..." : "Kuriama...")
+                    : (editingMaintenanceId ? "Atnaujinti" : "Sukurti")
+                  }
                 </Button>
               </div>
             </CardContent>
