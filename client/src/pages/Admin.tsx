@@ -120,6 +120,7 @@ export default function Admin() {
     date: "",
   });
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [createUserModal, setCreateUserModal] = useState(false);
   const [editUserModal, setEditUserModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -1823,176 +1824,132 @@ export default function Admin() {
                 {/* Left Column - Inline Calendar */}
                 <div className="lg:w-[340px] p-6 border-b lg:border-b-0 lg:border-r bg-gray-50/50">
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">Pasirinkite datą</Label>
-                  {(() => {
-                    const monthNames = [
-                      "Sausis", "Vasaris", "Kovas", "Balandis", "Gegužė", "Birželis",
-                      "Liepa", "Rugpjūtis", "Rugsėjis", "Spalis", "Lapkritis", "Gruodis"
-                    ];
-                    const dayNames = ["Pr", "An", "Tr", "Kt", "Pn", "Št", "Sk"];
+                  <div className="bg-white rounded-lg border shadow-sm p-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))}
+                        className="h-8 w-8"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <h3 className="font-semibold text-gray-900">
+                        {["Sausis", "Vasaris", "Kovas", "Balandis", "Gegužė", "Birželis", "Liepa", "Rugpjūtis", "Rugsėjis", "Spalis", "Lapkritis", "Gruodis"][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setCalendarMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))}
+                        className="h-8 w-8"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
 
-                    const [calendarMonth, setCalendarMonth] = useState(() => {
-                      if (reservationForm.date) {
-                        const date = new Date(reservationForm.date + 'T12:00:00');
-                        return new Date(date.getFullYear(), date.getMonth(), 1);
-                      }
-                      return new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-                    });
+                    {/* Day Headers */}
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {["Pr", "An", "Tr", "Kt", "Pn", "Št", "Sk"].map((day) => (
+                        <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
 
-                    const getDaysInMonth = (date: Date) => {
-                      return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-                    };
+                    {/* Calendar Days */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {(() => {
+                        const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                        const getFirstDayOfMonth = (date: Date) => {
+                          const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+                          return firstDay === 0 ? 6 : firstDay - 1;
+                        };
+                        const formatDateStr = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
-                    const getFirstDayOfMonth = (date: Date) => {
-                      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-                      return firstDay === 0 ? 6 : firstDay - 1;
-                    };
+                        const daysInMonth = getDaysInMonth(calendarMonth);
+                        const firstDay = getFirstDayOfMonth(calendarMonth);
+                        const days: { day: number; isCurrentMonth: boolean; date: Date }[] = [];
 
-                    const formatDate = (date: Date) => {
-                      return date.getFullYear() + '-' +
-                             String(date.getMonth() + 1).padStart(2, '0') + '-' +
-                             String(date.getDate()).padStart(2, '0');
-                    };
+                        const prevMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+                        const daysInPrevMonth = getDaysInMonth(prevMonth);
 
-                    const generateCalendarDays = () => {
-                      const daysInMonth = getDaysInMonth(calendarMonth);
-                      const firstDay = getFirstDayOfMonth(calendarMonth);
-                      const days = [];
-
-                      const prevMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
-                      const daysInPrevMonth = getDaysInMonth(prevMonth);
-
-                      for (let i = firstDay - 1; i >= 0; i--) {
-                        days.push({
-                          day: daysInPrevMonth - i,
-                          isCurrentMonth: false,
-                          date: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), daysInPrevMonth - i)
-                        });
-                      }
-
-                      for (let day = 1; day <= daysInMonth; day++) {
-                        days.push({
-                          day,
-                          isCurrentMonth: true,
-                          date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day)
-                        });
-                      }
-
-                      const remainingDays = 42 - days.length;
-                      for (let day = 1; day <= remainingDays; day++) {
-                        days.push({
-                          day,
-                          isCurrentMonth: false,
-                          date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, day)
-                        });
-                      }
-
-                      return days;
-                    };
-
-                    const navigateMonth = (direction: 'prev' | 'next') => {
-                      setCalendarMonth(prev => {
-                        const newMonth = new Date(prev);
-                        if (direction === 'prev') {
-                          newMonth.setMonth(prev.getMonth() - 1);
-                        } else {
-                          newMonth.setMonth(prev.getMonth() + 1);
+                        for (let i = firstDay - 1; i >= 0; i--) {
+                          days.push({
+                            day: daysInPrevMonth - i,
+                            isCurrentMonth: false,
+                            date: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), daysInPrevMonth - i)
+                          });
                         }
-                        return newMonth;
-                      });
-                    };
 
-                    const handleDateSelect = (date: Date) => {
-                      const formattedDate = formatDate(date);
-                      setReservationForm(prev => ({ ...prev, date: formattedDate }));
-                      setSelectedTimeSlots([]);
-                    };
+                        for (let day = 1; day <= daysInMonth; day++) {
+                          days.push({
+                            day,
+                            isCurrentMonth: true,
+                            date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day)
+                          });
+                        }
 
-                    const isPastDate = (date: Date) => {
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const checkDate = new Date(date);
-                      checkDate.setHours(0, 0, 0, 0);
-                      return checkDate < today;
-                    };
+                        const remainingDays = 42 - days.length;
+                        for (let day = 1; day <= remainingDays; day++) {
+                          days.push({
+                            day,
+                            isCurrentMonth: false,
+                            date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, day)
+                          });
+                        }
 
-                    return (
-                      <div className="bg-white rounded-lg border shadow-sm p-4">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigateMonth('prev')}
-                            className="h-8 w-8"
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </Button>
-                          <h3 className="font-semibold text-gray-900">
-                            {monthNames[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
-                          </h3>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigateMonth('next')}
-                            className="h-8 w-8"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
 
-                        {/* Day Headers */}
-                        <div className="grid grid-cols-7 gap-1 mb-2">
-                          {dayNames.map((day) => (
-                            <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                              {day}
-                            </div>
-                          ))}
-                        </div>
+                        return days.map((day, index) => {
+                          const checkDate = new Date(day.date);
+                          checkDate.setHours(0, 0, 0, 0);
+                          const isPast = checkDate < today;
+                          const isSelected = reservationForm.date && formatDateStr(day.date) === reservationForm.date;
+                          const isToday = formatDateStr(day.date) === formatDateStr(new Date());
 
-                        {/* Calendar Days */}
-                        <div className="grid grid-cols-7 gap-1">
-                          {generateCalendarDays().map((day, index) => {
-                            const isSelected = reservationForm.date && formatDate(day.date) === reservationForm.date;
-                            const isToday = formatDate(day.date) === formatDate(new Date());
-                            const isPast = isPastDate(day.date);
+                          return (
+                            <Button
+                              key={index}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (!isPast) {
+                                  setReservationForm(prev => ({ ...prev, date: formatDateStr(day.date) }));
+                                  setSelectedTimeSlots([]);
+                                }
+                              }}
+                              disabled={isPast && day.isCurrentMonth}
+                              className={`
+                                h-9 w-9 p-0 text-sm font-medium transition-all
+                                ${!day.isCurrentMonth ? 'text-gray-300' : isPast ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-tennis-green-50'}
+                                ${isSelected ? 'bg-tennis-green-500 text-white hover:bg-tennis-green-600 shadow-md' : ''}
+                                ${isToday && !isSelected ? 'bg-tennis-green-100 text-tennis-green-700 font-bold' : ''}
+                              `}
+                            >
+                              {day.day}
+                            </Button>
+                          );
+                        });
+                      })()}
+                    </div>
 
-                            return (
-                              <Button
-                                key={index}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => !isPast && handleDateSelect(day.date)}
-                                disabled={isPast && day.isCurrentMonth}
-                                className={`
-                                  h-9 w-9 p-0 text-sm font-medium transition-all
-                                  ${!day.isCurrentMonth ? 'text-gray-300' : isPast ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-tennis-green-50'}
-                                  ${isSelected ? 'bg-tennis-green-500 text-white hover:bg-tennis-green-600 shadow-md' : ''}
-                                  ${isToday && !isSelected ? 'bg-tennis-green-100 text-tennis-green-700 font-bold' : ''}
-                                `}
-                              >
-                                {day.day}
-                              </Button>
-                            );
+                    {/* Selected Date Display */}
+                    {reservationForm.date && (
+                      <div className="mt-4 pt-4 border-t text-center">
+                        <span className="text-sm text-gray-500">Pasirinkta:</span>
+                        <div className="font-semibold text-tennis-green-600">
+                          {new Date(reservationForm.date + 'T12:00:00').toLocaleDateString('lt-LT', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
                           })}
                         </div>
-
-                        {/* Selected Date Display */}
-                        {reservationForm.date && (
-                          <div className="mt-4 pt-4 border-t text-center">
-                            <span className="text-sm text-gray-500">Pasirinkta:</span>
-                            <div className="font-semibold text-tennis-green-600">
-                              {new Date(reservationForm.date + 'T12:00:00').toLocaleDateString('lt-LT', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    );
-                  })()}
+                    )}
+                  </div>
                 </div>
 
                 {/* Right Column - Form Fields */}
