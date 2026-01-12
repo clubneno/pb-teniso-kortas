@@ -53,6 +53,7 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
 
+    // Check maintenance FIRST - always show maintenance colors regardless of time
     if (slot.isMaintenance) {
       // Different colors for winter season vs maintenance
       if (slot.maintenanceType === 'winter_season') {
@@ -70,6 +71,7 @@ export default function TimeSlotGrid({
       return `${baseClasses} bg-orange-500/50 border border-orange-400/50`;
     }
 
+    // Only show "past" styling for available slots (not maintenance, not reserved)
     if (isPast) {
       return `${baseClasses} bg-white/10 border border-white/10 cursor-not-allowed opacity-50`;
     }
@@ -89,16 +91,18 @@ export default function TimeSlotGrid({
     const timeRange = `${slot.startTime}-${slot.endTime}`;
     const isPast = isSlotInPast(slot);
 
-    if (isPast) {
-      return "Praėjęs";
-    }
-
+    // Check maintenance FIRST - always show maintenance type regardless of time
     if (slot.isMaintenance) {
       return slot.maintenanceType === 'winter_season' ? "Žiemos sezonas" : "Tvarkymo darbai";
     }
 
     if (slot.isReserved) {
       return "Užimta";
+    }
+
+    // Only show "Praėjęs" for available slots (not maintenance, not reserved)
+    if (isPast) {
+      return "Praėjęs";
     }
 
     if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
