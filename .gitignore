@@ -8,3 +8,4 @@ api/index.js
 api/index.mjs
 api/_index.ts
 api/index.ts
+api/bundled.cjs
