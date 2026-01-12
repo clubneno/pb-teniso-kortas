@@ -37,7 +37,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer } from 'recharts';
 import DatePicker from "@/components/DatePicker";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import TennisBallIcon from "@/components/TennisBallIcon";
@@ -98,8 +98,6 @@ export default function Admin() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [chartDateFrom, setChartDateFrom] = useState("");
-  const [chartDateTo, setChartDateTo] = useState("");
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -163,6 +161,7 @@ export default function Admin() {
   });
   const { toast } = useToast();
 
+  // Filtered reservations for the table display
   const { data: adminReservations = [], isLoading: reservationsLoading } = useQuery<ReservationWithDetails[]>({
     queryKey: ["/api/admin/reservations", statusFilter, dateFrom, dateTo],
     queryFn: async () => {
@@ -170,19 +169,19 @@ export default function Admin() {
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (dateFrom) params.append('startDate', dateFrom);
       if (dateTo) params.append('endDate', dateTo);
-      
+
       const response = await fetch(`/api/admin/reservations?${params.toString()}`, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch reservations');
       }
-      
+
       const data = await response.json();
-      
+
       // Sort reservations: most recent dates first, latest times first within same day
       return data.sort((a: ReservationWithDetails, b: ReservationWithDetails) => {
         // First compare by date (descending - most recent first)
@@ -202,6 +201,25 @@ export default function Admin() {
 
         return minutesB - minutesA; // Latest time first
       });
+    },
+    retry: false,
+  });
+
+  // ALL reservations (unfiltered) for charts and stats
+  const { data: allReservations = [] } = useQuery<ReservationWithDetails[]>({
+    queryKey: ["/api/admin/reservations/all"],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/reservations`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch all reservations');
+      }
+
+      return response.json();
     },
     retry: false,
   });
@@ -305,8 +323,8 @@ export default function Admin() {
   const thisWeekEnd = new Date(thisWeekStart);
   thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
 
-  // All weekly stats
-  const thisWeekReservations = adminReservations.filter(r => {
+  // All weekly stats (use allReservations for accurate stats regardless of table filters)
+  const thisWeekReservations = allReservations.filter(r => {
     const reservationDate = new Date(r.date);
     return reservationDate >= thisWeekStart && reservationDate <= thisWeekEnd;
   });
@@ -382,56 +400,46 @@ export default function Admin() {
   const availableHoursPerWeek = 14 * 2 * 7; // 196 hours
   const thisWeekCourtUsage = Math.round((totalBookedHours / availableHoursPerWeek) * 100);
 
-  // Generate chart data based on date filters or default range
+  // Generate chart data for rolling 12-week (3 months) period
   const generateChartData = () => {
-    const startDate = chartDateFrom ? new Date(chartDateFrom) : (() => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - 2); // Default to 2 months ago
-      return date;
-    })();
-    
-    const endDate = chartDateTo ? new Date(chartDateTo) : new Date();
-    
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 12 * 7); // 12 weeks ago
+
     const weeks = [];
     let currentWeek = getWeekStart(startDate);
-    
+
     while (currentWeek <= endDate) {
       const weekEnd = new Date(currentWeek);
       weekEnd.setDate(currentWeek.getDate() + 6);
-      
-      const weekReservations = adminReservations.filter(r => {
+
+      const weekReservations = allReservations.filter(r => {
         const reservationDate = new Date(r.date);
         return reservationDate >= currentWeek && reservationDate <= weekEnd;
       });
-      
+
       const confirmedReservations = weekReservations.filter(r => r.status === 'confirmed');
       const cancelledReservations = weekReservations.filter(r => r.status === 'cancelled');
-      
+
       const weekBookedHours = confirmedReservations.reduce((sum, r) => {
         const start = new Date(`2000-01-01T${r.startTime}:00`);
         const end = new Date(`2000-01-01T${r.endTime}:00`);
         const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
         return sum + hours;
       }, 0);
-      
+
       const weekUsage = Math.round((weekBookedHours / availableHoursPerWeek) * 100);
-      const weekCancellationRate = weekReservations.length > 0 ? 
-        Math.round((cancelledReservations.length / weekReservations.length) * 100) : 0;
-      
+
       const weekRevenue = confirmedReservations.reduce((sum, r) => sum + parseFloat(r.totalPrice), 0);
-      
+
       weeks.push({
         week: `${currentWeek.getDate()}/${currentWeek.getMonth() + 1}`,
         usage: weekUsage,
-        cancellation: weekCancellationRate,
-        revenue: weekRevenue,
+        cancellations: cancelledReservations.length,
+        revenue: Math.round(weekRevenue * 100) / 100,
         reservations: confirmedReservations.length,
-        newUsers: adminUsers.filter(u => {
-          const createdDate = new Date(u.createdAt);
-          return createdDate >= currentWeek && createdDate <= weekEnd;
-        }).length
       });
-      
+
       currentWeek.setDate(currentWeek.getDate() + 7);
     }
     return weeks;
@@ -447,6 +455,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations/all"] });
       toast({
         title: "Pakeitimas išsaugotas",
         description: "Rezervacijos būsena sėkmingai atnaujinta"
@@ -468,6 +477,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations/all"] });
       toast({
         title: "Pakeitimas išsaugotas",
         description: "Rezervacija sėkmingai ištrinta"
@@ -524,6 +534,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reservations/all"] });
       setCreateReservationModal(false);
       setReservationForm({
         userId: "",
@@ -688,6 +699,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/maintenance'] });
       queryClient.invalidateQueries({ queryKey: ['/api/courts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/reservations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/reservations/all'] });
       setShowMaintenanceModal(false);
       setEditingMaintenanceId(null);
       setMaintenanceForm({ courtId: "", startDate: "", endDate: "", startTime: "08:00", endTime: "22:00", type: "maintenance", description: "" });
@@ -1146,121 +1158,137 @@ export default function Admin() {
               </Card>
             </div>
 
-            {/* Chart Filters */}
-            <Card className="mt-8">
-              <CardContent className="p-4">
-                <div className="flex items-end gap-4">
-                  <h3 className="font-medium pb-2">Grafikų Filtrai:</h3>
-                  <div className="flex gap-4">
-                    <div>
-                      <Label htmlFor="chart-date-from">Data nuo</Label>
-                      <DatePicker
-                        id="chart-date-from"
-                        value={chartDateFrom}
-                        onChange={setChartDateFrom}
-                        className="w-40"
-                        placeholder="YYYY-MM-DD"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="chart-date-to">Data iki</Label>
-                      <DatePicker
-                        id="chart-date-to"
-                        value={chartDateTo}
-                        onChange={setChartDateTo}
-                        className="w-40"
-                        placeholder="YYYY-MM-DD"
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => {
-                          setChartDateFrom("");
-                          setChartDateTo("");
-                        }}
-                      >
-                        Išvalyti
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Charts Section - 12 week rolling period */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Tendencijos (12 savaičių periodas)
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Court Usage Chart */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <TrendingUp className="h-4 w-4 text-violet-500" />
+                      Kortų Užimtumas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="week" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} unit="%" />
+                        <ChartTooltip
+                          formatter={(value) => [`${value}%`, 'Užimtumas']}
+                          labelFormatter={(label) => `Savaitė: ${label}`}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="usage"
+                          stroke="#8b5cf6"
+                          strokeWidth={2}
+                          dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 3 }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
 
-            {/* Charts Section */}
-            <div className="grid md:grid-cols-2 gap-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Kortų Užimtumas ir Atšaukimai
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="week" />
-                      <YAxis />
-                      <ChartTooltip formatter={(value, name) => [
-                        `${value}%`, 
-                        name === 'usage' ? 'Kortų Užimtumas' : 'Atšaukimų Dažnis'
-                      ]} />
-                      <Line 
-                        type="monotone" 
-                        dataKey="usage" 
-                        stroke="#8b5cf6" 
-                        strokeWidth={2}
-                        name="usage"
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="cancellation" 
-                        stroke="#ef4444" 
-                        strokeWidth={2}
-                        name="cancellation"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                {/* Cancellations Chart */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <TrendingDown className="h-4 w-4 text-red-500" />
+                      Kortų Atšaukimai
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="week" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                        <ChartTooltip
+                          formatter={(value) => [`${value}`, 'Atšaukimai']}
+                          labelFormatter={(label) => `Savaitė: ${label}`}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="cancellations"
+                          stroke="#ef4444"
+                          strokeWidth={2}
+                          dot={{ fill: '#ef4444', strokeWidth: 2, r: 3 }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Savaitinės Pajamos ir Rezervacijos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="week" />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <ChartTooltip formatter={(value, name, props) => {
-                        if (name === 'revenue') return [`${value}€`, 'Pajamos'];
-                        if (name === 'reservations') return [`${value}`, 'Rezervacijos'];
-                        return [value, name];
-                      }} />
-                      <Bar 
-                        yAxisId="left"
-                        dataKey="revenue" 
-                        fill="#eab308" 
-                        name="revenue"
-                      />
-                      <Bar 
-                        yAxisId="right"
-                        dataKey="reservations" 
-                        fill="#22c55e" 
-                        name="reservations"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                {/* Reservations Chart */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <CalendarCheck className="h-4 w-4 text-green-500" />
+                      Kortų Rezervacijos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="week" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                        <ChartTooltip
+                          formatter={(value) => [`${value}`, 'Rezervacijos']}
+                          labelFormatter={(label) => `Savaitė: ${label}`}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="reservations"
+                          stroke="#22c55e"
+                          strokeWidth={2}
+                          dot={{ fill: '#22c55e', strokeWidth: 2, r: 3 }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Revenue Chart */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Euro className="h-4 w-4 text-yellow-500" />
+                      Savaitinės Pajamos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="week" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} unit="€" />
+                        <ChartTooltip
+                          formatter={(value) => [`${value}€`, 'Pajamos']}
+                          labelFormatter={(label) => `Savaitė: ${label}`}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#eab308"
+                          strokeWidth={2}
+                          dot={{ fill: '#eab308', strokeWidth: 2, r: 3 }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
           </TabsContent>
