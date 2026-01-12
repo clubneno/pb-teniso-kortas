@@ -183,24 +183,24 @@ export default function Admin() {
       
       const data = await response.json();
       
-      // Sort reservations chronologically: earliest dates first, earliest times first within same day
+      // Sort reservations: most recent dates first, latest times first within same day
       return data.sort((a: ReservationWithDetails, b: ReservationWithDetails) => {
-        // First compare by date
+        // First compare by date (descending - most recent first)
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
-        
+
         if (dateA.getTime() !== dateB.getTime()) {
-          return dateA.getTime() - dateB.getTime(); // Earliest date first
+          return dateB.getTime() - dateA.getTime(); // Most recent date first
         }
-        
-        // If dates are equal, compare by start time
+
+        // If dates are equal, compare by start time (descending - latest time first)
         const timeA = a.startTime.split(':').map(num => parseInt(num));
         const timeB = b.startTime.split(':').map(num => parseInt(num));
-        
+
         const minutesA = timeA[0] * 60 + timeA[1];
         const minutesB = timeB[0] * 60 + timeB[1];
-        
-        return minutesA - minutesB; // Earliest time first
+
+        return minutesB - minutesA; // Latest time first
       });
     },
     retry: false,
