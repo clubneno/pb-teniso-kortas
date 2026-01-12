@@ -32,7 +32,9 @@ import {
   ToggleLeft,
   ToggleRight,
   Plus,
-  Wrench
+  Wrench,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -1802,204 +1804,395 @@ export default function Admin() {
       {/* Create Reservation Modal */}
       {createReservationModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-4xl mx-auto shadow-xl max-h-[95vh] flex flex-col">
-            <CardHeader className="flex-shrink-0">
+          <Card className="w-full max-w-5xl mx-auto shadow-xl max-h-[95vh] flex flex-col">
+            <CardHeader className="flex-shrink-0 border-b">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Sukurti Rezervaciją</CardTitle>
+                <CardTitle className="text-xl font-semibold">Sukurti Rezervaciją</CardTitle>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setCreateReservationModal(false)}
-                  className="h-6 w-6 hover:bg-gray-100"
+                  className="h-8 w-8 hover:bg-gray-100 rounded-full"
                 >
-                  <Plus className="h-4 w-4 rotate-45" />
+                  <Plus className="h-5 w-5 rotate-45" />
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4 overflow-y-auto flex-1">
-              <div>
-                <Label htmlFor="user-select">Naudotojas</Label>
-                <Select
-                  value={reservationForm.userId}
-                  onValueChange={(value) => setReservationForm(prev => ({ ...prev, userId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite naudotoją" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {adminUsers?.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName} ({user.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <CardContent className="overflow-y-auto flex-1 p-0">
+              <div className="flex flex-col lg:flex-row">
+                {/* Left Column - Inline Calendar */}
+                <div className="lg:w-[340px] p-6 border-b lg:border-b-0 lg:border-r bg-gray-50/50">
+                  <Label className="text-sm font-medium text-gray-700 mb-3 block">Pasirinkite datą</Label>
+                  {(() => {
+                    const monthNames = [
+                      "Sausis", "Vasaris", "Kovas", "Balandis", "Gegužė", "Birželis",
+                      "Liepa", "Rugpjūtis", "Rugsėjis", "Spalis", "Lapkritis", "Gruodis"
+                    ];
+                    const dayNames = ["Pr", "An", "Tr", "Kt", "Pn", "Št", "Sk"];
 
-              <div>
-                <Label htmlFor="court-select">Kortas</Label>
-                <Select
-                  value={reservationForm.courtId}
-                  onValueChange={(value) => setReservationForm(prev => ({ ...prev, courtId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite kortą" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {courts.map((court: any) => (
-                      <SelectItem key={court.id} value={court.id.toString()}>
-                        {court.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                    const [calendarMonth, setCalendarMonth] = useState(() => {
+                      if (reservationForm.date) {
+                        const date = new Date(reservationForm.date + 'T12:00:00');
+                        return new Date(date.getFullYear(), date.getMonth(), 1);
+                      }
+                      return new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+                    });
 
-              <div>
-                <Label htmlFor="date-input">Data</Label>
-                <DatePicker
-                  value={reservationForm.date}
-                  onChange={(date: string) => setReservationForm(prev => ({ 
-                    ...prev, 
-                    date: date
-                  }))}
-                  placeholder="Pasirinkite datą"
-                />
-              </div>
+                    const getDaysInMonth = (date: Date) => {
+                      return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                    };
 
-              {availabilityLoading && reservationForm.date && reservationForm.courtId && (
-                <div className="text-center text-sm text-gray-500 py-2">
-                  Tikrinama prieinamumas...
-                </div>
-              )}
+                    const getFirstDayOfMonth = (date: Date) => {
+                      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+                      return firstDay === 0 ? 6 : firstDay - 1;
+                    };
 
-              {reservationForm.date && reservationForm.courtId && (
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <Label>Laiko intervalai</Label>
-                    {selectedTimeSlots.length > 0 && (
-                      <span className="text-xs text-tennis-green-600 font-medium">
-                        {selectedTimeSlots.length} pasirinkta
-                      </span>
-                    )}
-                  </div>
-                  
-                  <TimeSlotGrid
-                    timeSlots={(() => {
-                      // Determine if selected date is weekend or weekday
-                      let operatingStartTime = "08:00";
-                      let operatingEndTime = "22:00";
+                    const formatDate = (date: Date) => {
+                      return date.getFullYear() + '-' +
+                             String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                             String(date.getDate()).padStart(2, '0');
+                    };
 
-                      const selectedDate = new Date(reservationForm.date);
-                      const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
-                      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                    const generateCalendarDays = () => {
+                      const daysInMonth = getDaysInMonth(calendarMonth);
+                      const firstDay = getFirstDayOfMonth(calendarMonth);
+                      const days = [];
 
-                      if (isWeekend) {
-                        operatingStartTime = operatingHours.weekends.start;
-                        operatingEndTime = operatingHours.weekends.end;
-                      } else {
-                        operatingStartTime = operatingHours.weekdays.start;
-                        operatingEndTime = operatingHours.weekdays.end;
+                      const prevMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
+                      const daysInPrevMonth = getDaysInMonth(prevMonth);
+
+                      for (let i = firstDay - 1; i >= 0; i--) {
+                        days.push({
+                          day: daysInPrevMonth - i,
+                          isCurrentMonth: false,
+                          date: new Date(prevMonth.getFullYear(), prevMonth.getMonth(), daysInPrevMonth - i)
+                        });
                       }
 
-                      // Parse operating hours
-                      const startHour = parseInt(operatingStartTime.split(':')[0]);
-                      const endHour = parseInt(operatingEndTime.split(':')[0]);
-
-                      // Generate 30-minute slots within operating hours
-                      const startMinutes = startHour * 60;
-                      const endMinutes = endHour * 60;
-                      const slots = [];
-
-                      for (let currentMinutes = startMinutes; currentMinutes + 30 <= endMinutes; currentMinutes += 30) {
-                        const currentStartHour = Math.floor(currentMinutes / 60);
-                        const currentStartMin = currentMinutes % 60;
-                        const currentEndMinutes = currentMinutes + 30;
-                        const currentEndHour = Math.floor(currentEndMinutes / 60);
-                        const currentEndMin = currentEndMinutes % 60;
-
-                        const currentStartTime = `${currentStartHour.toString().padStart(2, '0')}:${currentStartMin.toString().padStart(2, '0')}`;
-                        const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
-
-                        // Check if this 30-minute slot conflicts with existing reservations
-                        const isReserved = availability.some((period: any) => {
-                          return period.type === 'reservation' && !(currentEndTime <= period.startTime || currentStartTime >= period.endTime);
-                        });
-
-                        // Check if this slot is during maintenance
-                        const maintenancePeriod = availability.find((period: any) => {
-                          return period.type === 'maintenance' && !(currentEndTime <= period.startTime || currentStartTime >= period.endTime);
-                        });
-
-                        const isMaintenance = !!maintenancePeriod;
-                        const maintenanceType = maintenancePeriod?.maintenanceType;
-
-                        slots.push({
-                          startTime: currentStartTime,
-                          endTime: currentEndTime,
-                          timeDisplay: currentStartTime,
-                          isReserved,
-                          isMaintenance,
-                          maintenanceType,
+                      for (let day = 1; day <= daysInMonth; day++) {
+                        days.push({
+                          day,
+                          isCurrentMonth: true,
+                          date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day)
                         });
                       }
-                      return slots;
-                    })()}
-                    onSlotSelect={(slot) => {
-                      setSelectedTimeSlots(prev => 
-                        prev.includes(slot) 
-                          ? prev.filter(s => s !== slot)
-                          : [...prev, slot]
-                      );
-                    }}
-                    selectedSlots={selectedTimeSlots}
-                    selectedDate={reservationForm.date}
-                    isPublicView={false}
-                  />
-                  
-                  {selectedTimeSlots.length > 0 && (
-                    <div className="mt-4 p-3 bg-tennis-green-50 border border-tennis-green-200 rounded-lg">
-                      <h4 className="font-medium text-tennis-green-800 mb-2">Rezervacijos Santrauka</h4>
-                      <div className="text-sm text-tennis-green-700 space-y-1">
-                        <div><strong>Laikai:</strong> {selectedTimeSlots.sort().join(', ')}</div>
-                        <div><strong>Trukmė:</strong> {selectedTimeSlots.length * 30} min.</div>
-                        <div><strong>Kaina:</strong> {(() => {
-                          const court = courts.find(c => c.id.toString() === reservationForm.courtId);
-                          const hourlyRate = parseFloat(court?.hourlyRate || '0');
-                          const slotRate = hourlyRate / 2; // 30-minute slot rate
-                          return (slotRate * selectedTimeSlots.length).toFixed(2);
-                        })()}€</div>
+
+                      const remainingDays = 42 - days.length;
+                      for (let day = 1; day <= remainingDays; day++) {
+                        days.push({
+                          day,
+                          isCurrentMonth: false,
+                          date: new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, day)
+                        });
+                      }
+
+                      return days;
+                    };
+
+                    const navigateMonth = (direction: 'prev' | 'next') => {
+                      setCalendarMonth(prev => {
+                        const newMonth = new Date(prev);
+                        if (direction === 'prev') {
+                          newMonth.setMonth(prev.getMonth() - 1);
+                        } else {
+                          newMonth.setMonth(prev.getMonth() + 1);
+                        }
+                        return newMonth;
+                      });
+                    };
+
+                    const handleDateSelect = (date: Date) => {
+                      const formattedDate = formatDate(date);
+                      setReservationForm(prev => ({ ...prev, date: formattedDate }));
+                      setSelectedTimeSlots([]);
+                    };
+
+                    const isPastDate = (date: Date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const checkDate = new Date(date);
+                      checkDate.setHours(0, 0, 0, 0);
+                      return checkDate < today;
+                    };
+
+                    return (
+                      <div className="bg-white rounded-lg border shadow-sm p-4">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-4">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigateMonth('prev')}
+                            className="h-8 w-8"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <h3 className="font-semibold text-gray-900">
+                            {monthNames[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
+                          </h3>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigateMonth('next')}
+                            className="h-8 w-8"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {/* Day Headers */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                          {dayNames.map((day) => (
+                            <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Calendar Days */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {generateCalendarDays().map((day, index) => {
+                            const isSelected = reservationForm.date && formatDate(day.date) === reservationForm.date;
+                            const isToday = formatDate(day.date) === formatDate(new Date());
+                            const isPast = isPastDate(day.date);
+
+                            return (
+                              <Button
+                                key={index}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => !isPast && handleDateSelect(day.date)}
+                                disabled={isPast && day.isCurrentMonth}
+                                className={`
+                                  h-9 w-9 p-0 text-sm font-medium transition-all
+                                  ${!day.isCurrentMonth ? 'text-gray-300' : isPast ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-tennis-green-50'}
+                                  ${isSelected ? 'bg-tennis-green-500 text-white hover:bg-tennis-green-600 shadow-md' : ''}
+                                  ${isToday && !isSelected ? 'bg-tennis-green-100 text-tennis-green-700 font-bold' : ''}
+                                `}
+                              >
+                                {day.day}
+                              </Button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Selected Date Display */}
+                        {reservationForm.date && (
+                          <div className="mt-4 pt-4 border-t text-center">
+                            <span className="text-sm text-gray-500">Pasirinkta:</span>
+                            <div className="font-semibold text-tennis-green-600">
+                              {new Date(reservationForm.date + 'T12:00:00').toLocaleDateString('lt-LT', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedTimeSlots([])}
-                        className="mt-2 text-xs"
+                    );
+                  })()}
+                </div>
+
+                {/* Right Column - Form Fields */}
+                <div className="flex-1 p-6 space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="user-select" className="text-sm font-medium text-gray-700">Naudotojas</Label>
+                      <Select
+                        value={reservationForm.userId}
+                        onValueChange={(value) => setReservationForm(prev => ({ ...prev, userId: value }))}
                       >
-                        Išvalyti pasirinkimus
-                      </Button>
+                        <SelectTrigger className="mt-1.5">
+                          <SelectValue placeholder="Pasirinkite naudotoją" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {adminUsers?.map((user) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.firstName} {user.lastName} ({user.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="court-select" className="text-sm font-medium text-gray-700">Kortas</Label>
+                      <Select
+                        value={reservationForm.courtId}
+                        onValueChange={(value) => setReservationForm(prev => ({ ...prev, courtId: value }))}
+                      >
+                        <SelectTrigger className="mt-1.5">
+                          <SelectValue placeholder="Pasirinkite kortą" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {courts.map((court: any) => (
+                            <SelectItem key={court.id} value={court.id.toString()}>
+                              {court.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Time Slots Section */}
+                  {!reservationForm.date && !reservationForm.courtId && (
+                    <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                      <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p className="text-sm">Pasirinkite datą ir kortą, kad matytumėte laisvus laikus</p>
+                    </div>
+                  )}
+
+                  {availabilityLoading && reservationForm.date && reservationForm.courtId && (
+                    <div className="text-center text-sm text-gray-500 py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                      <div className="animate-spin h-8 w-8 border-2 border-tennis-green-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                      Tikrinama prieinamumas...
+                    </div>
+                  )}
+
+                  {reservationForm.date && reservationForm.courtId && !availabilityLoading && (
+                    <div>
+                      <div className="flex justify-between items-center mb-3">
+                        <Label className="text-sm font-medium text-gray-700">Laiko intervalai</Label>
+                        {selectedTimeSlots.length > 0 && (
+                          <Badge variant="secondary" className="bg-tennis-green-100 text-tennis-green-700">
+                            {selectedTimeSlots.length} pasirinkta
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="bg-gray-50 rounded-lg p-3 border">
+                        <TimeSlotGrid
+                          timeSlots={(() => {
+                            // Determine if selected date is weekend or weekday
+                            let operatingStartTime = "08:00";
+                            let operatingEndTime = "22:00";
+
+                            const selectedDate = new Date(reservationForm.date);
+                            const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
+                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+                            if (isWeekend) {
+                              operatingStartTime = operatingHours.weekends.start;
+                              operatingEndTime = operatingHours.weekends.end;
+                            } else {
+                              operatingStartTime = operatingHours.weekdays.start;
+                              operatingEndTime = operatingHours.weekdays.end;
+                            }
+
+                            // Parse operating hours
+                            const startHour = parseInt(operatingStartTime.split(':')[0]);
+                            const endHour = parseInt(operatingEndTime.split(':')[0]);
+
+                            // Generate 30-minute slots within operating hours
+                            const startMinutes = startHour * 60;
+                            const endMinutes = endHour * 60;
+                            const slots = [];
+
+                            for (let currentMinutes = startMinutes; currentMinutes + 30 <= endMinutes; currentMinutes += 30) {
+                              const currentStartHour = Math.floor(currentMinutes / 60);
+                              const currentStartMin = currentMinutes % 60;
+                              const currentEndMinutes = currentMinutes + 30;
+                              const currentEndHour = Math.floor(currentEndMinutes / 60);
+                              const currentEndMin = currentEndMinutes % 60;
+
+                              const currentStartTime = `${currentStartHour.toString().padStart(2, '0')}:${currentStartMin.toString().padStart(2, '0')}`;
+                              const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
+
+                              // Check if this 30-minute slot conflicts with existing reservations
+                              const isReserved = availability.some((period: any) => {
+                                return period.type === 'reservation' && !(currentEndTime <= period.startTime || currentStartTime >= period.endTime);
+                              });
+
+                              // Check if this slot is during maintenance
+                              const maintenancePeriod = availability.find((period: any) => {
+                                return period.type === 'maintenance' && !(currentEndTime <= period.startTime || currentStartTime >= period.endTime);
+                              });
+
+                              const isMaintenance = !!maintenancePeriod;
+                              const maintenanceType = maintenancePeriod?.maintenanceType;
+
+                              slots.push({
+                                startTime: currentStartTime,
+                                endTime: currentEndTime,
+                                timeDisplay: currentStartTime,
+                                isReserved,
+                                isMaintenance,
+                                maintenanceType,
+                              });
+                            }
+                            return slots;
+                          })()}
+                          onSlotSelect={(slot) => {
+                            setSelectedTimeSlots(prev =>
+                              prev.includes(slot)
+                                ? prev.filter(s => s !== slot)
+                                : [...prev, slot]
+                            );
+                          }}
+                          selectedSlots={selectedTimeSlots}
+                          selectedDate={reservationForm.date}
+                          isPublicView={false}
+                        />
+                      </div>
+
+                      {selectedTimeSlots.length > 0 && (
+                        <div className="mt-4 p-4 bg-tennis-green-50 border border-tennis-green-200 rounded-lg">
+                          <h4 className="font-semibold text-tennis-green-800 mb-3">Rezervacijos Santrauka</h4>
+                          <div className="text-sm text-tennis-green-700 space-y-2">
+                            <div className="flex justify-between">
+                              <span>Laikai:</span>
+                              <span className="font-medium">{selectedTimeSlots.sort().join(', ')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Trukmė:</span>
+                              <span className="font-medium">{selectedTimeSlots.length * 30} min.</span>
+                            </div>
+                            <div className="flex justify-between border-t border-tennis-green-200 pt-2 mt-2">
+                              <span className="font-semibold">Kaina:</span>
+                              <span className="font-bold text-tennis-green-800">{(() => {
+                                const court = courts.find(c => c.id.toString() === reservationForm.courtId);
+                                const hourlyRate = parseFloat(court?.hourlyRate || '0');
+                                const slotRate = hourlyRate / 2; // 30-minute slot rate
+                                return (slotRate * selectedTimeSlots.length).toFixed(2);
+                              })()}€</span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedTimeSlots([])}
+                            className="mt-3 text-xs w-full"
+                          >
+                            Išvalyti pasirinkimus
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-
-              <div className="flex gap-3 justify-end pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setCreateReservationModal(false)}
-                  disabled={createReservationMutation.isPending}
-                >
-                  Atšaukti
-                </Button>
-                <Button
-                  onClick={handleCreateReservation}
-                  disabled={createReservationMutation.isPending}
-                  className="bg-tennis-green-500 hover:bg-tennis-green-600"
-                >
-                  {createReservationMutation.isPending ? "Kuriama..." : "Sukurti Rezervaciją"}
-                </Button>
               </div>
             </CardContent>
+
+            {/* Footer with Actions */}
+            <div className="flex gap-3 justify-end p-6 border-t bg-gray-50/50">
+              <Button
+                variant="outline"
+                onClick={() => setCreateReservationModal(false)}
+                disabled={createReservationMutation.isPending}
+              >
+                Atšaukti
+              </Button>
+              <Button
+                onClick={handleCreateReservation}
+                disabled={createReservationMutation.isPending || !reservationForm.date || !reservationForm.courtId || !reservationForm.userId || selectedTimeSlots.length === 0}
+                className="bg-tennis-green-500 hover:bg-tennis-green-600"
+              >
+                {createReservationMutation.isPending ? "Kuriama..." : "Sukurti Rezervaciją"}
+              </Button>
+            </div>
           </Card>
         </div>
       )}
