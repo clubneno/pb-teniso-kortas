@@ -57,23 +57,23 @@ export default function TimeSlotGrid({
     if (slot.isMaintenance) {
       // Different colors for winter season vs maintenance
       if (slot.maintenanceType === 'winter_season') {
-        return `${baseClasses} bg-blue-600/60 border border-blue-500/50 cursor-not-allowed`;
+        return `${baseClasses} bg-blue-500/70 border-2 border-blue-400 cursor-not-allowed`;
       }
-      return `${baseClasses} bg-yellow-600/60 border border-yellow-500/50 cursor-not-allowed`;
+      return `${baseClasses} bg-amber-500/70 border-2 border-amber-400 cursor-not-allowed`;
     }
 
     if (slot.isReserved) {
-      return `${baseClasses} bg-red-600/60 border border-red-500/50 cursor-not-allowed`;
+      return `${baseClasses} bg-red-500/70 border-2 border-red-400 cursor-not-allowed`;
     }
 
     // Show partial availability for public view when other courts are reserved
     if (isPublicView && slot.totalReservations && slot.totalReservations > 0 && !slot.isReserved) {
-      return `${baseClasses} bg-orange-500/50 border border-orange-400/50`;
+      return `${baseClasses} bg-orange-500/60 border border-orange-400`;
     }
 
     // Only show "past" styling for available slots (not maintenance, not reserved)
     if (isPast) {
-      return `${baseClasses} bg-white/10 border border-white/10 cursor-not-allowed opacity-50`;
+      return `${baseClasses} bg-gray-500/50 border border-gray-400/50 cursor-not-allowed text-gray-300`;
     }
 
     if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
