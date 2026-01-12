@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Save, X, Trash2 } from "lucide-react";
+import { Save, X, Trash2, AlertTriangle } from "lucide-react";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 interface User {
   id: string;
@@ -28,6 +29,41 @@ export default function ProfileEdit({ user }: ProfileEditProps) {
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     phone: user?.phone || '',
+  });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/profile");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Paskyra ištrinta",
+        description: "Jūsų paskyra sėkmingai ištrinta.",
+      });
+      // Redirect to home page after deletion
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Neautorizuotas",
+          description: "Jūs esate atsijungę. Prisijungiama iš naujo...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Klaida",
+        description: error.message || "Nepavyko ištrinti paskyros. Bandykite dar kartą.",
+        variant: "destructive",
+      });
+    },
   });
 
   const updateProfileMutation = useMutation({
@@ -165,15 +201,30 @@ export default function ProfileEdit({ user }: ProfileEditProps) {
           <p className="text-gray-600 mb-4">
             Pašalinus paskyrą, visi duomenys bus negrįžtamai ištrinti.
           </p>
-          <Button 
+          <Button
             variant="destructive"
             className="bg-red-500 hover:bg-red-600"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleteAccountMutation.isPending}
           >
             <Trash2 size={16} className="mr-2" />
-            Ištrinti Paskyrą
+            {deleteAccountMutation.isPending ? "Trinama..." : "Ištrinti Paskyrą"}
           </Button>
         </CardContent>
       </Card>
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          deleteAccountMutation.mutate();
+          setShowDeleteConfirm(false);
+        }}
+        title="Ištrinti paskyrą?"
+        message="Ar tikrai norite ištrinti savo paskyrą? Šis veiksmas yra negrįžtamas ir visi jūsų duomenys bus pašalinti."
+        isDestructive={true}
+        isLoading={deleteAccountMutation.isPending}
+      />
     </div>
   );
 }

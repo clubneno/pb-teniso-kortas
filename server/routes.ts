@@ -267,21 +267,55 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const userId = req.user.id;
       const { firstName, lastName, phone } = req.body;
-      
+
       const updatedUser = await storage.updateUser(userId, {
         firstName,
         lastName,
         phone,
       });
-      
+
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Delete own account
+  app.delete('/api/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Check if user has active reservations
+      const hasActiveReservations = await storage.checkUserHasActiveReservations(userId);
+      if (hasActiveReservations) {
+        return res.status(400).json({
+          message: "Negalima ištrinti paskyros su aktyviomis rezervacijomis. Prašome pirma atšaukti rezervacijas."
+        });
+      }
+
+      // Delete the user
+      const deleted = await storage.deleteUser(userId);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Log out the user by destroying the session
+      req.logout((err: any) => {
+        if (err) {
+          console.error("Error logging out after account deletion:", err);
+        }
+      });
+
+      res.json({ message: "Account deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
     }
   });
 
