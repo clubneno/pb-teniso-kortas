@@ -1889,11 +1889,11 @@ export default function Admin() {
                       // Determine if selected date is weekend or weekday
                       let operatingStartTime = "08:00";
                       let operatingEndTime = "22:00";
-                      
+
                       const selectedDate = new Date(reservationForm.date);
                       const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
                       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-                      
+
                       if (isWeekend) {
                         operatingStartTime = operatingHours.weekends.start;
                         operatingEndTime = operatingHours.weekends.end;
@@ -1901,37 +1901,46 @@ export default function Admin() {
                         operatingStartTime = operatingHours.weekdays.start;
                         operatingEndTime = operatingHours.weekdays.end;
                       }
-                      
+
                       // Parse operating hours
                       const startHour = parseInt(operatingStartTime.split(':')[0]);
                       const endHour = parseInt(operatingEndTime.split(':')[0]);
-                      
+
                       // Generate 30-minute slots within operating hours
                       const startMinutes = startHour * 60;
                       const endMinutes = endHour * 60;
                       const slots = [];
-                      
+
                       for (let currentMinutes = startMinutes; currentMinutes + 30 <= endMinutes; currentMinutes += 30) {
                         const currentStartHour = Math.floor(currentMinutes / 60);
                         const currentStartMin = currentMinutes % 60;
                         const currentEndMinutes = currentMinutes + 30;
                         const currentEndHour = Math.floor(currentEndMinutes / 60);
                         const currentEndMin = currentEndMinutes % 60;
-                        
+
                         const currentStartTime = `${currentStartHour.toString().padStart(2, '0')}:${currentStartMin.toString().padStart(2, '0')}`;
                         const currentEndTime = `${currentEndHour.toString().padStart(2, '0')}:${currentEndMin.toString().padStart(2, '0')}`;
-                        
+
                         // Check if this 30-minute slot conflicts with existing reservations
-                        const isReserved = availability.some((reservation: any) => {
-                          // Check if time slots overlap
-                          return !(currentEndTime <= reservation.startTime || currentStartTime >= reservation.endTime);
+                        const isReserved = availability.some((period: any) => {
+                          return period.type === 'reservation' && !(currentEndTime <= period.startTime || currentStartTime >= period.endTime);
                         });
-                        
+
+                        // Check if this slot is during maintenance
+                        const maintenancePeriod = availability.find((period: any) => {
+                          return period.type === 'maintenance' && !(currentEndTime <= period.startTime || currentStartTime >= period.endTime);
+                        });
+
+                        const isMaintenance = !!maintenancePeriod;
+                        const maintenanceType = maintenancePeriod?.maintenanceType;
+
                         slots.push({
                           startTime: currentStartTime,
                           endTime: currentEndTime,
                           timeDisplay: currentStartTime,
                           isReserved,
+                          isMaintenance,
+                          maintenanceType,
                         });
                       }
                       return slots;

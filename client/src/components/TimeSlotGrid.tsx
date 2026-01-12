@@ -77,7 +77,7 @@ export default function TimeSlotGrid({
     }
 
     if (selectedSlots && selectedSlots.includes(timeRange) && !isPublicView) {
-      return `${baseClasses} bg-tennis-yellow/60 border border-tennis-yellow/70 text-black shadow-glow-yellow`;
+      return `${baseClasses} bg-tennis-yellow border-2 border-tennis-yellow text-tennis-green-700 font-semibold shadow-lg shadow-tennis-yellow/50 ring-2 ring-tennis-yellow/30 ring-offset-1 ring-offset-transparent`;
     }
 
     if (isPublicView) {
